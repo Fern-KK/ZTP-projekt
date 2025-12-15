@@ -40,6 +40,7 @@ public enum Priorities
 
 public interface IComponent
 {
+    public string Name { get; }
     DateTime StartDate { get; }
     public void Display(int depth);
     public void Display();
@@ -51,33 +52,23 @@ public interface IComponent
 public class Note : IComponent
 {
     public string Name { get; }
+    public string Content { get; }
     public DateTime StartDate { get; }
-    public DateTime EndDate { get; }
-    public bool IsCompleted { get; private set; } = false;
-    public bool IsLate { get; private set; } = false;
 
     // Konstruktor klasy Task, ustawiający nazwę oraz daty początku i końca zadania
-    public Note(string name, DateTime startDate, DateTime endDate)
+    public Note(string name, string content, DateTime startDate)
     {
         Name = name;
+        Content = content;
         StartDate = startDate;
-        EndDate = endDate;
+    }
+    public Note(Note other)
+    {
+        Name = other.Name;
+        Content = other.Content;
+        StartDate = other.StartDate;
     }
 
-    // Metoda oznaczająca zadanie jako wykonane; przyjmuje datę wykonania i sprawdza, czy zadanie wykonano na czas
-    public void MarkAsCompleted(DateTime completionDate)
-    {
-        IsCompleted = true;
-        IsLate = completionDate > EndDate;
-    }
-
-    // Zwraca status zadania: "Completed", "Completed Late" lub "Pending"
-    public string GetStatus()
-    {
-        if (IsCompleted)
-            return IsLate ? "[Completed Late]" : "[Completed]";
-        return "[Pending]";
-    }
 
     // Używana do wyświetlenia szczegółów zadania wraz ze statusem
     public void Display()
@@ -86,7 +77,7 @@ public class Note : IComponent
     }
     public void Display(int depth)
     {
-        Console.WriteLine(new String('-', depth) + $"{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}");
+        Console.WriteLine(new String('-', depth) + $"{Name} ({StartDate:dd.MM.yyyy}, Treść: {Content})");
     }
 }
 
@@ -195,7 +186,7 @@ public class Task : ITaskComponent
 public class TaskList : ITaskComponent
 {
     public string Name { get; }
-    private List<Task> components = new List<Task>();
+    private List<ITaskComponent> components = new List<ITaskComponent>();
 
     public DateTime StartDate
     {
@@ -239,18 +230,24 @@ public class TaskList : ITaskComponent
         Name = name;
     }
 
-    public TaskList(string name, List<Task> list)
+    public TaskList(string name, List<ITaskComponent> list)
     {
         Name = name;
         components = list;
     }
 
-    public void Add(Task component)
+    public TaskList(TaskList other)
+    {
+        Name = other.Name;
+        components = other.components;
+    }
+
+    public void Add(ITaskComponent component)
     {
         components.Add(component);
     }
 
-    public void Remove(Task component)
+    public void Remove(ITaskComponent component)
     {
         components.Remove(component);
     }
@@ -292,7 +289,7 @@ public class TaskList : ITaskComponent
         components.OfType<Task>().Count(t => t.IsCompleted && t.IsLate),
         components.OfType<Task>().Count(t => !t.IsCompleted),
         components.OfType<Task>().Count(t => !t.IsCompleted && DateTime.Now > t.EndDate)
-    };
+        };
 
         foreach (TaskList group in components.OfType<TaskList>())
         {
@@ -390,94 +387,113 @@ public class Group
 
 
 
+/*
+public interface ICommand
+{
+    void Execute();
+    void Undo();
+};
 
+public class NameCommand : ICommand
+{
+    private Component component;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+};
+*/
 
 
 
 
 public class Program
 {
-    public class TaskBuilder
+    public static class Builder
     {
-        private List<Task> tasks = new List<Task>();
-        private string listName = "Task List"; // Domyślna nazwa
+        private static List<IComponent> components = new List<IComponent>();
+        private static string _name = "No name"; // Domyślna nazwa
 
-        private Priorities prioritie;
+        private static Priorities prioritie;
 
         // Property tylko do odczytu - pobiera nazwę na podstawie zawartości
-        public string ListName
+        public static string Name
         {
             get
             {
-                if (tasks.Count == 0)
-                    return "Empty Task List";
+                if (components.Count == 0)
+                    return "Empty";
 
-                if (tasks.Count == 1)
-                    return tasks[0].Name;
+                if (components.Count == 1)
+                    return components[0].Name;
 
                 // Jeśli mamy wiele zadań, używamy ustawionej nazwy lub domyślnej
-                return listName;
+                return _name;
             }
         }
 
-        // Metoda do ustawienia nazwy listy
-        public TaskBuilder WithName(string name)
+        // Metoda do ustawienia nazwy komponentu
+        public static void WithName(string name)
         {
-            listName = name;
-            return this; // Zwracamy this dla fluent interface
+            _name = name;
         }
 
-        public TaskBuilder AddTask(Task task)
+        public static void AddComponent(IComponent component)
         {
-            tasks.Add(task);
-            return this;
+            components.Add(component);
         }
 
-        public ITaskComponent Build()
+        public static void EditComponent(IComponent component)
         {
-            if (tasks.Count == 0)
+            if (component is Note note)
             {
-                throw new InvalidOperationException("Cannot build - no tasks added");
+                Note other = new Note(note);
+                components.Add(other);
+            }
+            else if (component is Task task)
+            {
+                Task other = new Task(task);
+                components.Add(other);
+            }
+            else if (component is TaskList tasklist)
+            {
+                TaskList other = new TaskList(tasklist);
+                components.Add(other);
+            }
+        }
+
+        public static IComponent Build()
+        {
+            List<IComponent> copy = new List<IComponent>(components);
+            Clear();
+            if (copy.Count == 0)
+            {
+                Clear();
+                throw new InvalidOperationException("Cannot build - no components added");
             }
 
-            if (tasks.Count == 1)
+            if (copy.Count == 1)
             {
-                return tasks[0];
+                return copy[0];
             }
             else
             {
-                TaskList list = new TaskList(listName);
-                foreach (var i in tasks)
+                TaskList list = new TaskList(Name);
+                foreach (var i in copy)
                 {
-                    list.Add(new Task(i));
+                    if (i is Task t)
+                        list.Add(new Task(t));
+                    else if (i is TaskList tl)
+                        list.Add(new TaskList(tl));
                 }
+
                 return list;
                 
             }
         }
 
-        public void Clear()
+        public static void Clear()
         {
-            tasks.Clear();
-            listName = "Task List"; // Reset do domyślnej
+            components.Clear();
+            _name = "No name"; // Reset do domyślnej
         }
-
-        public int TaskCount => tasks.Count;
     }
 
 
@@ -509,8 +525,8 @@ public class Program
             var category = categories.FirstOrDefault(c => c.Name == name.ToLower());
             if (category != null)
             {
-                category=null;
                 categories.Remove(category);
+                category = null;
             }
             else
             {
@@ -622,6 +638,12 @@ public class Program
         gr5.Add(task9);
         gr5.Add(task10);
 
+        gr0.Add(gr1);
+        gr0.Add(gr2);
+        gr0.Add(gr3);
+        gr0.Add(gr4);
+        gr0.Add(gr5);
+        
         gr4.MarkAsCompleted(new DateTime(2024, 11, 1));
 
 
