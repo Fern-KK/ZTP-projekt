@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -40,6 +41,7 @@ public enum Priorities
 
 public interface IComponent
 {
+    public string Name { get; }
     DateTime StartDate { get; }
     public void Display(int depth);
     public void Display();
@@ -51,33 +53,23 @@ public interface IComponent
 public class Note : IComponent
 {
     public string Name { get; }
+    public string Content { get; }
     public DateTime StartDate { get; }
-    public DateTime EndDate { get; }
-    public bool IsCompleted { get; private set; } = false;
-    public bool IsLate { get; private set; } = false;
 
     // Konstruktor klasy Task, ustawiający nazwę oraz daty początku i końca zadania
-    public Note(string name, DateTime startDate, DateTime endDate)
+    public Note(string name, string content)
     {
         Name = name;
-        StartDate = startDate;
-        EndDate = endDate;
+        Content = content;
+        StartDate = DateTime.Now;
+    }
+    public Note(Note other)
+    {
+        Name = other.Name;
+        Content = other.Content;
+        StartDate = other.StartDate;
     }
 
-    // Metoda oznaczająca zadanie jako wykonane; przyjmuje datę wykonania i sprawdza, czy zadanie wykonano na czas
-    public void MarkAsCompleted(DateTime completionDate)
-    {
-        IsCompleted = true;
-        IsLate = completionDate > EndDate;
-    }
-
-    // Zwraca status zadania: "Completed", "Completed Late" lub "Pending"
-    public string GetStatus()
-    {
-        if (IsCompleted)
-            return IsLate ? "[Completed Late]" : "[Completed]";
-        return "[Pending]";
-    }
 
     // Używana do wyświetlenia szczegółów zadania wraz ze statusem
     public void Display()
@@ -86,7 +78,7 @@ public class Note : IComponent
     }
     public void Display(int depth)
     {
-        Console.WriteLine(new String('-', depth) + $"{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}");
+        Console.WriteLine(new String('-', depth) + $"{Name} ({StartDate:dd.MM.yyyy}) \n{new String(' ', depth)}Treść: {Content}");
     }
 }
 
@@ -105,7 +97,7 @@ public interface ITaskComponent : IComponent
     DateTime EndDate { get; }
     bool IsCompleted { get; }
     bool IsLate { get; }
-    Priorities Priority { get; } 
+    Priorities Priority { get; }
     public void MarkAsCompleted(DateTime completionDate);
     public string GetStatus();
     void SetPriority(Priorities priority);
@@ -124,20 +116,20 @@ public class Task : ITaskComponent
     public bool IsLate { get; private set; } = false;
 
     // Konstruktor klasy Task, ustawiający nazwę oraz daty początku i końca zadania
-    public Task(string name, DateTime startDate, DateTime endDate)
+    public Task(string name, DateTime endDate)
     {
         Name = name;
-        StartDate = startDate;
+        StartDate = DateTime.Now;
         EndDate = endDate;
     }
     public Task(Task other)
     {
-        Name=other.Name;
-        StartDate=other.StartDate;
-        EndDate=other.EndDate;
-        Priority=other.Priority;
-        IsCompleted=other.IsCompleted;
-        IsLate=other.IsLate;
+        Name = other.Name;
+        StartDate = other.StartDate;
+        EndDate = other.EndDate;
+        Priority = other.Priority;
+        IsCompleted = other.IsCompleted;
+        IsLate = other.IsLate;
 
     }
 
@@ -195,7 +187,7 @@ public class Task : ITaskComponent
 public class TaskList : ITaskComponent
 {
     public string Name { get; }
-    private List<Task> components = new List<Task>();
+    private List<ITaskComponent> components = new List<ITaskComponent>();
 
     public DateTime StartDate
     {
@@ -239,18 +231,24 @@ public class TaskList : ITaskComponent
         Name = name;
     }
 
-    public TaskList(string name, List<Task> list)
+    public TaskList(string name, List<ITaskComponent> list)
     {
         Name = name;
         components = list;
     }
 
-    public void Add(Task component)
+    public TaskList(TaskList other)
+    {
+        Name = other.Name;
+        components = other.components;
+    }
+
+    public void Add(ITaskComponent component)
     {
         components.Add(component);
     }
 
-    public void Remove(Task component)
+    public void Remove(ITaskComponent component)
     {
         components.Remove(component);
     }
@@ -292,7 +290,7 @@ public class TaskList : ITaskComponent
         components.OfType<Task>().Count(t => t.IsCompleted && t.IsLate),
         components.OfType<Task>().Count(t => !t.IsCompleted),
         components.OfType<Task>().Count(t => !t.IsCompleted && DateTime.Now > t.EndDate)
-    };
+        };
 
         foreach (TaskList group in components.OfType<TaskList>())
         {
@@ -372,6 +370,10 @@ public class Group
     {
         return components.Contains(component);
     }
+    public int Count()
+    {
+        return components.Count();
+    }
     public void Display()
     {
         this.Display(1);
@@ -390,96 +392,202 @@ public class Group
 
 
 
+/*
+public interface ICommand
+{
+    void Execute();
+    void Undo();
+};
 
+public class NameCommand : ICommand
+{
+    private Component component;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+};
+*/
 
 
 
 
 public class Program
 {
-    public class TaskBuilder
+
+
+    public interface IState
     {
-        private List<Task> tasks = new List<Task>();
-        private string listName = "Task List"; // Domyślna nazwa
+        void WithName(string name);
+        void AddComponent(IComponent component);
+        IComponent Build();
+        void Clear();
+        string GetName();
+    }
 
-        private Priorities prioritie;
+    public class TaskBuilderState : IState
+    {
+        private List<IComponent> components = new List<IComponent>();
+        private string _name = "";
 
-        // Property tylko do odczytu - pobiera nazwę na podstawie zawartości
-        public string ListName
+        public string GetName()
         {
-            get
-            {
-                if (tasks.Count == 0)
-                    return "Empty Task List";
-
-                if (tasks.Count == 1)
-                    return tasks[0].Name;
-
-                // Jeśli mamy wiele zadań, używamy ustawionej nazwy lub domyślnej
-                return listName;
-            }
+            if (string.IsNullOrEmpty(_name) && components.Count > 0)
+                return components.First().Name;
+            return _name;
         }
 
-        // Metoda do ustawienia nazwy listy
-        public TaskBuilder WithName(string name)
+        public void WithName(string name)
         {
-            listName = name;
-            return this; // Zwracamy this dla fluent interface
+            _name = name;
         }
 
-        public TaskBuilder AddTask(Task task)
+        public void AddComponent(IComponent component)
         {
-            tasks.Add(task);
-            return this;
-        }
-
-        public ITaskComponent Build()
-        {
-            if (tasks.Count == 0)
+            if (component is ITaskComponent)
             {
-                throw new InvalidOperationException("Cannot build - no tasks added");
-            }
-
-            if (tasks.Count == 1)
-            {
-                return tasks[0];
+                components.Add(component);
             }
             else
             {
-                TaskList list = new TaskList(listName);
-                foreach (var i in tasks)
+                throw new InvalidOperationException("TaskBuilder can only add task components");
+            }
+        }
+
+        public IComponent Build()
+        {
+            if (components.Count == 0)
+                throw new InvalidOperationException("Cannot build - no components added");
+
+            string buildName = GetName();
+            List<IComponent> copy = new List<IComponent>(components);
+            Clear();
+
+            if (copy.Count == 1)
+            {
+                return copy[0];
+            }
+            else
+            {
+                TaskList list = new TaskList(buildName);
+                foreach (var component in copy)
                 {
-                    list.Add(new Task(i));
+                    if (component is Task task)
+                        list.Add(new Task(task));
+                    else if (component is TaskList taskList)
+                        list.Add(new TaskList(taskList));
                 }
                 return list;
-                
             }
         }
 
         public void Clear()
         {
-            tasks.Clear();
-            listName = "Task List"; // Reset do domyślnej
+            components.Clear();
+            _name = "";
         }
-
-        public int TaskCount => tasks.Count;
     }
 
+    public class NoteBuilderState : IState
+    {
+        private List<IComponent> components = new List<IComponent>();
+        private string _name = "";
+
+        public string GetName()
+        {
+            if (string.IsNullOrEmpty(_name) && components.Count > 0)
+                return components.First().Name;
+            return _name;
+        }
+
+        public void WithName(string name)
+        {
+            _name = name;
+        }
+
+        public void AddComponent(IComponent component)
+        {
+            if (component is Note note)
+            {
+                components.Add(component);
+            }
+            else
+            {
+                throw new InvalidOperationException("NoteBuilder can only add notes");
+            }
+        }
+
+        public IComponent Build()
+        {
+            if (components.Count == 0)
+                throw new InvalidOperationException("Cannot build - no components added");
+
+            if (components.Count > 1)
+            {
+                Console.WriteLine("Warning: Multiple notes added, returning only the first one");
+            }
+
+            IComponent result = components.First();
+            Clear();
+            return result;
+        }
+
+        public void Clear()
+        {
+            components.Clear();
+            _name = "";
+        }
+    }
+
+
+
+    public static class Builder
+    {
+        private static IState currentState = new NoteBuilderState();
+
+
+        public static string Name
+        {
+            get
+            {
+                return currentState.GetName();
+            }
+        }
+
+        public static void SetState(IState state)
+        {
+            currentState = state;
+        }
+
+        public static void WithName(string name)
+        {
+            currentState.WithName(name);
+        }
+
+        public static void AddComponent(IComponent component)
+        {
+            // Automatycznie zmień stan na podstawie typu komponentu
+            if (component is Note && !(currentState is NoteBuilderState))
+            {
+                Console.WriteLine("Automatically switching to NoteBuilder state");
+                SetState(new NoteBuilderState());
+            }
+            else if (component is ITaskComponent && !(currentState is TaskBuilderState))
+            {
+                Console.WriteLine("Automatically switching to TaskBuilder state");
+                SetState(new TaskBuilderState());
+            }
+            
+            currentState.AddComponent(component);
+        }
+
+        public static IComponent Build()
+        {
+            return currentState.Build();
+        }
+
+        public static void Clear()
+        {
+            currentState.Clear();
+        }
+    }
 
 
 
@@ -509,8 +617,8 @@ public class Program
             var category = categories.FirstOrDefault(c => c.Name == name.ToLower());
             if (category != null)
             {
-                category=null;
                 categories.Remove(category);
+                category = null;
             }
             else
             {
@@ -563,6 +671,20 @@ public class Program
                 Console.WriteLine("-" + category.Name);
             }
         }
+        public static void DisplayCategory(int index)
+        {
+            if (index < 0 || index >= categories.Count)
+            {
+                Console.WriteLine("Nieprawidłowy numer kategorii!");
+                return;
+            }
+            var category = categories[index];
+            category.Display();
+        }
+        public static int Count()
+        {
+            return categories.Count();
+        }
 
         public static List<Group> GetCategories()
         {
@@ -571,63 +693,299 @@ public class Program
     }
 
 
+    public static class Tags
+    {
+        private static List<Group> tags = new List<Group>();
+
+        public static void Add(string name)
+        {
+            if (tags.Any(c => c.Name == name.ToLower()))
+            {
+                Console.WriteLine("Category already exists");
+            }
+            else
+            {
+                tags.Add(new Group(name.ToLower()));
+            }
+        }
+
+        public static void Remove(string name)
+        {
+            var tag = tags.FirstOrDefault(c => c.Name == name.ToLower());
+            if (tag != null)
+            {
+                tags.Remove(tag);
+                tag = null;
+            }
+            else
+            {
+                Console.WriteLine("Tag not found");
+            }
+        }
+
+        public static void AddToCategory(IComponent component, string tagName)
+        {
+
+
+            // Teraz dodajemy do nowej kategorii
+            var targetTag = tags.FirstOrDefault(c => c.Name == tagName.ToLower());
+            if (targetTag != null)
+            {
+                targetTag.Add(component);
+            }
+            else
+            {
+                Console.WriteLine($"Tag '{tagName}' not found");
+            }
+        }
+
+        public static void RemoveFromCategory(IComponent component, string tagName)
+        {
+            var category = tags.FirstOrDefault(c => c.Name == tagName.ToLower());
+            if (category != null)
+            {
+                category.Remove(component);
+            }
+            else
+            {
+                Console.WriteLine($"Tag '{tagName}' not found");
+            }
+        }
+
+        public static void Display()
+        {
+            Console.WriteLine("Tags: ");
+            foreach (var t in tags)
+            {
+                Console.WriteLine("#" + t.Name);
+            }
+        }
+        public static void DisplayCategory(int index)
+        {
+            if (index < 0 || index >= tags.Count)
+            {
+                Console.WriteLine("Nieprawidłowy numer tagu!");
+                return;
+            }
+            var tag = tags[index];
+            tag.Display();
+        }
+        public static int Count()
+        {
+            return tags.Count();
+        }
+
+        public static List<Group> GetTags()
+        {
+            return new List<Group>(tags);
+        }
+    }
 
 
 
 
 
 
-
+    private static Group AllGroup = new Group("all");
+    private static Group AllTasksGroup = new Group("Tasks");
+    private static Group AllNotesGroup = new Group("Notes");
 
 
     public static void Main()
     {
-        // Przykładowe zadania
-        var task1 = new Task("1A - Implementacja algorytmu sortowania", new DateTime(2024, 10, 21), new DateTime(2024, 10, 27));
-        var task2 = new Task("1B - Analiza złożoności czasowej", new DateTime(2024, 10, 24), new DateTime(2024, 10, 31));
-        var task3 = new Task("2A - Projektowanie schematu bazy danych", new DateTime(2024, 10, 28), new DateTime(2024, 11, 3));
-        var task4 = new Task("2B - Tworzenie zapytań SQL", new DateTime(2024, 11, 1), new DateTime(2024, 11, 30));
-        var task5 = new Task("2.1A - Implementacja rozwiązań", new DateTime(2024, 9, 1), new DateTime(2024, 11, 30));
-        var task6 = new Task("2.1B - Testy", new DateTime(2025, 11, 5), new DateTime(2025, 11, 30));
-        var task7 = new Task("3A - Przejrzenie wytycznych kodów", new DateTime(2024, 9, 1), new DateTime(2024, 11, 30));
-        var task8 = new Task("3B - Wykonanie kodów", new DateTime(2025, 11, 5), new DateTime(2025, 11, 30));
-        var task9 = new Task("3.1A - Testy kodów", new DateTime(2024, 9, 1), new DateTime(2024, 11, 30));
-        var task10 = new Task("3.1B - Wgranie gotowych kodów", new DateTime(2025, 11, 5), new DateTime(2025, 11, 30));
+        Categories.Add("szkoła");
+        Categories.Add("dom");
+
+        bool exitProgram = false;
+        while (!exitProgram)
+        {
+            Console.Clear();
+            DisplayMainMenu();
+
+            if (int.TryParse(Console.ReadLine(), out int choice))
+            {
+                switch (choice)
+                {
+                    case 0:
+                        exitProgram = true;
+                        Console.WriteLine("Zamykanie programu...");
+                        break;
+                    case 1:
+                        DisplayMenu();
+                        break;
+                    case 2:
+                        AddMenu();
+                        break;
+                    case 3:
+                        //EditMenu();
+                        break;
+                    default:
+                        Console.WriteLine("Nieprawidłowy wybór!");
+                        Console.ReadKey();
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Nieprawidłowe dane wejściowe!");
+                Console.ReadKey();
+            }
+        }
+    }
+
+    private static void DisplayMainMenu()
+    {
+        Console.WriteLine("=======================================");
+        Console.WriteLine("   SYSTEM ZARZĄDZANIA ZADANIAMI");
+        Console.WriteLine("=======================================");
+
+        Console.WriteLine($"\nSTATYSTYKI:");
+        Console.WriteLine($"Wszystkie elementy: {AllGroup.Count()}");
+        Console.WriteLine($"Zadania: {AllTasksGroup.Count()}");
+        Console.WriteLine($"Notatki: {AllNotesGroup.Count()}");
+        Console.WriteLine($"Kategorie: {Categories.Count()}");
+        Console.WriteLine($"Tagi: {Tags.Count()}");
+
+        Console.WriteLine("\n=== GŁÓWNE MENU ===");
+        Console.WriteLine("0. Wyjście");
+        Console.WriteLine("1. Wyświetl");
+        Console.WriteLine("2. Dodaj");
+        Console.WriteLine("3. Edytuj");
+        Console.Write("\nWybierz opcję: ");
+    }
 
 
-        // Oznaczanie przykładowych zadań jako wykonane (z różnymi datami ukończenia)
-        task1.MarkAsCompleted(new DateTime(2024, 10, 25)); // Wykonane na czas
-        task2.MarkAsCompleted(new DateTime(2024, 11, 1)); // Wykonane z opóźnieniem
-        // task3 i task4 są jeszcze niewykonane
 
-        // Lista zadań (przykładowa organizacja wyłącznie według nazw)
-        var tasks = new List<Task> { task1, task2, task3, task4 };
+    private static void DisplayMenu()
+    {
+        bool back = false;
+        while (!back)
+        {
+            Console.Clear();
+            Console.WriteLine("\n=== WYŚWIETL ===");
+            Console.WriteLine("0. Powrót");
+            Console.WriteLine("1. Wyświetl wszystko");
+            Console.WriteLine("2. Wyświetl zadania");
+            Console.WriteLine("3. Wyświetl notatki");
+            Categories.Display();
+            Tags.Display();
+            Console.Write("\nWybierz opcję: ");
 
-        // Wyświetlanie listy zadań i ich statusów
-        TaskList gr0 = new TaskList("Lista zadań");
+            if (int.TryParse(Console.ReadLine(), out int choice))
+            {
+                switch (choice)
+                {
+                    case 0:
+                        back = true;
+                        break;
+                    case 1:
+                        Console.WriteLine("\n=== WSZYSTKIE ELEMENTY ===");
+                        AllGroup.Display();
+                        Console.ReadKey();
+                        break;
+                    case 2:
+                        Console.WriteLine("\n=== ZADANIA ===");
+                        AllTasksGroup.Display();
+                        Console.ReadKey();
+                        break;
+                    case 3:
+                        Console.WriteLine("\n=== NOTATKI ===");
+                        AllNotesGroup.Display();
+                        Console.ReadKey();
+                        break;
+                    case 4:
+                        // DisplayByCategory();
+                        break;
+                    default:
+                        Console.WriteLine("Nieprawidłowy wybór!");
+                        Console.ReadKey();
+                        break;
+                }
+            }
+        }
+    }
+    private static void AddMenu()
+    {
+        bool back = false;
+        while (!back)
+        {
+            Console.Clear();
+            Console.WriteLine("\n=== DODAJ NOWY ELEMENT ===");
+            Console.WriteLine("0. Powrót");
+            Console.WriteLine("1. Dodaj notatkę");
+            Console.WriteLine("2. Dodaj zadanie");
+            Console.Write("\nWybierz opcję: ");
 
-        TaskList gr1 = new TaskList("Zadania z algorytmiki");
-        gr1.Add(task1);
-        gr1.Add(task2);
-        TaskList gr2 = new TaskList("Zadania z baz danych");
-        gr2.Add(task3);
-        gr2.Add(task4);
-        TaskList gr3 = new TaskList("Zadania z baz danych - wdrażanie");
-        gr3.Add(task5);
-        gr3.Add(task6);
-        TaskList gr4 = new TaskList("Zadania z programowania");
-        gr4.Add(task7);
-        gr4.Add(task8);
-        TaskList gr5 = new TaskList("Zadania z programowania cd.");
-        gr5.Add(task9);
-        gr5.Add(task10);
+            if (int.TryParse(Console.ReadLine(), out int choice))
+            {
+                switch (choice)
+                {
+                    case 0:
+                        back = true;
+                        // Zbuduj i dodaj komponent do odpowiednich grup
+                        try
+                        {
+                            IComponent builtComponent = Builder.Build();
+                            if (builtComponent != null)
+                            {
+                                AllGroup.Add(builtComponent);
 
-        gr4.MarkAsCompleted(new DateTime(2024, 11, 1));
+                                // Dodaj do odpowiedniej grupy
+                                if (builtComponent is Note)
+                                {
+                                    AllNotesGroup.Add(builtComponent);
+                                }
+                                else if (builtComponent is ITaskComponent)
+                                {
+                                    AllTasksGroup.Add(builtComponent);
+                                }
 
+                                Console.WriteLine($"Dodano: {builtComponent.Name}");
+                            }
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            Console.WriteLine($"Błąd: {ex.Message}");
+                        }
+                        Console.ReadKey();
+                        break;
 
-        gr0.Display();
-        gr0.Report();
+                    case 1:
+                        Console.Write("\nPodaj tytuł notatki: ");
+                        string noteTitle = Console.ReadLine();
+                        Console.Write("Podaj treść notatki: ");
+                        string noteContent = Console.ReadLine();
 
+                        // Ustaw nazwę dla Buildera
+                        Builder.WithName(noteTitle);
+                        // Dodaj komponent
+                        Builder.AddComponent(new Note(noteTitle, noteContent));
+                        Console.WriteLine($"Dodano notatkę: {noteTitle}");
+                        break;
 
+                    case 2:
+                        Console.Write("\nPodaj nazwę zadania: ");
+                        string taskName = Console.ReadLine();
+                        Console.Write("Podaj datę zakończenia (dd.MM.yyyy): ");
+
+                        if (DateTime.TryParse(Console.ReadLine(), out DateTime endDate))
+                        {
+                            // Dodaj komponent
+                            Builder.AddComponent(new Task(taskName, endDate));
+                            Console.WriteLine($"Dodano zadanie: {taskName}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Nieprawidłowa data!");
+                        }
+                        break;
+
+                    default:
+                        Console.WriteLine("Nieprawidłowy wybór!");
+                        Console.ReadKey();
+                        break;
+                }
+            }
+        }
     }
 }
