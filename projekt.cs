@@ -437,12 +437,20 @@ public class Program
 
         public static void AddComponent(IComponent component)
         {
-            components.Add(component);
+            if (component is Note && component.Count == 0)
+            {
+                components.Add(component);
+                Build();
+            }
+            else if (component is not Note)
+            {
+                component.Add(component);
+            }
         }
 
         public static void EditComponent(IComponent component)
         {
-            if (component is Note note)
+            if (component is Note note && component.Count == 0)
             {
                 Note other = new Note(note);
                 components.Add(other);
