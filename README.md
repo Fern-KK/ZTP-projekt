@@ -1,4 +1,6 @@
-Witaj świecie! I Stasiu
+#### Aby wysztko działało trzeba dodać do VSCode takie rozszerzenia:
+- Avalonia Templates
+- Avalonia for VSCode
 
 
 
