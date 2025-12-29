@@ -5,5 +5,19 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ZTP.MainWindow"
         Title="ZTP">
-    Welcome to Avalonia!
+
+    <Grid ColumnDefinitions="300, *" >
+        <Border Grid.Column="0" Padding="10" Background="#E6E9EF">
+        <StackPanel Spacing="10" Classes="menu" >
+            <Button x:Name="BtnAll" Click="Button_Click">Wszystkie</Button>
+            <Button x:Name="BtnTasks" Click="Button_Click">Zadania</Button>
+            <Button x:Name="BtnNotes" Click="Button_Click">Notatki</Button>
+        </StackPanel>
+        </Border>
+        <TextBlock x:Name="ContentText" 
+                   Grid.Column="1" 
+                   Text="Wybierz kategorię"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"/>
+    </Grid>
 </Window>

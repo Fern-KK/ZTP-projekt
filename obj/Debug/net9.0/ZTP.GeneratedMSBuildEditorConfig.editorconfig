@@ -26,3 +26,6 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [C:/Users/Studenciak/Desktop/kody/ZTP/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/Studenciak/Desktop/kody/ZTP/styles/DefaultStyle.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
