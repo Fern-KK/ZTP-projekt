@@ -33,6 +33,7 @@ namespace ZTP
         public MainWindow()
         {
             InitializeComponent();
+            GlobalGroups.Initialize();
         }
         
         private void MenuButton_Click(object sender, RoutedEventArgs e)
