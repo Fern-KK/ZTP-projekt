@@ -47,10 +47,14 @@
         </Border>
 
         <!-- Prawa kolumna - zawartość -->
-        <TextBlock x:Name="ContentText" 
-                   Grid.Column="1" 
-                   Text="Wybierz kategorię"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                      HorizontalScrollBarVisibility="Disabled"
+                      Grid.Column="1">
+            <TextBlock x:Name="ContentText" 
+                Text="Wybierz kategorię"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                TextWrapping="Wrap"/>
+        </ScrollViewer>
     </Grid>
 </Window>

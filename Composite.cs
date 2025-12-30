@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-
+using System.Text;
 
 namespace ZTP;
 
@@ -16,16 +16,13 @@ public enum Priorities
     Important
 }
 
-
-
 public interface IComponent
 {
     public string Name { get; }
     DateTime StartDate { get; }
-    public void Display(int depth);
-    public void Display();
+    public string Display(int depth);
+    public string Display();
 }
-
 
 public class Note : IComponent
 {
@@ -33,13 +30,13 @@ public class Note : IComponent
     public string Content { get; }
     public DateTime StartDate { get; }
 
-    // Konstruktor klasy Task, ustawiający nazwę oraz daty początku i końca zadania
     public Note(string name, string content)
     {
         Name = name;
         Content = content;
         StartDate = DateTime.Now;
     }
+    
     public Note(Note other)
     {
         Name = other.Name;
@@ -47,19 +44,23 @@ public class Note : IComponent
         StartDate = other.StartDate;
     }
 
-
-    // Używana do wyświetlenia szczegółów zadania wraz ze statusem
-    public void Display()
+    public string Display()
     {
-        this.Display(1);
+        return this.Display(1);
     }
-    public void Display(int depth)
+    
+    public string Display(int depth)
     {
-        Console.WriteLine(new String('-', depth) + $"{Name} ({StartDate:dd.MM.yyyy}) \n{new String(' ', depth)}Treść: {Content}");
+        string indent = new string(' ', depth);
+        string dashPrefix = new string('-', depth);
+        
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"{dashPrefix}{Name} ({StartDate:dd.MM.yyyy})");
+        sb.AppendLine($"{indent}Treść: {Content}");
+        
+        return sb.ToString();
     }
 }
-
-
 
 public interface ITaskComponent : IComponent
 {
@@ -72,9 +73,6 @@ public interface ITaskComponent : IComponent
     void SetPriority(Priorities priority);
 }
 
-
-
-
 public class Task : ITaskComponent
 {
     public string Name { get; }
@@ -84,13 +82,13 @@ public class Task : ITaskComponent
     public bool IsCompleted { get; private set; } = false;
     public bool IsLate { get; private set; } = false;
 
-    // Konstruktor klasy Task, ustawiający nazwę oraz daty początku i końca zadania
     public Task(string name, DateTime endDate)
     {
         Name = name;
         StartDate = DateTime.Now;
         EndDate = endDate;
     }
+    
     public Task(Task other)
     {
         Name = other.Name;
@@ -99,17 +97,14 @@ public class Task : ITaskComponent
         Priority = other.Priority;
         IsCompleted = other.IsCompleted;
         IsLate = other.IsLate;
-
     }
 
-    // Metoda oznaczająca zadanie jako wykonane; przyjmuje datę wykonania i sprawdza, czy zadanie wykonano na czas
     public void MarkAsCompleted(DateTime completionDate)
     {
         IsCompleted = true;
         IsLate = completionDate > EndDate;
     }
 
-    // Zwraca status zadania: "Completed", "Completed Late" lub "Pending"
     public string GetStatus()
     {
         if (IsCompleted)
@@ -122,20 +117,17 @@ public class Task : ITaskComponent
         Priority = priority;
     }
 
-    // Używana do wyświetlenia szczegółów zadania wraz ze statusem
-    public void Display()
+    public string Display()
     {
-        this.Display(1);
+        return this.Display(1);
     }
-    public void Display(int depth)
+    
+    public string Display(int depth)
     {
-        Console.WriteLine(new String('-', depth) + $"{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}");
+        string dashPrefix = new string('-', depth);
+        return $"{dashPrefix}{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}\n";
     }
 }
-
-
-
-
 
 public class TaskList : ITaskComponent
 {
@@ -177,6 +169,7 @@ public class TaskList : ITaskComponent
             return components.Count > 0 && components.Any(component => component.IsLate);
         }
     }
+    
     public Priorities Priority { get; private set; } = 0;
 
     public TaskList(string name)
@@ -205,6 +198,7 @@ public class TaskList : ITaskComponent
     {
         components.Remove(component);
     }
+    
     public void SetPriority(Priorities priority)
     {
         Priority = priority;
@@ -224,25 +218,34 @@ public class TaskList : ITaskComponent
             return IsLate ? "[Completed Late]" : "[Completed]";
         return "[Pending]";
     }
-    public void Display()
+    
+    public string Display()
     {
-        this.Display(1);
+        return this.Display(1);
     }
-    public void Display(int depth)
+    
+    public string Display(int depth)
     {
-        Console.WriteLine(new String('-', depth) + $"{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}");
+        StringBuilder sb = new StringBuilder();
+        string dashPrefix = new string('-', depth);
+        
+        sb.AppendLine($"{dashPrefix}{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}");
+        
         foreach (var component in components)
         {
-            component.Display(depth + 2);
+            sb.Append(component.Display(depth + 2));
         }
+        
+        return sb.ToString();
     }
+    
     private int[] getStatistics()
     {
         int[] statistics = new int[4] {
-        components.OfType<Task>().Count(t => t.IsCompleted && !t.IsLate),
-        components.OfType<Task>().Count(t => t.IsCompleted && t.IsLate),
-        components.OfType<Task>().Count(t => !t.IsCompleted),
-        components.OfType<Task>().Count(t => !t.IsCompleted && DateTime.Now > t.EndDate)
+            components.OfType<Task>().Count(t => t.IsCompleted && !t.IsLate),
+            components.OfType<Task>().Count(t => t.IsCompleted && t.IsLate),
+            components.OfType<Task>().Count(t => !t.IsCompleted),
+            components.OfType<Task>().Count(t => !t.IsCompleted && DateTime.Now > t.EndDate)
         };
 
         foreach (TaskList group in components.OfType<TaskList>())
@@ -256,26 +259,34 @@ public class TaskList : ITaskComponent
 
         return statistics;
     }
-    public void Report()
+    
+    public string Report()
     {
         int[] stat = this.getStatistics();
-        Console.WriteLine("\nPodsumowanie zadań:");
-        Console.WriteLine($"Zadania wykonane na czas: {stat[0]}");
-        Console.WriteLine($"Zadania wykonane z opóźnieniem: {stat[1]}");
-        Console.WriteLine($"Zadania oczekujące: {stat[2]}");
-        Console.WriteLine($"Zadania oczekujące z przekroczonym terminem: {stat[3]}");
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("\nPodsumowanie zadań:");
+        sb.AppendLine($"Zadania wykonane na czas: {stat[0]}");
+        sb.AppendLine($"Zadania wykonane z opóźnieniem: {stat[1]}");
+        sb.AppendLine($"Zadania oczekujące: {stat[2]}");
+        sb.AppendLine($"Zadania oczekujące z przekroczonym terminem: {stat[3]}");
+        
+        return sb.ToString();
     }
-
 }
 
-
-
-
-
-public class Group
+public class Group : IComponent
 {
     public string Name { get; }
     private List<IComponent> components = new List<IComponent>();
+        public DateTime StartDate
+    {
+        get
+        {
+            if (components.Count == 0)
+                return DateTime.MinValue;
+            return components.Min(component => component.StartDate);
+        }
+    }
     public Group(string name)
     {
         Name = name;
@@ -290,23 +301,68 @@ public class Group
     {
         components.Remove(component);
     }
+    
     public bool Contains(IComponent component)
     {
         return components.Contains(component);
     }
+    
     public int Count()
     {
         return components.Count();
     }
-    public void Display()
+    
+    public IReadOnlyList<IComponent> GetComponents()
     {
-        this.Display(1);
+        return components.AsReadOnly();
     }
-    public void Display(int depth)
+    
+    public string Display()
     {
+        return this.Display(1);
+    }
+    
+    public string Display(int depth)
+    {
+        StringBuilder sb = new StringBuilder();
+        
         foreach (var component in components)
         {
-            component.Display(depth + 2);
+            sb.Append(component.Display(depth + 2));
         }
+        
+        return sb.ToString();
+    }
+    
+    public string GetFormattedList()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"{Name}:");
+        sb.AppendLine();
+        
+        int i = 1;
+        foreach (var component in components)
+        {
+            sb.AppendLine($"{i}. {component.Name}");
+            i++;
+        }
+        
+        return sb.ToString();
+    }
+    
+    public string GetDetailedList()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"{Name}:");
+        sb.AppendLine();
+        
+        int i = 1;
+        foreach (var component in components)
+        {
+            sb.AppendLine($"{i}. {component.Display()}");
+            i++;
+        }
+        
+        return sb.ToString();
     }
 }
