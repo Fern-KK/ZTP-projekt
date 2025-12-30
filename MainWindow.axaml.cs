@@ -200,13 +200,13 @@ namespace ZTP
                 switch (buttonName)
                 {
                     case "BtnAll":
-                        WyswietlListe(GlobalGroups.AllGroup, GlobalGroups.AllGroup.Name);
+                        WyswietlListe(GlobalGroups.AllGroup);
                         break;
                     case "BtnTasks":
-                        WyswietlListe(GlobalGroups.AllTasksGroup, GlobalGroups.AllTasksGroup.Name);
+                        WyswietlListe(GlobalGroups.AllTasksGroup);
                         break;
                     case "BtnNotes":
-                        WyswietlListe(GlobalGroups.AllNotesGroup, GlobalGroups.AllNotesGroup.Name);
+                        WyswietlListe(GlobalGroups.AllNotesGroup);
                         break;
                     default:
                         ContentText.Text = "Nieznany przycisk";
@@ -215,9 +215,15 @@ namespace ZTP
             }
         }
 
-        private void WyswietlListe(Group group, string naglowek)
+        private void WyswietlListe(Group group)
         {
-            ContentText.Text = naglowek + "\n\n" + group.GetDetailedList();
+            ContentText.Text = "\n\n" + group.GetDetailedList();
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            string userInput = InputTextBox.Text;
+            ContentText.Text = $"Wpisałeś: {userInput}";
         }
     }
 }
