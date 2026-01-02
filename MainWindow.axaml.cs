@@ -217,13 +217,15 @@ namespace ZTP
 
         private void WyswietlListe(Group group)
         {
-            ContentText.Text = "\n\n" + group.GetDetailedList();
+            Desktop.Content = group.DisplayGUI();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             string userInput = InputTextBox.Text;
-            ContentText.Text = $"Wpisałeś: {userInput}";
+
+            ContentText.Text = $"hgdfgdgf";
+            ContentText.Text += $"Wpisałeś: {userInput}";
         }
     }
 }

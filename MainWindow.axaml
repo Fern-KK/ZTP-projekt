@@ -13,8 +13,8 @@
                     <Button x:Name="BtnNew" Click="MenuButton_Click">Wszystkie</Button>
                     <Button x:Name="dd" Click="MenuButton_Click">Zadania</Button>
                     <Button x:Name="ss" Click="MenuButton_Click">Notatki</Button>
-                    <TextBox x:Name="InputTextBox" Watermark="Wpisz tekst..." Height="20"/>
-                    <Button Content="Zapisz" Click="SaveButton_Click" HorizontalAlignment="Center" Width="100"/>
+                    <TextBox x:Name="InputTextBox" HorizontalAlignment="Stretch" Watermark="Wpisz tekst..." Height="20"/>
+                    <Button Content="Szukaj" Click="SaveButton_Click" HorizontalAlignment="Center" Width="100"/>
 
             </StackPanel>
         </Border>
@@ -61,7 +61,8 @@
             <!-- Prawa kolumna - zawartość -->
             <ScrollViewer VerticalScrollBarVisibility="Auto" 
                         HorizontalScrollBarVisibility="Disabled"
-                        Grid.Column="1">
+                        Grid.Column="1"
+                        x:Name="Desktop">
                 <TextBlock x:Name="ContentText" 
                     Text="Wybierz kategorię"
                     VerticalAlignment="Center"
