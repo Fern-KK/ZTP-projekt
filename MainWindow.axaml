@@ -6,51 +6,71 @@
         x:Class="ZTP.MainWindow"
         Title="ZTP">
 
-    <Grid ColumnDefinitions="300, *" Background="#fff">
-        <!-- Lewa kolumna - menu -->
-        <Border Grid.Column="0" Padding="10" Background="#E6E9EF">
-            <StackPanel Spacing="10">
-                <!-- Przyciski główne -->
-                <Button x:Name="BtnAll" HorizontalAlignment="Stretch" Click="MenuButton_Click">Wszystkie</Button>
-                <Button x:Name="BtnTasks" HorizontalAlignment="Stretch" Click="MenuButton_Click">Zadania</Button>
-                <Button x:Name="BtnNotes" HorizontalAlignment="Stretch" Click="MenuButton_Click">Notatki</Button>
-                
-                <!-- Sekcja z Expanderami -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto" 
-                              HorizontalScrollBarVisibility="Disabled"
-                              MaxHeight="300">
-                    <StackPanel Spacing="5">
-                        <Expander Header="Kategorie" HorizontalAlignment="Stretch">
-                            <TextBlock Text="Bardzo długi tekst.ddddd dddddd Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laboruddddddddddddddddddddddddddddddddddddddddddddd.." 
-                                   TextWrapping="Wrap"/>
-                        </Expander>
-                        
-                        <Expander Header="Tagi" HorizontalAlignment="Stretch">
-                            <TextBlock Text="Zawartość sekcji 2" TextWrapping="Wrap"/>
-                        </Expander>
-                        
-                        <!-- Dodatkowe expandery dla testu -->
-                        <Expander Header="Przykład listy" HorizontalAlignment="Stretch">
-                            <StackPanel Spacing="3">
-                                <CheckBox Content="Kategoria 1"/>
-                                <CheckBox Content="Kategoria 2"/>
-                                <CheckBox Content="Kategoria 3"/>
-                                <CheckBox Content="Kategoria 4"/>
-                                <CheckBox Content="Kategoria 5"/>
-                                <CheckBox Content="Kategoria 6"/>
-                                <CheckBox Content="Kategoria 7"/>
-                            </StackPanel>
-                        </Expander>
-                    </StackPanel>
-                </ScrollViewer>
+    <Grid RowDefinitions="Auto, *" Background="#fff">
+        <Border Grid.Row="0" Background="#DCE0E8">
+            <StackPanel Spacing="10" Orientation="Horizontal">
+                    <!-- Przyciski główne -->
+                    <Button x:Name="BtnNew" Click="MenuButton_Click">Wszystkie</Button>
+                    <Button x:Name="dd" Click="MenuButton_Click">Zadania</Button>
+                    <Button x:Name="ss" Click="MenuButton_Click">Notatki</Button>
+                    <TextBox x:Name="InputTextBox" HorizontalAlignment="Stretch" Watermark="Wpisz tekst..." Height="20"/>
+                    <Button Content="Szukaj" Click="SaveButton_Click" HorizontalAlignment="Center" Width="100"/>
+
             </StackPanel>
         </Border>
+        <Grid ColumnDefinitions="300, *" Grid.Row="1">
+            <!-- Lewa kolumna - menu -->
+            <Border Grid.Column="0" Padding="10" Background="#E6E9EF">
+                <StackPanel Spacing="10">
+                    <!-- Przyciski główne -->
+                    <Button x:Name="BtnAll" HorizontalAlignment="Stretch" Click="MenuButton_Click">Wszystkie</Button>
+                    <Button x:Name="BtnTasks" HorizontalAlignment="Stretch" Click="MenuButton_Click">Zadania</Button>
+                    <Button x:Name="BtnNotes" HorizontalAlignment="Stretch" Click="MenuButton_Click">Notatki</Button>
+                    
+                    <!-- Sekcja z Expanderami -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                                HorizontalScrollBarVisibility="Disabled"
+                                MaxHeight="300">
+                        <StackPanel Spacing="5">
+                            <Expander Header="Kategorie" HorizontalAlignment="Stretch">
+                                <TextBlock Text="Bardzo długi tekst.ddddd dddddd Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laboruddddddddddddddddddddddddddddddddddddddddddddd.." 
+                                    TextWrapping="Wrap"/>
+                            </Expander>
+                            
+                            <Expander Header="Tagi" HorizontalAlignment="Stretch">
+                                <TextBlock Text="Zawartość sekcji 2" TextWrapping="Wrap"/>
+                            </Expander>
+                            
+                            <!-- Dodatkowe expandery dla testu -->
+                            <Expander Header="Przykład listy" HorizontalAlignment="Stretch">
+                                <StackPanel Spacing="3">
+                                    <CheckBox Content="Kategoria 1"/>
+                                    <CheckBox Content="Kategoria 2"/>
+                                    <CheckBox Content="Kategoria 3"/>
+                                    <CheckBox Content="Kategoria 4"/>
+                                    <CheckBox Content="Kategoria 5"/>
+                                    <CheckBox Content="Kategoria 6"/>
+                                    <CheckBox Content="Kategoria 7"/>
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
 
-        <!-- Prawa kolumna - zawartość -->
-        <TextBlock x:Name="ContentText" 
-                   Grid.Column="1" 
-                   Text="Wybierz kategorię"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"/>
+            <!-- Prawa kolumna - zawartość -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                        HorizontalScrollBarVisibility="Disabled"
+                        Grid.Column="1"
+                        x:Name="Desktop">
+                <TextBlock x:Name="ContentText" 
+                    Text="Wybierz kategorię"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </Grid>        
+        
+        
     </Grid>
 </Window>
