@@ -4,8 +4,7 @@
 
 
 
-przewspaniały projekt 
-
+aby odpalić trzeba zrobić run któregokolwiek z plików .cs
 
 
 
