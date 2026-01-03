@@ -8,13 +8,13 @@
 
     <Grid RowDefinitions="Auto, *" Background="#fff">
         <Border Grid.Row="0" Background="#DCE0E8">
-            <StackPanel Spacing="10" Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal">
                     <!-- Przyciski główne -->
-                    <Button x:Name="BtnNew" Click="MenuButton_Click">Wszystkie</Button>
-                    <Button x:Name="dd" Click="MenuButton_Click">Zadania</Button>
-                    <Button x:Name="ss" Click="MenuButton_Click">Notatki</Button>
+                    <Button x:Name="BtnNew" Click="NewObject_Click" Classes="topMenuButton">Nowy</Button>
+                    <Button x:Name="dd" Click="Save_Click" Classes="topMenuButton">Zapisz</Button>
+                    <Button x:Name="ss" Click="Sych_Click" Classes="topMenuButton">Synch</Button>
                     <TextBox x:Name="InputTextBox" HorizontalAlignment="Stretch" Watermark="Wpisz tekst..." Height="20"/>
-                    <Button Content="Szukaj" Click="SaveButton_Click" HorizontalAlignment="Center" Width="100"/>
+                    <Button Click="SearchButton_Click" HorizontalAlignment="Center" Classes="topMenuButton">Szukaj</Button>
 
             </StackPanel>
         </Border>
@@ -23,14 +23,13 @@
             <Border Grid.Column="0" Padding="10" Background="#E6E9EF">
                 <StackPanel Spacing="10">
                     <!-- Przyciski główne -->
-                    <Button x:Name="BtnAll" HorizontalAlignment="Stretch" Click="MenuButton_Click">Wszystkie</Button>
-                    <Button x:Name="BtnTasks" HorizontalAlignment="Stretch" Click="MenuButton_Click">Zadania</Button>
-                    <Button x:Name="BtnNotes" HorizontalAlignment="Stretch" Click="MenuButton_Click">Notatki</Button>
+                    <Button x:Name="BtnAll" Click="MenuButton_Click" Classes="leftMenuButton">Wszystkie</Button>
+                    <Button x:Name="BtnTasks" Click="MenuButton_Click" Classes="leftMenuButton">Zadania</Button>
+                    <Button x:Name="BtnNotes" Click="MenuButton_Click" Classes="leftMenuButton">Notatki</Button>
                     
                     <!-- Sekcja z Expanderami -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" 
-                                HorizontalScrollBarVisibility="Disabled"
-                                MaxHeight="300">
+                                HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Spacing="5">
                             <Expander Header="Kategorie" HorizontalAlignment="Stretch">
                                 <TextBlock Text="Bardzo długi tekst.ddddd dddddd Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laboruddddddddddddddddddddddddddddddddddddddddddddd.." 
@@ -62,9 +61,10 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" 
                         HorizontalScrollBarVisibility="Disabled"
                         Grid.Column="1"
-                        x:Name="Desktop">
+                        x:Name="Desktop"
+                        Padding="10">
                 <TextBlock x:Name="ContentText" 
-                    Text="Wybierz kategorię"
+                    Text= "Witamy :D"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
                     TextWrapping="Wrap"/>

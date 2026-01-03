@@ -186,9 +186,6 @@ namespace ZTP
             group1.Add(zadanie1);
             group1.Add(studia);
             GlobalGroups.AllGroup.Add(group1);
-
-
-
         }
 
         private void MenuButton_Click(object sender, RoutedEventArgs e)
@@ -220,12 +217,122 @@ namespace ZTP
             Desktop.Content = group.DisplayGUI();
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
             string userInput = InputTextBox.Text;
 
             ContentText.Text = $"hgdfgdgf";
             ContentText.Text += $"Wpisałeś: {userInput}";
         }
+        private void NewObject_Click(object sender, RoutedEventArgs e)
+        {
+            string cat = @"       ,
+       \`-._           __
+        \\  `-..____,.'  `.
+         :`.         /    \`.
+         :  )       :      : \
+          ;'        '   ;  |  :
+          )..      .. .:.`.;  :
+         /::...  .:::...   ` ;
+         ; _ '    __        /:\
+         `:o>   /\o_>      ;:. `.
+        `-`.__ ;   __..--- /:.   \
+        === \_/   ;=====_.':.     ;
+         ,/'`--'...`--....        ;
+              ;                    ;
+            .'                      ;
+          .'                        ;
+        .'     ..     ,      .       ;
+       :       ::..  /      ;::.     |
+      /      `.;::.  |       ;:..    ;
+     :         |:.   :       ;:.    ;
+     :         ::     ;:..   |.    ;
+      :       :;      :::....|     |
+      /\     ,/ \      ;:::::;     ;
+    .:. \:..|    :     ; '.--|     ;
+   ::.  :''  `-.,,;     ;'   ;     ;
+.-'. _.'\      / `;      \,__:      \
+`---'    `----'   ;      /    \,.,,,/
+                   `----`              ";
+            var button1 = new Button{Content="Nowa notatka", Name="BtnSelectNote"};
+            button1.Click += (s, e) => {
+                                            Desktop.Content = new TextBlock{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
+                                                                            Text=cat};
+                                            CreateNoteView();
+                                       };
+            var button2 = new Button{Content="Nowe zadanie", Name="BtnSelectTask"};
+            button2.Click += (s, e) => {
+                                            Save_Click(s,e);
+                                       };
+
+            var panel = new StackPanel{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
+                                      HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center,
+                                      Orientation=Avalonia.Layout.Orientation.Horizontal,
+                                      Spacing=10};
+            panel.Children.Add(button1);
+            panel.Children.Add(button2);    
+            Desktop.Content = panel;
+        }
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            Save();
+            // Builder.AddComponent
+        }
+        private void Save()
+        {
+            Desktop.Content = new TextBlock{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
+                                            HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center, 
+                                            Text="Zapisywanie..."};
+        }
+        private void Sych_Click(object sender, RoutedEventArgs e)
+        {
+            Save();
+
+            var button1 = new Button{Content="Zapisz do Chmury", Name="BtnSynchToCloud"};
+            // button1.Classes.Add("menuButton"); NIE POTRZEBNY TU STYL TEN, MOZE BYĆ DOMYŚLNY
+            button1.Click += (s, e) => {
+                                            Desktop.Content = new TextBlock{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
+                                                                            HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center, 
+                                                                            Text="Zsynchroniczowanie "};
+                                       };
+            var button2 = new Button{Content="Pobierz z Chmury", Name="BtnSynchFromCloud"};
+            // button2.Classes.Add("menuButton"); NIE POTRZEBNY TU STYL TEN, MOZE BYĆ DOMYŚLNY
+            button2.Click += (s, e) => {
+                                            Save_Click(s,e);
+                                       };
+
+            var panel = new StackPanel{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
+                                       HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center,
+                                       Orientation=Avalonia.Layout.Orientation.Horizontal,
+                                       Spacing=10};
+            panel.Children.Add(button1);
+            panel.Children.Add(button2);    
+            Desktop.Content = panel;
+        }
+        private void CreateNoteView()
+        {
+            var titleBar = new TextBox{HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Stretch,
+                                       Watermark="Tytuł notatki"};
+            var contentBar = new TextBox{HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Stretch,
+                                         MinHeight=400};
+            var panel = new StackPanel{Orientation=Avalonia.Layout.Orientation.Vertical,
+                                       Spacing=10};
+            panel.Children.Add(titleBar);
+            panel.Children.Add(contentBar);
+            Desktop.Content = panel;
+        }
+        // private void Save_Click(object sender, RoutedEventArgs e)
+        // {
+        //     Desktop.Content = new TextBlock{Text="Zapisywanie..."};
+        //     // Builder.AddComponent
+        // }
+        // private void Sych_Click(object sender, RoutedEventArgs e)
+        // {
+        //     Desktop.Content = new TextBlock{Text="Zapisywanie..."};
+
+
+        //     Desktop.Content = new TextBlock{Text="Zapisz do Chmury   |   Pobierz z Chmury"};
+        //     // Builder.AddComponent
+        // }
     }
 }
