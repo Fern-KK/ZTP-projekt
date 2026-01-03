@@ -21,7 +21,7 @@
         <Grid ColumnDefinitions="300, *" Grid.Row="1">
             <!-- Lewa kolumna - menu -->
             <Border Grid.Column="0" Padding="10" Background="#E6E9EF">
-                <StackPanel Spacing="10">
+                <StackPanel>
                     <!-- Przyciski główne -->
                     <Button x:Name="BtnAll" Click="MenuButton_Click" Classes="leftMenuButton">Wszystkie</Button>
                     <Button x:Name="BtnTasks" Click="MenuButton_Click" Classes="leftMenuButton">Zadania</Button>
