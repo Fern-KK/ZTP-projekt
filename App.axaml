@@ -7,7 +7,82 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="styles/DefaultStyle.axaml"/>
+
+
+        <Style Selector="Button">
+            <!-- Podstawowy styl dla WSZYSTKICH przycisków -->
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style Selector="Button.leftMenuButton">
+            <Setter Property="Background" Value="#E6E9EF"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+
+        <Style Selector="Button.topMenuButton">
+            <Setter Property="Background" Value="#DCE0E8"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+
+
     </Application.Styles>
+    
+
+
+
+        <!-- <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#F44336"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+        
+        <Style Selector="Button.success">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+        
+        <Style Selector="TextBlock.header">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="Foreground" Value="#333"/>
+        </Style>
+        
+        <Style Selector="TextBlock.subheader">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Foreground" Value="#555"/>
+        </Style>
+        
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style> -->
+ 
+
+
+
+
     
     <!-- Zasoby globalne - dostępne WSZĘDZIE -->
     <!-- <Application.Resources>
