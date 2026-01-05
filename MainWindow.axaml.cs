@@ -176,13 +176,13 @@ namespace ZTP
                 switch (buttonName)
                 {
                     case "BtnAll":
-                        WyswietlListe(GlobalGroups.AllGroup);
+                        DisplayGroup(GlobalGroups.AllGroup);
                         break;
                     case "BtnTasks":
-                        WyswietlListe(GlobalGroups.AllTasksGroup);
+                        DisplayGroup(GlobalGroups.AllTasksGroup);
                         break;
                     case "BtnNotes":
-                        WyswietlListe(GlobalGroups.AllNotesGroup);
+                        DisplayGroup(GlobalGroups.AllNotesGroup);
                         break;
                     default:
                         ContentText.Text = "Nieznany przycisk";
@@ -191,7 +191,7 @@ namespace ZTP
             }
         }
 
-        private void WyswietlListe(Group group)
+        private void DisplayGroup(Group group)
         {
             Desktop.Content = group.SimpleDisplay();
         }
@@ -246,6 +246,7 @@ namespace ZTP
         // Dodaj pola dla kontrolek
         private TextBox? inputTitle;
         private TextBox? inputContent;
+        private Button? saveEditing;
 
         private void NewNoteView()
         {
@@ -254,49 +255,47 @@ namespace ZTP
                                        Margin = new Thickness(20)};
 
             inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                                     Watermark = "Tytuł notatki"};
+                                     Text = Builder.DefaultName()};
 
             inputContent = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                                         MinHeight = 300,
                                         AcceptsReturn = true};
 
-            var saveButton = new Button{Content = "Zapisz notatkę",
-                                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                                        Width = 120,
-                                        Margin = new Thickness(0, 10, 0, 0)};
-            saveButton.Click += (s, e) => NoteBuilder();
+            saveEditing = new Button{Content = "Zapisz notatkę",
+                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                                    Width = 120,
+                                    Margin = new Thickness(0, 10, 0, 0)};
+            saveEditing.Click += (s, e) => NoteBuilder();
 
             
 
             mainBox.Children.Add(inputTitle);
             mainBox.Children.Add(inputContent);
-            mainBox.Children.Add(saveButton);
+            mainBox.Children.Add(saveEditing);
 
             Desktop.Content = mainBox;
         }
 
         private void NoteBuilder()
         {
-            if (inputTitle == null || inputContent == null)
-                return;
-
             string title = inputTitle.Text?.Trim() ?? "";
-            string content = inputContent.Text?.Trim() ?? "";
 
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                // Pokaż błąd
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(title)){ 
+                inputTitle.Classes.Add("mustFill");
+                
+                return; }
+            inputTitle.Classes.Remove("mustFill");
+            
 
-            Note note = new Note(title, content);
-            GlobalGroups.AllGroup.Add(note);
-            GlobalGroups.AllNotesGroup.Add(note);
+            Builder.SetName(title);
+            Builder.SetContent(inputContent.Text?.Trim() ?? "");
+            Builder.BuildNote();
+
 
             // Wyczyść pola
             inputTitle.Text = "";
             inputContent.Text = "";
-            WyswietlListe(GlobalGroups.AllGroup);
+            DisplayGroup(GlobalGroups.AllGroup);
         }
 
 

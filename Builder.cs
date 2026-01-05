@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Xml;
 
 namespace ZTP;
 
-
-
-public static class TaskBuilder
+public static class Builder
 {
     private static List<IComponent> components = new List<IComponent>();
     private static string currentName = "";
     private static string content = "";
     private static Priorities prioritie = 0;
+    private static int counter = 1;
     // private static DateTime EndTime = null;
     public static string GetName()
     {
@@ -22,6 +22,21 @@ public static class TaskBuilder
             return components.First().Name;
         return currentName;
     }
+    public static string DefaultName()
+    {
+        return $"New note {counter}";
+    }
+
+    public static void SetName(string s)
+    {
+        currentName = s;
+    }
+
+    public static void SetContent(string s)
+    {
+        content = s;
+    }
+
     public static void StartNew(string name = "")
     {
         Clear();
@@ -33,10 +48,18 @@ public static class TaskBuilder
         components.Add(component);
     }
 
-    public static void AddNote(Note note)
+    public static void BuildNote()
     {
-        components.Add(note);
+        Note note = new Note(currentName, content);
+        GlobalGroups.AllGroup.Add(note);
+        GlobalGroups.AllNotesGroup.Add(note);
+        if(currentName == $"New note {counter}")
+        {
+            counter++;
+        }
     }
+    
+
 
     public static IComponent BuildTask()
     {
@@ -65,27 +88,25 @@ public static class TaskBuilder
         return taskList;
     }
 
-    public static Note BuildNote()
-    {
-        if (components.Count == 0)
-            throw new InvalidOperationException("Cannot build note - no components added");
-
-        if (components.Count > 1)
-        {
-            Console.WriteLine("Warning: Multiple notes in builder, using first one");
-        }
-
-        var result = components.First() as Note;
-        Clear();
-        return result ?? throw new InvalidOperationException("Failed to build note");
-    }
-
     public static void Clear()
     {
         components.Clear();
         currentName = "";
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

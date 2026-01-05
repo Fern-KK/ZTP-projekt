@@ -25,6 +25,12 @@
             <Setter Property="CornerRadius" Value="0" />
         </Style>
 
+        <Style Selector="TextBox.mustFill">
+            <Setter Property="BorderBrush" Value="Red" />
+            <Setter Property="BorderThickness" Value="3" />
+            <Setter Property="Watermark" Value="Nie może być puste" />
+        </Style>
+
 
     </Application.Styles>
     
