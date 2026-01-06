@@ -30,6 +30,14 @@
             <Setter Property="BorderThickness" Value="3" />
             <Setter Property="Watermark" Value="Nie może być puste" />
         </Style>
+        
+        <Style Selector="Expander.expanderCategories">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+
 
 
     </Application.Styles>

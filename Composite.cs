@@ -602,4 +602,14 @@ public class Group : IComponent
     {
         return SimpleDisplay(1);
     }
+
+    public Button DisplayGUI()
+    {
+        // Tytuł notatki jako TextBox
+        var b = new Button{Content=Name,
+                           HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                           Background = Brushes.Transparent};
+        return b;
+    }
+
 }

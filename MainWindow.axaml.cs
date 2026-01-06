@@ -165,6 +165,68 @@ namespace ZTP
             group1.Add(zadanie1);
             group1.Add(studia);
             GlobalGroups.AllGroup.Add(group1);
+
+
+
+
+
+
+
+
+
+
+
+
+    var panel = new StackPanel{};
+    
+    // Utwórz przyciski ręcznie
+    foreach (var category in Categories.GetCategories())
+    {
+        var button = new Button{Content = category.Name,
+                                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch};
+        
+        // Przypisz event który wywoła SimpleDisplay z depth = 0
+        button.Click += (s, e) => Desktop.Content = category.SimpleDisplay();
+        button.Classes.Add("leftMenuButton");
+      
+        panel.Children.Add(button);
+    }
+    CategoriesExtender.Content = panel;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+           
+
+            // foreach (var category in Categories.GetCategories())
+            // {
+            //     var categoryButton = category.DisplayGUI();
+            //     categoryButton.Click += (s, e) => DisplayGroup(category);
+            //     categoriesContainer.Children.Add(categoryButton);
+            // }
         }
 
         private void MenuButton_Click(object sender, RoutedEventArgs e)
@@ -246,6 +308,8 @@ namespace ZTP
         // Dodaj pola dla kontrolek
         private TextBox? inputTitle;
         private TextBox? inputContent;
+        private ComboBox? SelectCategorie;
+        private ListBox? selectTags;
         private Button? saveEditing;
 
         private void NewNoteView()
@@ -261,16 +325,28 @@ namespace ZTP
                                         MinHeight = 300,
                                         AcceptsReturn = true};
 
+            
+            
+            selectTags = new ListBox{SelectionMode = SelectionMode.Multiple, // Ważne: wiele wyborów
+                                   ItemsSource = Tags.GetTags(),
+                                   DisplayMemberBinding = new Avalonia.Data.Binding("Name") };
+
+            SelectCategorie = new ComboBox{ItemsSource = Categories.GetCategories(),
+                                     DisplayMemberBinding = new Avalonia.Data.Binding("Name") };
+
+
             saveEditing = new Button{Content = "Zapisz notatkę",
                                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
                                     Width = 120,
                                     Margin = new Thickness(0, 10, 0, 0)};
             saveEditing.Click += (s, e) => NoteBuilder();
-
             
 
             mainBox.Children.Add(inputTitle);
             mainBox.Children.Add(inputContent);
+        
+            mainBox.Children.Add(selectTags);
+            mainBox.Children.Add(SelectCategorie);
             mainBox.Children.Add(saveEditing);
 
             Desktop.Content = mainBox;
@@ -280,12 +356,19 @@ namespace ZTP
         {
             string title = inputTitle.Text?.Trim() ?? "";
 
-            if (string.IsNullOrWhiteSpace(title)){ 
+            if (string.IsNullOrWhiteSpace(title))
+            { 
                 inputTitle.Classes.Add("mustFill");
-                
-                return; }
+                return; 
+            }
             inputTitle.Classes.Remove("mustFill");
-            
+
+            selectTags.SelectedItems.Cast<Group>().ToList();
+
+            if (SelectCategorie.SelectedItem is Group category)
+            {
+                //Categories.AddToCategory(note, category.Name);
+            }
 
             Builder.SetName(title);
             Builder.SetContent(inputContent.Text?.Trim() ?? "");
