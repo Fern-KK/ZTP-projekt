@@ -23,8 +23,8 @@ public static class Builder
 
 
 
-    private static Group category;
-    private static List<Group> tags;
+    private static string Category;
+    private static string Tags;
 
 
     
@@ -70,10 +70,23 @@ public static class Builder
         {
             counter++;
         }
-        if (category != null)
+        if (Category != null)
         {
-            Categories.AddToCategory(note, category);
+            note.SetCategory(Category);
         }
+        // if(Tags != null)
+        // {
+        //     GlobalGroups.AddTags(Tags);
+        //     var tags = Tags.Split(',');
+        //     foreach (var t in tags)
+        //     {
+        //         string tag = t?.Trim().ToLower() ?? "";
+        //         if (!string.IsNullOrWhiteSpace(tag))
+        //         {
+        //             note.SetTags(tag);
+        //         }
+        //     }
+        // }
     }
     
 
@@ -105,13 +118,13 @@ public static class Builder
         Clear();
         return taskList;
     }
-    public static void setCategory(Group selectedCategory)
+    public static void SetCategory(string selectedCategory)
     {
-        category=selectedCategory;    
+        Category=selectedCategory;    
     }
-    public static void setTags(List<Group> selectedTags)
+    public static void SetTags(string selectedTags)
     {
-        tags=selectedTags;
+        Tags=selectedTags;
     }
     public static void Clear()
     {

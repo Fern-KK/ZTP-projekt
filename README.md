@@ -4,7 +4,15 @@
 
 
 
-przewspaniały projekt 
+#### Podzieliłem wcześniejszt kod na 3 pliki: 
+- Composite.cs
+- Builder.cs
+- GlobalGroups.cs
+
+#### Istotne pliki Avalonii:
+- MainWindow.axaml.cs - to jak plik js w stronach internetowych. Tak funkcjonalnie jest Program.cs naszego programu, gdzie MainWindow() jest odpowiednikiem normalnego Main()
+- MainWindow.axaml - To jak plik html w stronach internetowej
+- App.axaml - to jak plik css, gdzie definuje style 
 
 
 

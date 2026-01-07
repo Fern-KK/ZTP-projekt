@@ -22,6 +22,9 @@ public interface IComponent
 {
     public string Name { get; }
     DateTime StartDate { get; }
+    // public List<string> Tags { get; }
+    // public string Category { get; }
+    
     public string Display(int depth);
     public string Display();
     public StackPanel SimpleDisplay(int depth);
@@ -33,6 +36,8 @@ public class Note : IComponent
     public string Name { get; }
     public string Content { get; }
     public DateTime StartDate { get; }
+    public List<string> Tags { get; set;}
+    public string Category { get; set;}
 
     public Note(string name, string content)
     {
@@ -46,6 +51,19 @@ public class Note : IComponent
         Name = other.Name;
         Content = other.Content;
         StartDate = other.StartDate;
+    }
+
+    public void SetCategory(string category)
+    {
+        Category=category;
+    }
+    public void SetTags(List<string> tags)
+    {
+        Tags=tags;
+    }
+    public void SetTags(string tag)
+    {
+        Tags.Add(tag);
     }
 
     public string Display()
@@ -67,7 +85,7 @@ public class Note : IComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainBox = new StackPanel{ Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
 
         // Tytuł notatki jako TextBox
         var titleBox = new TextBox{Text = $"📝 {Name}",
@@ -77,7 +95,7 @@ public class Note : IComponent
                                    IsReadOnly = true,
                                    BorderThickness = new Thickness(0),
                                    Background = Brushes.Transparent};
-        mainBox.Children.Add(titleBox);
+        mainSection.Children.Add(titleBox);
 
         // Treść notatki
         if (!string.IsNullOrEmpty(Content))
@@ -91,7 +109,7 @@ public class Note : IComponent
                 Background = Brushes.Transparent,
                 Margin = new Thickness(10, 0, 0, 0)
             };
-            mainBox.Children.Add(contentBox);
+            mainSection.Children.Add(contentBox);
         }
 
         // Data utworzenia
@@ -103,9 +121,9 @@ public class Note : IComponent
             Background = Brushes.Transparent,
             Margin = new Thickness(10, 0, 0, 0)
         };
-        mainBox.Children.Add(dateBox);
+        mainSection.Children.Add(dateBox);
 
-        return mainBox;
+        return mainSection;
     }
     public StackPanel SimpleDisplay()
     {
@@ -113,7 +131,7 @@ public class Note : IComponent
     }
     public StackPanel DisplayDetails()
     {
-        var mainBox = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
+        var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
                                    Spacing = 10,
                                    Margin = new Thickness(20)};
 
@@ -137,11 +155,11 @@ public class Note : IComponent
                                     Margin = new Thickness(0, 10, 0, 0)};
         // saveButton.Click += (s, e) => NoteBuilder();
         
-        mainBox.Children.Add(inputTitle);
-        mainBox.Children.Add(inputContent);
-        mainBox.Children.Add(dateBox);
-        mainBox.Children.Add(saveButton);
-        return mainBox;
+        mainSection.Children.Add(inputTitle);
+        mainSection.Children.Add(inputContent);
+        mainSection.Children.Add(dateBox);
+        mainSection.Children.Add(saveButton);
+        return mainSection;
     }
     
 }
@@ -214,7 +232,7 @@ public class Task : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainBox = new StackPanel
+        var mainSection = new StackPanel
         {
             Spacing = 10,
             Margin = new Thickness(10*depth, 5)
@@ -275,8 +293,8 @@ public class Task : ITaskComponent
         grid.Children.Add(dateText);
         grid.Children.Add(priorityIcon);
 
-        mainBox.Children.Add(grid);
-        return mainBox;
+        mainSection.Children.Add(grid);
+        return mainSection;
     }
     public StackPanel SimpleDisplay()
     {
@@ -441,7 +459,7 @@ public class TaskList : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainBox = new StackPanel
+        var mainSection = new StackPanel
         {
             Spacing = 10,
             Margin = new Thickness(10*depth, 5)
@@ -456,7 +474,7 @@ public class TaskList : ITaskComponent
             Margin = new Thickness(0, 0, 0, 5)
         };
 
-        mainBox.Children.Add(titleText);
+        mainSection.Children.Add(titleText);
 
         // Status i informacje
         var infoText = new TextBlock
@@ -466,14 +484,14 @@ public class TaskList : ITaskComponent
             Foreground = Brushes.Gray,
             Margin = new Thickness(10, 0, 0, 10)
         };
-        mainBox.Children.Add(infoText);
+        mainSection.Children.Add(infoText);
 
         // Zadania w liście
         foreach(var c in components)
         {
-            mainBox.Children.Add(c.SimpleDisplay(depth+1));
+            mainSection.Children.Add(c.SimpleDisplay(depth+1));
         }
-        return mainBox;
+        return mainSection;
     }
     public StackPanel SimpleDisplay()
     {
@@ -576,27 +594,27 @@ public class Group : IComponent
     public StackPanel SimpleDisplay(int depth)
     {
 
-        var mainBox = new StackPanel{Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{Margin = new Thickness(10*depth, 5)};
 
         // Tytuł grupy
         var titleText = new TextBlock{Text = $"📂 {Name}",
                                       FontSize = 14,
                                       FontWeight = FontWeight.SemiBold};
-        mainBox.Children.Add(titleText);
+        mainSection.Children.Add(titleText);
 
         // Licznik elementów
         var counterText = new TextBlock{Text = $"({Count()} elementów)",
                                         FontSize = 12,
                                         Foreground = Brushes.Gray,
                                         Margin = new Thickness(10, 0, 0, 10)};
-        mainBox.Children.Add(counterText);
+        mainSection.Children.Add(counterText);
 
         // Elementy grupy
         foreach(var c in components)
         {
-            mainBox.Children.Add(c.SimpleDisplay(depth+1));
+            mainSection.Children.Add(c.SimpleDisplay(depth+1));
         }
-        return mainBox;
+        return mainSection;
     }
     public StackPanel SimpleDisplay()
     {

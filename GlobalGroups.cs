@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using HarfBuzzSharp;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -10,29 +12,153 @@ using System.Text;
 
 namespace ZTP;
 
-    public static class GlobalGroups
+public static class GlobalGroups
+{
+    public static Group AllGroup = new Group("Wszystko");
+    public static Group AllTasksGroup = new Group("Zadania");
+    public static Group AllNotesGroup = new Group("Notatki");
+    private static List<string> AllCategories { get; } = new List<string>();
+    private static List<string> AllTags = new List<string>();
+
+    public static void Initialize()
     {
-        public static Group AllGroup = new Group("Wszystko");
-        public static Group AllTasksGroup = new Group("Zadania");
-        public static Group AllNotesGroup = new Group("Notatki");
+        // Dodaj domyślne kategorie
+        Categories.Add("szkoła");
+        Categories.Add("dom");
+
+        // Opcjonalnie: dodaj też tagi
+        AddTags("pilne");
+        AddTags("ważne");
+        AddTags("codzienne");
+
+
+        AddCategory("szkola");
+        AddCategory("dom");
+        AddCategory("dzieci");
         
-        public static void Initialize()
+    }
+    // public static StackPanel adsa(string contains)
+    // {
+    //     var mainSection = new StackPanel{};
+    //     foreach(var)
+    //     return mainSection;
+    // }
+    public static void AddTags(List<string> tags)
+    {
+        foreach (var t in tags)
         {
-            // Dodaj domyślne kategorie
-            Categories.Add("szkoła");
-            Categories.Add("dom");
-            
-            // Opcjonalnie: dodaj też tagi
-            Tags.Add("pilne");
-            Tags.Add("ważne");
-            Tags.Add("codzienne");
+            string tag = t?.Trim().ToLower() ?? "";
+            if (!string.IsNullOrWhiteSpace(tag) && !AllTags.Contains(tag))
+            {
+                AllTags.Add(tag);
+            }
+
         }
+    }
+    public static void AddTags(string tag)
+    {
+        if (tag.Contains(','))
+        {
+            List<string> tags = new List<string>(tag.Split(','));
+            AddTags(tags);
+
+        }
+        else
+        {
+            string t = tag?.Trim().ToLower() ?? "";
+            if (!string.IsNullOrWhiteSpace(t) && !AllTags.Contains(t))
+            {
+                AllTags.Add(t);
+            }
+        }
+        
+    }
+    public static List<Button> GetTags()
+    {
+        var buttons = new List<Button>();
+        foreach(var tag in AllTags)
+        {
+            var tagButton = new Button{Content = $"#{tag}", Name=tag};
+            tagButton.Classes.Add("leftMenuButton");
+            buttons.Add(tagButton);
+        }
+        return buttons;
     }
 
 
+        public static void AddCategory(List<string> categories)
+    {
+        foreach (var c in categories)
+        {
+            string category = c?.Trim().ToLower() ?? "";
+            if (!string.IsNullOrWhiteSpace(category) && !AllCategories.Contains(category))
+            {
+                AllCategories.Add(category);
+            }
+
+        }
+    }
+    public static void AddCategory(string category)
+    {
+
+            List<string> categories = new List<string>(category.Split(','));
+            AddCategory(categories);
+        
+    }
+    public static List<Button> GetCategories()
+    {
+        var buttons = new List<Button>();
+        foreach(var category in AllCategories)
+        {
+            var categoryButton = new Button{Content = $"{category}", Name=category};
+            categoryButton.Classes.Add("leftMenuButton");
+            buttons.Add(categoryButton);
+        }
+        return buttons;
+    }
+    public static ComboBox SelectableCategoryList()
+    {
+        return new ComboBox{ItemsSource = AllCategories };
+    }
+}
 
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -91,7 +217,7 @@ public static class Categories
         }
 
     }
-        public static void AddToCategory(IComponent component, string selectedCategory)
+    public static void AddToCategory(IComponent component, string selectedCategory)
     {
         // Najpierw usuwamy komponent ze wszystkich istniejących kategorii
         foreach (var c in categories)
@@ -132,14 +258,14 @@ public static class Categories
     public static StackPanel SimpleDisplay()
     {
 
-        var mainBox = new StackPanel{};
+        var mainSection = new StackPanel { };
         // Licznik elementów
         // Elementy grupy
-        foreach(var c in categories)
+        foreach (var c in categories)
         {
-            mainBox.Children.Add(c.DisplayGUI());
+            mainSection.Children.Add(c.DisplayGUI());
         }
-        return mainBox;
+        return mainSection;
     }
     public static int Count()
     {
@@ -242,7 +368,7 @@ public static class Tags
 
 
 
-        public static ComboBox CreateComboBox(string watermark = null)
+    public static ComboBox CreateComboBox(string watermark = null)
     {
         var comboBox = new ComboBox
         {
@@ -253,15 +379,15 @@ public static class Tags
             DisplayMemberBinding = new Avalonia.Data.Binding("Name"),
             SelectedIndex = 0
         };
-        
+
         if (!string.IsNullOrEmpty(watermark))
         {
-            
+
         }
-        
+
         return comboBox;
     }
-    
+
     // Metoda zwracająca CheckBox listę (do wielokrotnego wyboru)
     public static StackPanel CreateCheckBoxList(string header = null)
     {
@@ -269,7 +395,7 @@ public static class Tags
         {
             Spacing = 5
         };
-        
+
         if (!string.IsNullOrEmpty(header))
         {
             panel.Children.Add(new TextBlock
@@ -279,7 +405,7 @@ public static class Tags
                 Margin = new Thickness(0, 0, 0, 5)
             });
         }
-        
+
         foreach (var tag in tags)
         {
             var checkBox = new CheckBox
@@ -290,15 +416,15 @@ public static class Tags
             };
             panel.Children.Add(checkBox);
         }
-        
+
         return panel;
     }
-    
+
     // Metoda do pobierania zaznaczonych tagów z CheckBox listy
     public static List<Group> GetSelectedTags(StackPanel checkBoxPanel)
     {
         var selectedTags = new List<Group>();
-        
+
         foreach (var child in checkBoxPanel.Children)
         {
             if (child is CheckBox checkBox && checkBox.IsChecked == true && checkBox.Tag is Group tag)
@@ -306,15 +432,15 @@ public static class Tags
                 selectedTags.Add(tag);
             }
         }
-        
+
         return selectedTags;
     }
-    
+
     // Metoda pomocnicza do ComboBox
     private static List<ComboBoxItem> GetTagsForComboBox()
     {
         var items = new List<ComboBoxItem>();
-        
+
         foreach (var tag in tags)
         {
             items.Add(new ComboBoxItem
@@ -323,10 +449,10 @@ public static class Tags
                 Tag = tag
             });
         }
-        
+
         return items;
     }
-    
+
     // Metoda do aktualizacji ComboBox
     public static void UpdateComboBox(ComboBox comboBox)
     {
