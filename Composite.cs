@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using HarfBuzzSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,7 +37,7 @@ public class Note : IComponent
     public string Name { get; }
     public string Content { get; }
     public DateTime StartDate { get; }
-    public List<string> Tags { get; set;}
+    public List<string> Tags { get; set;} = new List<string>();
     public string Category { get; set;}
 
     public Note(string name, string content)
@@ -88,7 +89,7 @@ public class Note : IComponent
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
 
         // Tytuł notatki jako TextBox
-        var titleBox = new TextBox{Text = $"📝 {Name}, {Category}",
+        var titleBox = new TextBox{Text = $"📝 {Name}, {Category}, {string.Join( ",", Tags.ToArray() )}",
                                    FontSize = 14,
                                    FontWeight = FontWeight.SemiBold,
                                    Margin = new Thickness(0, 0, 0, 5),

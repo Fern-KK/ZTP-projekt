@@ -77,15 +77,15 @@ public static class Builder
         if(Tags != null)
         {
             GlobalGroups.AddTags(Tags);
-            // var tags = Tags.Split(',');
-            // foreach (var t in tags)
-            // {
-            //     string tag = t?.Trim().ToLower() ?? "";
-            //     if (!string.IsNullOrWhiteSpace(tag))
-            //     {
-            //         note.SetTags(tag);
-            //     }
-            // }
+            var tags = Tags.Split(',');
+            foreach (var t in tags)
+            {
+                string tag = t?.Trim().ToLower() ?? "";
+                if (!string.IsNullOrWhiteSpace(tag))
+                {
+                    note.SetTags(tag);
+                }
+            }
         }
     }
     
@@ -120,7 +120,6 @@ public static class Builder
     }
     public static void SetCategory(string selectedCategory)
     {
-        
         Category=selectedCategory;    
     }
     public static void SetTags(string selectedTags)
