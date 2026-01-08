@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input.TextInput;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using System;
@@ -13,28 +14,6 @@ namespace ZTP
 {
     public partial class MainWindow : Window
     {
-        // Listy danych
-        private List<string> wszystkieElementy = new List<string>
-        {
-            "Wszystko 1", "Wszystko 2", "Wszystko 3", "Wszystko 4"
-        };
-
-        private List<string> zadania = new List<string>
-        {
-            "Zadanie 1: Zrobić zakupy",
-            "Zadanie 2: Nauczyć się Avalonii",
-            "Zadanie 3: Spotkanie z klientem",
-            "Zadanie 4: Napisać raport"
-        };
-
-        private List<string> notatki = new List<string>
-        {
-            "Notatka 1: Pomysł na projekt",
-            "Notatka 2: Lista zakupów",
-            "Notatka 3: Spotkania w tym tygodniu",
-            "Notatka 4: Ważne numery telefonów"
-        };
-
         public MainWindow()
         {
             InitializeComponent();
@@ -186,7 +165,49 @@ namespace ZTP
             group1.Add(zadanie1);
             group1.Add(studia);
             GlobalGroups.AllGroup.Add(group1);
+
+
+
+            InitializeMenu();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // foreach (var category in Categories.GetCategories())
+            // {
+            //     var categoryButton = category.DisplayGUI();
+            //     categoryButton.Click += (s, e) => DisplayGroup(category);
+            //     categoriesContainer.Children.Add(categoryButton);
+            // }
         }
+
 
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
@@ -197,13 +218,13 @@ namespace ZTP
                 switch (buttonName)
                 {
                     case "BtnAll":
-                        WyswietlListe(GlobalGroups.AllGroup);
+                        DisplayGroup(GlobalGroups.AllGroup);
                         break;
                     case "BtnTasks":
-                        WyswietlListe(GlobalGroups.AllTasksGroup);
+                        DisplayGroup(GlobalGroups.AllTasksGroup);
                         break;
                     case "BtnNotes":
-                        WyswietlListe(GlobalGroups.AllNotesGroup);
+                        DisplayGroup(GlobalGroups.AllNotesGroup);
                         break;
                     default:
                         ContentText.Text = "Nieznany przycisk";
@@ -212,67 +233,206 @@ namespace ZTP
             }
         }
 
-        private void WyswietlListe(Group group)
+        private void DisplayGroup(Group group)
         {
-            Desktop.Content = group.DisplayGUI();
-        }
-
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
-        {
-            string userInput = InputTextBox.Text;
-
-            ContentText.Text = $"hgdfgdgf";
-            ContentText.Text += $"Wpisałeś: {userInput}";
+            Desktop.Content = group.SimpleDisplay();
         }
         private void NewObject_Click(object sender, RoutedEventArgs e)
         {
-            string cat = @"       ,
-       \`-._           __
-        \\  `-..____,.'  `.
-         :`.         /    \`.
-         :  )       :      : \
-          ;'        '   ;  |  :
-          )..      .. .:.`.;  :
-         /::...  .:::...   ` ;
-         ; _ '    __        /:\
-         `:o>   /\o_>      ;:. `.
-        `-`.__ ;   __..--- /:.   \
-        === \_/   ;=====_.':.     ;
-         ,/'`--'...`--....        ;
-              ;                    ;
-            .'                      ;
-          .'                        ;
-        .'     ..     ,      .       ;
-       :       ::..  /      ;::.     |
-      /      `.;::.  |       ;:..    ;
-     :         |:.   :       ;:.    ;
-     :         ::     ;:..   |.    ;
-      :       :;      :::....|     |
-      /\     ,/ \      ;:::::;     ;
-    .:. \:..|    :     ; '.--|     ;
-   ::.  :''  `-.,,;     ;'   ;     ;
-.-'. _.'\      / `;      \,__:      \
-`---'    `----'   ;      /    \,.,,,/
-                   `----`              ";
-            var button1 = new Button{Content="Nowa notatka", Name="BtnSelectNote"};
-            button1.Click += (s, e) => {
-                                            Desktop.Content = new TextBlock{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
-                                                                            Text=cat};
-                                            CreateNoteView();
-                                       };
-            var button2 = new Button{Content="Nowe zadanie", Name="BtnSelectTask"};
-            button2.Click += (s, e) => {
-                                            Save_Click(s,e);
-                                       };
+            var button1 = new Button { Content = "Nowa notatka", Name = "BtnSelectNote" };
+            button1.Click += (s, e) => CreateNoteView();
 
-            var panel = new StackPanel{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
-                                      HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center,
-                                      Orientation=Avalonia.Layout.Orientation.Horizontal,
-                                      Spacing=10};
-            panel.Children.Add(button1);
-            panel.Children.Add(button2);    
-            Desktop.Content = panel;
+            var button2 = new Button { Content = "Nowe zadanie", Name = "BtnSelectTask" };
+            button2.Click += (s, e) => CreateTaskView();
+
+            var mainSection = new StackPanel{VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                                       HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                                       Orientation = Avalonia.Layout.Orientation.Horizontal,
+                                       Spacing = 10};
+            mainSection.Children.Add(button1);
+            mainSection.Children.Add(button2);
+            Desktop.Content = mainSection;
         }
+        
+        // Dodaj pola dla kontrolek
+        private TextBox? inputTitle;
+        private TextBox? inputContent;
+        private TextBox? inputTags;
+        private ComboBox? inputCategory;
+        private Button? saveEditingButton;
+        private StackPanel? inputTasksSection;
+        private List<TextBox>? taskTextBoxes;
+
+        private void CreateNoteView()
+        {
+            var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
+                                       Spacing = 10,
+                                       Margin = new Thickness(20)};
+
+            inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                                     Text = Builder.DefaultName()};
+
+            inputContent = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                                        MinHeight = 200,
+                                        AcceptsReturn = true};
+
+            var downSection = new Grid{ ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") }; 
+
+            inputCategory = GlobalGroups.SelectableCategoryList();
+            inputTags = new TextBox{Watermark="Wpisz tagi...", MaxWidth=200, Text=null};
+            
+            
+            saveEditingButton = new Button{Content = "Zapisz notatkę"};
+            saveEditingButton.Click += (s, e) => NoteBuilder();
+
+            var leftSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Left, 
+                                           Orientation=Avalonia.Layout.Orientation.Horizontal};
+            Grid.SetColumn(leftSide, 0);
+            leftSide.Children.Add(inputCategory);
+            leftSide.Children.Add(inputTags);
+
+            var rightSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right};
+            Grid.SetColumn(rightSide, 1);
+            rightSide.Children.Add(saveEditingButton);
+
+            downSection.Children.Add(leftSide);
+            downSection.Children.Add(rightSide);
+
+            
+
+            
+
+            
+            
+            // inputTags = new ListBox{SelectionMode = SelectionMode.Multiple, // Ważne: wiele wyborów
+            //                        ItemsSource = Tags.GetTags(),
+            //                        DisplayMemberBinding = new Avalonia.Data.Binding("Name") };
+
+            
+
+
+            
+            
+
+            mainSection.Children.Add(inputTitle);
+            mainSection.Children.Add(inputContent);
+        
+            mainSection.Children.Add(downSection);
+
+
+            Desktop.Content = mainSection;
+        }
+
+        private void NoteBuilder()
+        {
+            string title = inputTitle.Text?.Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(title))
+            { 
+                inputTitle.Classes.Add("mustFill");
+                return; 
+            }
+            inputTitle.Classes.Remove("mustFill");
+
+            
+
+            if (inputCategory.SelectedItem is string category) {Builder.SetCategory(category);}
+            if (inputTags.Text is string tag) {Builder.SetTags(tag);}
+
+            Builder.SetName(title);
+            Builder.SetContent(inputContent.Text?.Trim() ?? "");
+            Builder.BuildNote();
+
+
+            // Wyczyść pola
+            inputTitle.Text = "";
+            inputContent.Text = "";
+            inputTags.Text = "";
+            inputCategory.SelectedItem = "";
+            DisplayGroup(GlobalGroups.AllGroup);
+        }
+
+
+
+
+
+        private void CreateTaskView()
+        {
+            var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
+                                       Spacing = 10,
+                                       Margin = new Thickness(20)};
+            
+
+            inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="Tytuł listy"};
+
+            taskTextBoxes = new List<TextBox>();
+            inputTasksSection = new StackPanel{Spacing=5};
+
+            
+
+            
+            var addTaskButtonSection = new StackPanel{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center};
+
+            var addTaskButton = new Button{Content = "Dodaj zadanie"};
+            addTaskButton.Click += (s, e) => AddTaskButtons();
+            addTaskButtonSection.Children.Add(addTaskButton);
+            AddTaskButtons();
+
+            var downSection = new Grid{ ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") }; 
+
+            inputCategory = GlobalGroups.SelectableCategoryList();
+            inputTags = new TextBox{Watermark="Wpisz tagi...", MaxWidth=200};
+            
+            saveEditingButton = new Button{Content = "Zapisz notatkę"};
+            saveEditingButton.Click += (s, e) => TaskBuilder();
+
+            var leftSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Left, 
+                                           Orientation=Avalonia.Layout.Orientation.Horizontal};
+            Grid.SetColumn(leftSide, 0);
+            leftSide.Children.Add(inputCategory);
+            leftSide.Children.Add(inputTags);
+
+            var rightSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right};
+            Grid.SetColumn(rightSide, 1);
+            rightSide.Children.Add(saveEditingButton);
+
+            downSection.Children.Add(leftSide);
+            downSection.Children.Add(rightSide);
+            mainSection.Children.Add(inputTitle);
+            mainSection.Children.Add(inputTasksSection);
+            mainSection.Children.Add(addTaskButtonSection);
+            mainSection.Children.Add(downSection);
+            Desktop.Content = mainSection;
+        }
+        private void AddTaskButtons()
+        {
+            var inputTask = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="zadanie"};
+            taskTextBoxes.Add(inputTask);
+            inputTasksSection.Children.Add(inputTask);
+        }
+        private void TaskBuilder()
+        {
+
+            foreach (var textBox in taskTextBoxes)
+            {
+                string text = textBox.Text?.Trim() ?? "";
+                if (!string.IsNullOrEmpty(text))
+                {
+                    Builder.AddTaskComponent(new Task(text));
+                }
+            }
+            Builder.BuildTask();
+
+            // Wyczyść pola
+            inputTitle.Text = "";
+            DisplayGroup(GlobalGroups.AllGroup);
+        }
+
+
+
+
+
+
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             Save();
@@ -280,59 +440,75 @@ namespace ZTP
         }
         private void Save()
         {
-            Desktop.Content = new TextBlock{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
-                                            HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center, 
-                                            Text="Zapisywanie..."};
+            Desktop.Content = new TextBlock{VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                                            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                                            Text = "Zapisywanie..."};
         }
         private void Sych_Click(object sender, RoutedEventArgs e)
         {
             Save();
 
-            var button1 = new Button{Content="Zapisz do Chmury", Name="BtnSynchToCloud"};
-            // button1.Classes.Add("menuButton"); NIE POTRZEBNY TU STYL TEN, MOZE BYĆ DOMYŚLNY
-            button1.Click += (s, e) => {
-                                            Desktop.Content = new TextBlock{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
-                                                                            HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center, 
-                                                                            Text="Zsynchroniczowanie "};
-                                       };
-            var button2 = new Button{Content="Pobierz z Chmury", Name="BtnSynchFromCloud"};
+            var button = new Button { Content = "Zaloguj się", Name = "BtnLogIn" };
             // button2.Classes.Add("menuButton"); NIE POTRZEBNY TU STYL TEN, MOZE BYĆ DOMYŚLNY
-            button2.Click += (s, e) => {
-                                            Save_Click(s,e);
-                                       };
+            button.Click += (s, e) => Save_Click(s, e);
 
-            var panel = new StackPanel{VerticalAlignment=Avalonia.Layout.VerticalAlignment.Center, 
-                                       HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Center,
-                                       Orientation=Avalonia.Layout.Orientation.Horizontal,
-                                       Spacing=10};
-            panel.Children.Add(button1);
-            panel.Children.Add(button2);    
-            Desktop.Content = panel;
+            var mainSection = new StackPanel{VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                                             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                                             Orientation = Avalonia.Layout.Orientation.Horizontal,
+                                             Spacing = 10};
+            mainSection.Children.Add(button);
+            Desktop.Content = mainSection;
         }
-        private void CreateNoteView()
+
+
+
+
+        // private void SaveCategoriesToCloud()
+        // {
+        //     var categories = Categories.GetCategories();
+        //     // Tutaj kod zapisu do chmury (np. do pliku JSON, bazy danych itp.)
+        //     // Przykład: Serializacja do JSON
+        //     var json = System.Text.Json.JsonSerializer.Serialize(categories);
+        //     // Zapisz gdzieś (plik, API, etc.)
+        // }
+
+        // private void LoadCategoriesFromCloud()
+        // {
+        //     // Tutaj kod wczytywania z chmury
+        //     // Przykład: Deserializacja z JSON
+        //     // var json = ... // wczytaj z chmury
+        //     // var categories = System.Text.Json.JsonSerializer.Deserialize<List<Group>>(json);
+        // }
+        private void InitializeMenu()
         {
-            var titleBar = new TextBox{HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Stretch,
-                                       Watermark="Tytuł notatki"};
-            var contentBar = new TextBox{HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Stretch,
-                                         MinHeight=400};
-            var panel = new StackPanel{Orientation=Avalonia.Layout.Orientation.Vertical,
-                                       Spacing=10};
-            panel.Children.Add(titleBar);
-            panel.Children.Add(contentBar);
-            Desktop.Content = panel;
+            var mainSectionTag = new StackPanel{};
+            foreach (var button in GlobalGroups.GetTags())
+            {
+                button.Click += (s, e) => DisplayContaing(button.Name);
+                mainSectionTag.Children.Add(button);
+            }
+            TagsExtender.Content = mainSectionTag;
+
+            var mainSectionCategory = new StackPanel{};
+            foreach (var button in GlobalGroups.GetCategories())
+            {
+                button.Click += (s, e) => DisplayContaing(button.Name);
+                mainSectionCategory.Children.Add(button);
+            }
+            CategoriesExtender.Content = mainSectionCategory;
+
         }
-        // private void Save_Click(object sender, RoutedEventArgs e)
-        // {
-        //     Desktop.Content = new TextBlock{Text="Zapisywanie..."};
-        //     // Builder.AddComponent
-        // }
-        // private void Sych_Click(object sender, RoutedEventArgs e)
-        // {
-        //     Desktop.Content = new TextBlock{Text="Zapisywanie..."};
+        private void DisplayContaing(string sssss)
+        {
+            
+        }
 
 
-        //     Desktop.Content = new TextBlock{Text="Zapisz do Chmury   |   Pobierz z Chmury"};
-        //     // Builder.AddComponent
-        // }
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            GlobalGroups.AddCategory(InputTextBox.Text);
+            InitializeMenu();
+            
+        }
     }
 }

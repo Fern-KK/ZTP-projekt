@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using HarfBuzzSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,9 +23,13 @@ public interface IComponent
 {
     public string Name { get; }
     DateTime StartDate { get; }
+    // public List<string> Tags { get; }
+    // public string Category { get; }
+    
     public string Display(int depth);
     public string Display();
-    public StackPanel DisplayGUI(); // Dodano wymaganie tej metody w interfejsie
+    public StackPanel SimpleDisplay(int depth);
+    public StackPanel SimpleDisplay();
 }
 
 public class Note : IComponent
@@ -32,6 +37,8 @@ public class Note : IComponent
     public string Name { get; }
     public string Content { get; }
     public DateTime StartDate { get; }
+    public List<string> Tags { get; set;} = new List<string>();
+    public string Category { get; set;}
 
     public Note(string name, string content)
     {
@@ -45,6 +52,19 @@ public class Note : IComponent
         Name = other.Name;
         Content = other.Content;
         StartDate = other.StartDate;
+    }
+
+    public void SetCategory(string category)
+    {
+        Category=category;
+    }
+    public void SetTags(List<string> tags)
+    {
+        Tags=tags;
+    }
+    public void SetTags(string tag)
+    {
+        Tags.Add(tag);
     }
 
     public string Display()
@@ -64,62 +84,90 @@ public class Note : IComponent
         return sb.ToString();
     }
 
-    public StackPanel DisplayGUI()
-{
-    var panel = new StackPanel
+    public StackPanel SimpleDisplay(int depth)
     {
-        Spacing = 10,
-        Margin = new Thickness(10, 5)
-    };
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
 
-    // Tytuł notatki jako TextBox
-    var titleBox = new TextBox
-    {
-        Text = $"📝 {Name}",
-        FontSize = 14,
-        FontWeight = FontWeight.SemiBold,
-        Margin = new Thickness(0, 0, 0, 5),
-        IsReadOnly = true,
-        BorderThickness = new Thickness(0),
-        Background = Brushes.Transparent
-    };
-    panel.Children.Add(titleBox);
+        // Tytuł notatki jako TextBox
+        var titleBox = new TextBox{Text = $"📝 {Name}, {Category}, {string.Join( ",", Tags.ToArray() )}",
+                                   FontSize = 14,
+                                   FontWeight = FontWeight.SemiBold,
+                                   Margin = new Thickness(0, 0, 0, 5),
+                                   IsReadOnly = true,
+                                   BorderThickness = new Thickness(0),
+                                   Background = Brushes.Transparent};
+        mainSection.Children.Add(titleBox);
 
-    // Treść notatki
-    if (!string.IsNullOrEmpty(Content))
-    {
-        var contentBox = new TextBox
+        // Treść notatki
+        if (!string.IsNullOrEmpty(Content))
         {
-            Text = Content,
-            IsReadOnly = true,
-            TextWrapping = TextWrapping.Wrap,
-            BorderThickness = new Thickness(0),
+            var contentBox = new TextBox
+            {
+                Text = Content,
+                IsReadOnly = true,
+                TextWrapping = TextWrapping.Wrap,
+                BorderThickness = new Thickness(0),
+                Background = Brushes.Transparent,
+                Margin = new Thickness(10, 0, 0, 0)
+            };
+            mainSection.Children.Add(contentBox);
+        }
+
+        // Data utworzenia
+        var dateBox = new TextBlock
+        {
+            Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
+            FontSize = 11,
+            Foreground = Brushes.Gray,
             Background = Brushes.Transparent,
             Margin = new Thickness(10, 0, 0, 0)
         };
-        panel.Children.Add(contentBox);
+        mainSection.Children.Add(dateBox);
+
+        return mainSection;
     }
-
-    // Data utworzenia
-    var dateBox = new TextBox
+    public StackPanel SimpleDisplay()
     {
-        Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
-        FontSize = 11,
-        Foreground = Brushes.Gray,
-        Margin = new Thickness(10, 5, 0, 0),
-        IsReadOnly = true,
-        BorderThickness = new Thickness(0),
-        Background = Brushes.Transparent
-    };
-    panel.Children.Add(dateBox);
+        return SimpleDisplay(1);
+    }
+    public StackPanel DisplayDetails()
+    {
+        var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
+                                   Spacing = 10,
+                                   Margin = new Thickness(20)};
 
-    return panel;
-}
+        var inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                                     Text = Name,
+                                     AcceptsReturn = true};
+
+        var inputContent = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                                       MinHeight = 300,
+                                       Text = Content,
+                                       AcceptsReturn = true};
+        
+        var dateBox = new TextBlock{Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
+                                    FontSize = 11,
+                                    Foreground = Brushes.Gray,
+                                    Background = Brushes.Transparent};
+
+        var saveButton = new Button{Content = "Zapisz notatkę",
+                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                                    Width = 120,
+                                    Margin = new Thickness(0, 10, 0, 0)};
+        // saveButton.Click += (s, e) => NoteBuilder();
+        
+        mainSection.Children.Add(inputTitle);
+        mainSection.Children.Add(inputContent);
+        mainSection.Children.Add(dateBox);
+        mainSection.Children.Add(saveButton);
+        return mainSection;
+    }
+    
 }
 
 public interface ITaskComponent : IComponent
 {
-    DateTime EndDate { get; }
+    DateTime? EndDate { get; }
     bool IsCompleted { get; }
     bool IsLate { get; }
     Priorities Priority { get; }
@@ -132,7 +180,7 @@ public class Task : ITaskComponent
 {
     public string Name { get; }
     public DateTime StartDate { get; }
-    public DateTime EndDate { get; }
+    public DateTime? EndDate { get; }
     public Priorities Priority { get; private set; } = 0;
     public bool IsCompleted { get; private set; } = false;
     public bool IsLate { get; private set; } = false;
@@ -142,6 +190,12 @@ public class Task : ITaskComponent
         Name = name;
         StartDate = DateTime.Now;
         EndDate = endDate;
+    }
+    public Task(string name)
+    {
+        Name = name;
+        StartDate = DateTime.Now;
+        EndDate = null;
     }
 
     public Task(Task other)
@@ -183,12 +237,12 @@ public class Task : ITaskComponent
         return $"{dashPrefix}{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}\n";
     }
 
-    public StackPanel DisplayGUI()
+    public StackPanel SimpleDisplay(int depth)
     {
-        var panel = new StackPanel
+        var mainSection = new StackPanel
         {
             Spacing = 10,
-            Margin = new Thickness(0, 5)
+            Margin = new Thickness(10*depth, 5)
         };
 
         var grid = new Grid();
@@ -246,8 +300,12 @@ public class Task : ITaskComponent
         grid.Children.Add(dateText);
         grid.Children.Add(priorityIcon);
 
-        panel.Children.Add(grid);
-        return panel;
+        mainSection.Children.Add(grid);
+        return mainSection;
+    }
+    public StackPanel SimpleDisplay()
+    {
+        return SimpleDisplay(1);
     }
 
     private string GetPriorityIcon()
@@ -277,7 +335,7 @@ public class TaskList : ITaskComponent
         }
     }
 
-    public DateTime EndDate
+    public DateTime? EndDate
     {
         get
         {
@@ -406,12 +464,12 @@ public class TaskList : ITaskComponent
         return sb.ToString();
     }
 
-    public StackPanel DisplayGUI()
+    public StackPanel SimpleDisplay(int depth)
     {
-        var panel = new StackPanel
+        var mainSection = new StackPanel
         {
             Spacing = 10,
-            Margin = new Thickness(10, 5)
+            Margin = new Thickness(10*depth, 5)
         };
 
         // Tytuł listy zadań
@@ -423,7 +481,7 @@ public class TaskList : ITaskComponent
             Margin = new Thickness(0, 0, 0, 5)
         };
 
-        panel.Children.Add(titleText);
+        mainSection.Children.Add(titleText);
 
         // Status i informacje
         var infoText = new TextBlock
@@ -433,14 +491,18 @@ public class TaskList : ITaskComponent
             Foreground = Brushes.Gray,
             Margin = new Thickness(10, 0, 0, 10)
         };
-        panel.Children.Add(infoText);
+        mainSection.Children.Add(infoText);
 
         // Zadania w liście
         foreach(var c in components)
         {
-            panel.Children.Add(c.DisplayGUI());
+            mainSection.Children.Add(c.SimpleDisplay(depth+1));
         }
-        return panel;
+        return mainSection;
+    }
+    public StackPanel SimpleDisplay()
+    {
+        return SimpleDisplay(1);
     }
 }
 
@@ -536,40 +598,43 @@ public class Group : IComponent
         return sb.ToString();
     }
 
-    public StackPanel DisplayGUI()
+    public StackPanel SimpleDisplay(int depth)
     {
-        var panel = new StackPanel
-        {
-            Spacing = 10,
-            Margin = new Thickness(10, 5)
-        };
+
+        var mainSection = new StackPanel{Margin = new Thickness(10*depth, 5)};
 
         // Tytuł grupy
-        var titleText = new TextBlock
-        {
-            Text = $"📂 {Name}",
-            FontSize = 14,
-            FontWeight = FontWeight.SemiBold,
-            Margin = new Thickness(0, 0, 0, 5)
-        };
-
-        panel.Children.Add(titleText);
+        var titleText = new TextBlock{Text = $"📂 {Name}",
+                                      FontSize = 14,
+                                      FontWeight = FontWeight.SemiBold};
+        mainSection.Children.Add(titleText);
 
         // Licznik elementów
-        var counterText = new TextBlock
-        {
-            Text = $"({Count()} elementów)",
-            FontSize = 12,
-            Foreground = Brushes.Gray,
-            Margin = new Thickness(10, 0, 0, 10)
-        };
-        panel.Children.Add(counterText);
+        var counterText = new TextBlock{Text = $"({Count()} elementów)",
+                                        FontSize = 12,
+                                        Foreground = Brushes.Gray,
+                                        Margin = new Thickness(10, 0, 0, 10)};
+        mainSection.Children.Add(counterText);
 
         // Elementy grupy
         foreach(var c in components)
         {
-            panel.Children.Add(c.DisplayGUI());
+            mainSection.Children.Add(c.SimpleDisplay(depth+1));
         }
-        return panel;
+        return mainSection;
     }
+    public StackPanel SimpleDisplay()
+    {
+        return SimpleDisplay(1);
+    }
+
+    public Button DisplayGUI()
+    {
+        // Tytuł notatki jako TextBox
+        var b = new Button{Content=Name,
+                           HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                           Background = Brushes.Transparent};
+        return b;
+    }
+
 }
