@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using System;
@@ -131,23 +131,17 @@ public static class Builder
             switch (component)
             {
                 case Task task:
-                    task.SetCategory(Category);
-                    task.SetTags(Tags);
-                    task.SetPriority(prioritie);
                     taskList.Add(new Task(task));
                     break;
                 
                 case TaskList tl:
-                    tl.SetCategory(Category);
-                    tl.SetTags(Tags);
-                    tl.SetPriority(prioritie);
                     taskList.Add(new TaskList(tl));
                     break;
             }
         }
         
         Clear();
-        GlobalGroups.AllNotesGroup.Add(taskList);
+        GlobalGroups.AllTasksGroup.Add(taskList);
         GlobalGroups.AllGroup.Add(taskList);
         return taskList;
     }
