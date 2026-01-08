@@ -115,6 +115,8 @@ public static class Builder
             var result = components.First();
 
             Clear();
+            GlobalGroups.AllNotesGroup.Add(result);
+            GlobalGroups.AllGroup.Add(result);
             return result;
         }
 
@@ -143,8 +145,10 @@ public static class Builder
                     break;
             }
         }
-
+        
         Clear();
+        GlobalGroups.AllNotesGroup.Add(taskList);
+        GlobalGroups.AllGroup.Add(taskList);
         return taskList;
     }
 }

@@ -184,7 +184,7 @@ public class Note : IComponent
 
 public interface ITaskComponent : IComponent
 {
-    DateTime EndDate { get; }
+    DateTime? EndDate { get; }
     bool IsCompleted { get; }
     bool IsLate { get; }
     Priorities Priority { get; }
@@ -199,7 +199,7 @@ public class Task : ITaskComponent
 {
     public string Name { get; }
     public DateTime StartDate { get; }
-    public DateTime EndDate { get; }
+    public DateTime? EndDate { get; }
     public Priorities Priority { get; private set; } = 0;
     public bool IsCompleted { get; private set; } = false;
     public bool IsLate { get; private set; } = false;
@@ -211,6 +211,12 @@ public class Task : ITaskComponent
         Name = name;
         StartDate = DateTime.Now;
         EndDate = endDate;
+    }
+    public Task(string name)
+    {
+        Name = name;
+        StartDate = DateTime.Now;
+        EndDate = null;
     }
 
     public Task(Task other)
@@ -391,7 +397,7 @@ public class TaskList : ITaskComponent
         }
     }
 
-    public DateTime EndDate
+    public DateTime? EndDate
     {
         get
         {
