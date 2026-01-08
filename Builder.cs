@@ -19,10 +19,6 @@ public static class Builder
     private static string content = "";
     private static Priorities prioritie = 0;
     private static DateTime endDate;
-
-
-
-
     private static string Category;
     private static string Tags;
 
@@ -87,6 +83,8 @@ public static class Builder
                 }
             }
         }
+
+        Clear();
     }
     
 
@@ -130,6 +128,11 @@ public static class Builder
     {
         components.Clear();
         currentName = "";
+        content = "";
+        prioritie = 0;
+        currentName = "";
+        Category = "";
+        Tags = "";
     }
 }
 
