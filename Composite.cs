@@ -88,7 +88,12 @@ public class Note : IComponent
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
 
         // Tytuł notatki jako TextBox
-        var titleBox = new TextBox{Text = $"📝 {Name}",
+        string name = $"{Name} - K: {Category}, Tags:";
+        foreach(var tag in Tags)
+        {
+            name+=tag;
+        }
+        var titleBox = new TextBox{Text = $"📝 {name},",
                                    FontSize = 14,
                                    FontWeight = FontWeight.SemiBold,
                                    Margin = new Thickness(0, 0, 0, 5),

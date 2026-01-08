@@ -74,19 +74,19 @@ public static class Builder
         {
             note.SetCategory(Category);
         }
-        // if(Tags != null)
-        // {
-        //     GlobalGroups.AddTags(Tags);
-        //     var tags = Tags.Split(',');
-        //     foreach (var t in tags)
-        //     {
-        //         string tag = t?.Trim().ToLower() ?? "";
-        //         if (!string.IsNullOrWhiteSpace(tag))
-        //         {
-        //             note.SetTags(tag);
-        //         }
-        //     }
-        // }
+        if(Tags != null)
+        {
+            GlobalGroups.AddTags(Tags);
+            // var tags = Tags.Split(',');
+            // foreach (var t in tags)
+            // {
+            //     string tag = t?.Trim().ToLower() ?? "";
+            //     if (!string.IsNullOrWhiteSpace(tag))
+            //     {
+            //         note.SetTags(tag);
+            //     }
+            // }
+        }
     }
     
 

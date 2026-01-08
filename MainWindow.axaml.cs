@@ -512,6 +512,7 @@ namespace ZTP
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
+            
             GlobalGroups.AddCategory(InputTextBox.Text);
             InitializeMenu();
             

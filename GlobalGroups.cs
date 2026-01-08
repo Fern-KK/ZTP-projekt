@@ -86,7 +86,7 @@ public static class GlobalGroups
     }
 
 
-        public static void AddCategory(List<string> categories)
+    public static void AddCategory(List<string> categories)
     {
         foreach (var c in categories)
         {
@@ -100,7 +100,7 @@ public static class GlobalGroups
     }
     public static void AddCategory(string category)
     {
-
+            if(category==null){return;}
             List<string> categories = new List<string>(category.Split(','));
             AddCategory(categories);
         
