@@ -259,9 +259,12 @@ namespace ZTP
         private TextBox? inputContent;
         private TextBox? inputTags;
         private ComboBox? inputCategory;
+        private ComboBox? inputPriority;
         private Button? saveEditingButton;
         private StackPanel? inputTasksSection;
-        private List<TextBox>? taskTextBoxes;
+        private List<TextBox>? taskTextBoxesList;
+        private List<DatePicker>? taskEndDateList = new List<DatePicker>();
+        
 
         private void CreateNoteView()
         {
@@ -286,7 +289,8 @@ namespace ZTP
             saveEditingButton.Click += (s, e) => NoteBuilder();
 
             var leftSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Left, 
-                                           Orientation=Avalonia.Layout.Orientation.Horizontal};
+                                           Orientation=Avalonia.Layout.Orientation.Horizontal,
+                                           Spacing=5};
             Grid.SetColumn(leftSide, 0);
             leftSide.Children.Add(inputCategory);
             leftSide.Children.Add(inputTags);
@@ -365,7 +369,7 @@ namespace ZTP
 
             inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="Tytuł listy"};
 
-            taskTextBoxes = new List<TextBox>();
+            taskTextBoxesList = new List<TextBox>();
             inputTasksSection = new StackPanel{Spacing=5};
 
             
@@ -376,21 +380,27 @@ namespace ZTP
             var addTaskButton = new Button{Content = "Dodaj zadanie"};
             addTaskButton.Click += (s, e) => AddTaskButtons();
             addTaskButtonSection.Children.Add(addTaskButton);
+
             AddTaskButtons();
 
             var downSection = new Grid{ ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") }; 
 
             inputCategory = GlobalGroups.SelectableCategoryList();
             inputTags = new TextBox{Watermark="Wpisz tagi...", MaxWidth=200};
+            inputPriority = new ComboBox{ItemsSource = Enum.GetValues<Priorities>()};
             
-            saveEditingButton = new Button{Content = "Zapisz notatkę"};
-            saveEditingButton.Click += (s, e) => TaskBuilder();
-
             var leftSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Left, 
-                                           Orientation=Avalonia.Layout.Orientation.Horizontal};
+                                           Orientation=Avalonia.Layout.Orientation.Horizontal,
+                                           Spacing=5};
             Grid.SetColumn(leftSide, 0);
             leftSide.Children.Add(inputCategory);
             leftSide.Children.Add(inputTags);
+            leftSide.Children.Add(inputPriority);
+
+
+
+            saveEditingButton = new Button{Content = "Zapisz notatkę"};
+            saveEditingButton.Click += (s, e) => TaskBuilder();
 
             var rightSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right};
             Grid.SetColumn(rightSide, 1);
@@ -406,21 +416,55 @@ namespace ZTP
         }
         private void AddTaskButtons()
         {
-            var inputTask = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="zadanie"};
-            taskTextBoxes.Add(inputTask);
-            inputTasksSection.Children.Add(inputTask);
+            var mainSection = new StackPanel{Orientation=Avalonia.Layout.Orientation.Horizontal, Spacing=5};
+            var inputTask = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="nowe zadanie", Width=400};
+            var inputEndDate = new DatePicker{};
+
+            taskTextBoxesList.Add(inputTask);
+            taskEndDateList.Add(inputEndDate);
+            mainSection.Children.Add(inputTask);
+            mainSection.Children.Add(inputEndDate);
+            inputTasksSection.Children.Add(mainSection);
         }
         private void TaskBuilder()
         {
-
-            foreach (var textBox in taskTextBoxes)
+            foreach(var date in taskEndDateList)
+            {
+                if (date.SelectedDate.HasValue && date.SelectedDate.Value.Date < DateTime.Today)
+                {
+                    //date = BorderBrush =3 itp że zła data
+                    return;
+                }
+            }
+            // if (inputEndDate.SelectedDate.Value < DateTime.Today)
+            // {
+            //     MessageBox.Show("Data nie może być z przeszłości!");
+            //     return;
+            // }
+            int i = 0;
+            foreach (var textBox in taskTextBoxesList)
             {
                 string text = textBox.Text?.Trim() ?? "";
                 if (!string.IsNullOrEmpty(text))
                 {
-                    Builder.AddTaskComponent(new Task(text));
+                    if(taskEndDateList[i].SelectedDate.HasValue)
+                    {
+                      Builder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));  
+                    }
+                    else{Builder.AddTaskComponent(new Task(text));}
+                    
                 }
+                i++;
             }
+
+
+            // DateTimeOffset? wybranadata = inputEndDate.SelectedDate;
+            // if (wybranadata.HasValue)
+            // {
+            //     DateTime dateOnly = wybranadata.Value.DateTime; // Konwersja na zwykły DateTime
+            // }
+
+
             Builder.BuildTask();
 
             // Wyczyść pola
