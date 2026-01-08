@@ -565,7 +565,7 @@ public class TaskList : ITaskComponent
             Text = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}",
             FontSize = 12,
             Foreground = Brushes.Gray,
-            Margin = new Thickness(10, 0, 0, 10)
+            Margin = new Thickness(10*depth, 0, 0, 0)
         };
         mainSection.Children.Add(infoText);
 
@@ -577,7 +577,7 @@ public class TaskList : ITaskComponent
                 Text = $"Kategoria: {Category}",
                 FontSize = 12,
                 Foreground = Brushes.Gray,
-                Margin = new Thickness(10, 0, 0, 10)
+                Margin = new Thickness(10*depth, 0, 0, 0)
             };
             mainSection.Children.Add(catText);
         }
@@ -590,7 +590,7 @@ public class TaskList : ITaskComponent
                 Text = $"Tagi: #{string.Join( ", #", Tags.ToArray())}",
                 FontSize = 12,
                 Foreground = Brushes.Gray,
-                Margin = new Thickness(10, 0, 0, 10)
+                Margin = new Thickness(10*depth, 0, 0, 0)
             };
             mainSection.Children.Add(tagText);
         }

@@ -463,12 +463,20 @@ namespace ZTP
             // {
             //     DateTime dateOnly = wybranadata.Value.DateTime; // Konwersja na zwykły DateTime
             // }
+            if (inputCategory.SelectedItem is string category) {Builder.SetCategory(category);}
+            if (inputTags.Text is string tag) {Builder.SetTags(tag);}
+            if(inputTitle.Text != null) {Builder.SetName(inputTitle.Text);}
+            if (inputPriority.SelectedItem is Priorities priority){Builder.SetPriority(priority);}
 
-
+            
             Builder.BuildTask();
 
             // Wyczyść pola
             inputTitle.Text = "";
+            taskEndDateList.Clear();
+            taskTextBoxesList.Clear();
+            inputTags.Text = "";
+            inputCategory.SelectedItem = "";
             DisplayGroup(GlobalGroups.AllGroup);
         }
 
