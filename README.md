@@ -14,6 +14,7 @@
 - MainWindow.axaml - To jak plik html w stronach internetowej
 - App.axaml - to jak plik css, gdzie definuje style 
 
+aby odpalić trzeba zrobić run któregokolwiek z plików .cs
 
 
 
