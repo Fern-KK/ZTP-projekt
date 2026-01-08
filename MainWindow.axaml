@@ -13,8 +13,8 @@
                     <Button x:Name="BtnNew" Click="NewObject_Click" Classes="topMenuButton">Nowy</Button>
                     <Button x:Name="dd" Click="Save_Click" Classes="topMenuButton">Zapisz</Button>
                     <Button x:Name="ss" Click="Sych_Click" Classes="topMenuButton">Synch</Button>
-                    <TextBox x:Name="InputTextBox" HorizontalAlignment="Stretch" Watermark="Wpisz tekst..." Height="20"/>
-                    <Button Click="SearchButton_Click" HorizontalAlignment="Center" Classes="topMenuButton">Szukaj</Button>
+                    <TextBox x:Name="InputTextBox" HorizontalAlignment="Stretch" Watermark="Wpisz tekst..." Height="20" />
+                    <Button Click="SearchButton_Click" HorizontalAlignment="Center" Classes="topMenuButton" >Szukaj</Button>
 
             </StackPanel>
         </Border>
