@@ -22,9 +22,6 @@ public static class Builder
     private static string Category;
     private static string Tags;
 
-
-    
-    // private static DateTime EndTime = null;
     public static string GetName()
     {
         if (string.IsNullOrEmpty(currentName) && components.Count > 0)
@@ -55,6 +52,25 @@ public static class Builder
     public static void AddTaskComponent(ITaskComponent component)
     {
         components.Add(component);
+    }
+
+    public static void SetCategory(string selectedCategory)
+    {
+        Category=selectedCategory;    
+    }
+    public static void SetTags(string selectedTags)
+    {
+        Tags=selectedTags;
+    }
+    public static void Clear()
+    {
+        components.Clear();
+        currentName = "";
+        content = "";
+        prioritie = 0;
+        currentName = "";
+        Category = "";
+        Tags = "";
     }
 
     public static void BuildNote()
@@ -104,49 +120,31 @@ public static class Builder
 
         string name = string.IsNullOrEmpty(currentName) ? components.First().Name : currentName;
         var taskList = new TaskList(name);
+        taskList.SetCategory(Category);
+        taskList.SetTags(Tags);
+        taskList.SetPriority(prioritie);
 
         foreach (var component in components)
         {
-            if (component is Task task)
-                taskList.Add(new Task(task));
-            else if (component is TaskList tl)
-                taskList.Add(new TaskList(tl));
+            switch (component)
+            {
+                case Task task:
+                    task.SetCategory(Category);
+                    task.SetTags(Tags);
+                    task.SetPriority(prioritie);
+                    taskList.Add(new Task(task));
+                    break;
+                
+                case TaskList tl:
+                    tl.SetCategory(Category);
+                    tl.SetTags(Tags);
+                    tl.SetPriority(prioritie);
+                    taskList.Add(new TaskList(tl));
+                    break;
+            }
         }
 
         Clear();
         return taskList;
     }
-    public static void SetCategory(string selectedCategory)
-    {
-        Category=selectedCategory;    
-    }
-    public static void SetTags(string selectedTags)
-    {
-        Tags=selectedTags;
-    }
-    public static void Clear()
-    {
-        components.Clear();
-        currentName = "";
-        content = "";
-        prioritie = 0;
-        currentName = "";
-        Category = "";
-        Tags = "";
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

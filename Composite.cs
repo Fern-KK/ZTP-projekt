@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -190,6 +191,8 @@ public interface ITaskComponent : IComponent
     public void MarkAsCompleted(DateTime completionDate);
     public string GetStatus();
     void SetPriority(Priorities priority);
+    public void SetTags(string tag);
+    public void SetCategory(string category);
 }
 
 public class Task : ITaskComponent
@@ -246,6 +249,11 @@ public class Task : ITaskComponent
         Tags.Add(tag);
     }
 
+    public void SetCategory(string category)
+    {
+        Category = category;
+    }
+
     public string Display()
     {
         return this.Display(1);
@@ -288,7 +296,7 @@ public class Task : ITaskComponent
         // Nazwa zadania
         var nameText = new TextBlock
         {
-            Text = Name + ", " + Category + ", " + string.Join( ",", Tags.ToArray() ),
+            Text = Name,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             FontWeight = IsCompleted ? FontWeight.Normal : FontWeight.Bold,
             TextDecorations = IsCompleted ? TextDecorations.Strikethrough : null
@@ -304,6 +312,32 @@ public class Task : ITaskComponent
             Foreground = Brushes.Gray
         };
         Grid.SetColumn(dateText, 2);
+
+        // Kategoria
+        if (Category != "")
+        {
+            var catText = new TextBlock
+            {
+                Text = $"Kategoria: {Category}",
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                FontSize = 12,
+                Foreground = Brushes.Gray
+            };
+            Grid.SetColumn(catText, 2);
+        }
+
+        // Tagi
+        if (Tags.Count() > 0)
+        {
+            var catText = new TextBlock
+            {
+                Text = $"Tagi: {string.Join( ",", Tags.ToArray() )}",
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                FontSize = 12,
+                Foreground = Brushes.Gray
+            };
+            Grid.SetColumn(catText, 2);
+        }
 
         // Priorytet
         var priorityIcon = new TextBlock
@@ -363,7 +397,7 @@ public class TaskList : ITaskComponent
         {
             if (components.Count == 0)
                 return DateTime.MaxValue;
-            return components.Max(component => component.EndDate);
+            return components.Min(component => component.EndDate);
         }
     }
 
@@ -432,6 +466,11 @@ public class TaskList : ITaskComponent
     public void SetTags(string tag)
     {
         Tags.Add(tag);
+    }
+
+    public void SetCategory(string category)
+    {
+        Category = category;
     }
 
     public string GetStatus()
@@ -506,7 +545,7 @@ public class TaskList : ITaskComponent
         // Tytuł listy zadań
         var titleText = new TextBlock
         {
-            Text = $"📋 {Name}" + ", " + Category + ", " + string.Join( ",", Tags.ToArray() ),
+            Text = $"📋 {Name}",
             FontSize = 14,
             FontWeight = FontWeight.SemiBold,
             Margin = new Thickness(0, 0, 0, 5)
@@ -523,6 +562,32 @@ public class TaskList : ITaskComponent
             Margin = new Thickness(10, 0, 0, 10)
         };
         mainSection.Children.Add(infoText);
+
+        // Kategoria
+        if (Category != "")
+        {
+            var catText = new TextBlock
+            {
+                Text = $"Kategoria: {Category}",
+                FontSize = 12,
+                Foreground = Brushes.Gray,
+                Margin = new Thickness(10, 0, 0, 10)
+            };
+            mainSection.Children.Add(catText);
+        }
+
+        // Tagi
+        if (Tags.Count > 0)
+        {
+            var tagText = new TextBlock
+            {
+                Text = $"Tagi: #{string.Join( ", #", Tags.ToArray())}",
+                FontSize = 12,
+                Foreground = Brushes.Gray,
+                Margin = new Thickness(10, 0, 0, 10)
+            };
+            mainSection.Children.Add(tagText);
+        }
 
         // Zadania w liście
         foreach(var c in components)
