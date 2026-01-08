@@ -1,11 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using HarfBuzzSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -38,7 +38,7 @@ public class Note : IComponent
     public string Content { get; }
     public DateTime StartDate { get; }
     public List<string> Tags { get; set;} = new List<string>();
-    public string Category { get; set;}
+    public string Category { get; set;} = "";
 
     public Note(string name, string content)
     {
@@ -89,7 +89,7 @@ public class Note : IComponent
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
 
         // Tytuł notatki jako TextBox
-        var titleBox = new TextBox{Text = $"📝 {Name}, {Category}, {string.Join( ",", Tags.ToArray() )}",
+        var titleBox = new TextBox{Text = $"📝 {Name}",
                                    FontSize = 14,
                                    FontWeight = FontWeight.SemiBold,
                                    Margin = new Thickness(0, 0, 0, 5),
@@ -113,16 +113,33 @@ public class Note : IComponent
             mainSection.Children.Add(contentBox);
         }
 
-        // Data utworzenia
-        var dateBox = new TextBlock
+        // Kategoria
+        if (Category != "")
         {
-            Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
-            FontSize = 11,
-            Foreground = Brushes.Gray,
-            Background = Brushes.Transparent,
-            Margin = new Thickness(10, 0, 0, 0)
-        };
-        mainSection.Children.Add(dateBox);
+            var catBox = new TextBlock
+            {
+                Text = $"Kategoria: {Category}",
+                FontSize = 11,
+                Foreground = Brushes.Gray,
+                Background = Brushes.Transparent,
+                Margin = new Thickness(10, 0, 0, 0)
+            };
+            mainSection.Children.Add(catBox);
+        }
+
+        // Tagi
+        if (Tags.Count > 0)
+        {
+            var tagBox = new TextBlock
+            {
+                Text = $"Tagi: #{string.Join( ", #", Tags.ToArray() )}",
+                FontSize = 11,
+                Foreground = Brushes.Gray,
+                Background = Brushes.Transparent,
+                Margin = new Thickness(10, 0, 0, 0)
+            };
+            mainSection.Children.Add(tagBox);
+        }
 
         return mainSection;
     }
@@ -174,6 +191,8 @@ public interface ITaskComponent : IComponent
     public void MarkAsCompleted(DateTime completionDate);
     public string GetStatus();
     void SetPriority(Priorities priority);
+    public void SetTags(string tag);
+    public void SetCategory(string category);
 }
 
 public class Task : ITaskComponent
@@ -184,6 +203,8 @@ public class Task : ITaskComponent
     public Priorities Priority { get; private set; } = 0;
     public bool IsCompleted { get; private set; } = false;
     public bool IsLate { get; private set; } = false;
+    public List<string> Tags { get; set;} = new List<string>();
+    public string Category { get; set;} = "";
 
     public Task(string name, DateTime endDate)
     {
@@ -224,6 +245,19 @@ public class Task : ITaskComponent
     public void SetPriority(Priorities priority)
     {
         Priority = priority;
+    }
+    public void SetTags(List<string> tags)
+    {
+        Tags=tags;
+    }
+    public void SetTags(string tag)
+    {
+        Tags.Add(tag);
+    }
+
+    public void SetCategory(string category)
+    {
+        Category = category;
     }
 
     public string Display()
@@ -285,6 +319,32 @@ public class Task : ITaskComponent
         };
         Grid.SetColumn(dateText, 2);
 
+        // Kategoria
+        if (Category != "")
+        {
+            var catText = new TextBlock
+            {
+                Text = $"Kategoria: {Category}",
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                FontSize = 12,
+                Foreground = Brushes.Gray
+            };
+            Grid.SetColumn(catText, 2);
+        }
+
+        // Tagi
+        if (Tags.Count() > 0)
+        {
+            var catText = new TextBlock
+            {
+                Text = $"Tagi: {string.Join( ",", Tags.ToArray() )}",
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                FontSize = 12,
+                Foreground = Brushes.Gray
+            };
+            Grid.SetColumn(catText, 2);
+        }
+
         // Priorytet
         var priorityIcon = new TextBlock
         {
@@ -324,6 +384,8 @@ public class TaskList : ITaskComponent
 {
     public string Name { get; }
     private List<ITaskComponent> components = new List<ITaskComponent>();
+    public List<string> Tags { get; set;} = new List<string>();
+    public string Category { get; set;} = "";
 
     public DateTime StartDate
     {
@@ -341,7 +403,7 @@ public class TaskList : ITaskComponent
         {
             if (components.Count == 0)
                 return DateTime.MaxValue;
-            return components.Max(component => component.EndDate);
+            return components.Min(component => component.EndDate);
         }
     }
 
@@ -401,6 +463,20 @@ public class TaskList : ITaskComponent
         {
             component.MarkAsCompleted(completionDate);
         }
+    }
+
+    public void SetTags(List<string> tags)
+    {
+        Tags=tags;
+    }
+    public void SetTags(string tag)
+    {
+        Tags.Add(tag);
+    }
+
+    public void SetCategory(string category)
+    {
+        Category = category;
     }
 
     public string GetStatus()
@@ -492,6 +568,32 @@ public class TaskList : ITaskComponent
             Margin = new Thickness(10, 0, 0, 10)
         };
         mainSection.Children.Add(infoText);
+
+        // Kategoria
+        if (Category != "")
+        {
+            var catText = new TextBlock
+            {
+                Text = $"Kategoria: {Category}",
+                FontSize = 12,
+                Foreground = Brushes.Gray,
+                Margin = new Thickness(10, 0, 0, 10)
+            };
+            mainSection.Children.Add(catText);
+        }
+
+        // Tagi
+        if (Tags.Count > 0)
+        {
+            var tagText = new TextBlock
+            {
+                Text = $"Tagi: #{string.Join( ", #", Tags.ToArray())}",
+                FontSize = 12,
+                Foreground = Brushes.Gray,
+                Margin = new Thickness(10, 0, 0, 10)
+            };
+            mainSection.Children.Add(tagText);
+        }
 
         // Zadania w liście
         foreach(var c in components)
