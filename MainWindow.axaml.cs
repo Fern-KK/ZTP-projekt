@@ -261,6 +261,7 @@ namespace ZTP
         private ComboBox? inputCategory;
         private Button? saveEditingButton;
         private StackPanel? inputTasksSection;
+        private List<TextBox>? taskTextBoxes;
 
         private void CreateNoteView()
         {
@@ -278,7 +279,8 @@ namespace ZTP
             var downSection = new Grid{ ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") }; 
 
             inputCategory = GlobalGroups.SelectableCategoryList();
-            inputTags = new TextBox{Watermark="Wpisz tagi...", MaxWidth=200};
+            inputTags = new TextBox{Watermark="Wpisz tagi...", MaxWidth=200, Text=null};
+            
             
             saveEditingButton = new Button{Content = "Zapisz notatkę"};
             saveEditingButton.Click += (s, e) => NoteBuilder();
@@ -363,18 +365,18 @@ namespace ZTP
 
             inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="Tytuł listy"};
 
-            inputTasksSection = new StackPanel{};
+            taskTextBoxes = new List<TextBox>();
+            inputTasksSection = new StackPanel{Spacing=5};
 
-            var inputTask = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="zadanie"};
-            inputTasksSection.Children.Add(inputTask);
+            
 
             
             var addTaskButtonSection = new StackPanel{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center};
 
             var addTaskButton = new Button{Content = "Dodaj zadanie"};
-            //addTaskButton.Click += (s, e) => AddTaskButtons();
+            addTaskButton.Click += (s, e) => AddTaskButtons();
             addTaskButtonSection.Children.Add(addTaskButton);
-
+            AddTaskButtons();
 
             var downSection = new Grid{ ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") }; 
 
@@ -382,7 +384,7 @@ namespace ZTP
             inputTags = new TextBox{Watermark="Wpisz tagi...", MaxWidth=200};
             
             saveEditingButton = new Button{Content = "Zapisz notatkę"};
-            //saveEditingButton.Click += (s, e) => TaskBuilder();
+            saveEditingButton.Click += (s, e) => TaskBuilder();
 
             var leftSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Left, 
                                            Orientation=Avalonia.Layout.Orientation.Horizontal};
@@ -396,35 +398,35 @@ namespace ZTP
 
             downSection.Children.Add(leftSide);
             downSection.Children.Add(rightSide);
-
-            
-
-            
-
-            
-            
-            // inputTags = new ListBox{SelectionMode = SelectionMode.Multiple, // Ważne: wiele wyborów
-            //                        ItemsSource = Tags.GetTags(),
-            //                        DisplayMemberBinding = new Avalonia.Data.Binding("Name") };
-
-            
-
-
-            
-            
-
             mainSection.Children.Add(inputTitle);
             mainSection.Children.Add(inputTasksSection);
             mainSection.Children.Add(addTaskButtonSection);
             mainSection.Children.Add(downSection);
-
-
             Desktop.Content = mainSection;
         }
+        private void AddTaskButtons()
+        {
+            var inputTask = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="zadanie"};
+            taskTextBoxes.Add(inputTask);
+            inputTasksSection.Children.Add(inputTask);
+        }
+        private void TaskBuilder()
+        {
 
+            foreach (var textBox in taskTextBoxes)
+            {
+                string text = textBox.Text?.Trim() ?? "";
+                if (!string.IsNullOrEmpty(text))
+                {
+                    Builder.AddTaskComponent(new Task(text));
+                }
+            }
+            Builder.BuildTask();
 
-
-
+            // Wyczyść pola
+            inputTitle.Text = "";
+            DisplayGroup(GlobalGroups.AllGroup);
+        }
 
 
 

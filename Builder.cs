@@ -101,6 +101,8 @@ public static class Builder
             var result = components.First();
 
             Clear();
+            GlobalGroups.AllNotesGroup.Add(result);
+            GlobalGroups.AllGroup.Add(result);
             return result;
         }
 
@@ -111,11 +113,14 @@ public static class Builder
         {
             if (component is Task task)
                 taskList.Add(new Task(task));
+                
             else if (component is TaskList tl)
                 taskList.Add(new TaskList(tl));
         }
-
+        
         Clear();
+        GlobalGroups.AllNotesGroup.Add(taskList);
+        GlobalGroups.AllGroup.Add(taskList);
         return taskList;
     }
     public static void SetCategory(string selectedCategory)
