@@ -100,7 +100,7 @@ public static class GlobalGroups
     }
     public static void AddCategory(string category)
     {
-            if(category==null){return;}
+            if(category==null){return;};
             List<string> categories = new List<string>(category.Split(','));
             AddCategory(categories);
         

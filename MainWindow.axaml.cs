@@ -446,23 +446,15 @@ namespace ZTP
         {
             Save();
 
-            var button1 = new Button { Content = "Zapisz do Chmury", Name = "BtnSynchToCloud" };
-            // button1.Classes.Add("menuButton"); NIE POTRZEBNY TU STYL TEN, MOZE BYĆ DOMYŚLNY
-            button1.Click += (s, e) => {
-                                           Desktop.Content = new TextBlock{VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                                                           HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                                                                           Text = "Zsynchroniczowanie "};
-                                       };
-            var button2 = new Button { Content = "Pobierz z Chmury", Name = "BtnSynchFromCloud" };
+            var button = new Button { Content = "Zaloguj się", Name = "BtnLogIn" };
             // button2.Classes.Add("menuButton"); NIE POTRZEBNY TU STYL TEN, MOZE BYĆ DOMYŚLNY
-            button2.Click += (s, e) => Save_Click(s, e);
+            button.Click += (s, e) => Save_Click(s, e);
 
             var mainSection = new StackPanel{VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                       HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                                       Orientation = Avalonia.Layout.Orientation.Horizontal,
-                                       Spacing = 10};
-            mainSection.Children.Add(button1);
-            mainSection.Children.Add(button2);
+                                             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                                             Orientation = Avalonia.Layout.Orientation.Horizontal,
+                                             Spacing = 10};
+            mainSection.Children.Add(button);
             Desktop.Content = mainSection;
         }
 
@@ -512,7 +504,6 @@ namespace ZTP
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            
             GlobalGroups.AddCategory(InputTextBox.Text);
             InitializeMenu();
             

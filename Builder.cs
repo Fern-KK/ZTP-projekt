@@ -120,6 +120,7 @@ public static class Builder
     }
     public static void SetCategory(string selectedCategory)
     {
+        
         Category=selectedCategory;    
     }
     public static void SetTags(string selectedTags)
