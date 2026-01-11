@@ -110,10 +110,11 @@ public static class Builder
         if (components.Count == 0)
             return null;
 
-        if (components.Count == 1)
+        if (components.Count == 1 && components.First() is Task result)
         {
-            var result = components.First();
-
+            result.SetCategory(Category);
+            result.SetTags(Tags);
+            result.SetPriority(prioritie);
             Clear();
             GlobalGroups.AllNotesGroup.Add(result);
             GlobalGroups.AllGroup.Add(result);

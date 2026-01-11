@@ -42,7 +42,6 @@ namespace ZTP
                         DisplayGroup(GlobalGroups.AllNotesGroup);
                         break;
                     default:
-                        ContentText.Text = "Nieznany przycisk";
                         break;
                 }
             }
