@@ -13,49 +13,45 @@ namespace ZTP;
 
 public static class Builder
 {
-    private static List<IComponent> Components = new List<IComponent>();
-    private static string CurrentName = "";
-    private static int Counter = 1;
-    private static string Content = "";
-    private static Priorities Priority = 0;
-    private static DateTime EndDate;
+    private static List<IComponent> components = new List<IComponent>();
+    private static string currentName = "";
+    private static int counter = 1;
+    private static string content = "";
+    private static Priorities prioritie = 0;
+    private static DateTime endDate;
     private static string Category;
     private static string Tags;
 
     public static string GetName()
     {
-        if (string.IsNullOrEmpty(CurrentName) && Components.Count > 0)
-            return Components.First().Name;
-        return CurrentName;
+        if (string.IsNullOrEmpty(currentName) && components.Count > 0)
+            return components.First().Name;
+        return currentName;
     }
     public static string DefaultName()
     {
-        return $"New note {Counter}";
+        return $"New note {counter}";
     }
 
     public static void SetName(string s)
     {
-        CurrentName = s;
+        currentName = s;
     }
 
     public static void SetContent(string s)
     {
-        Content = s;
+        content = s;
     }
 
     public static void StartNew(string name = "")
     {
         Clear();
-        CurrentName = name ?? "";
-    }
-    public static void SetPriority(Priorities priority)
-    {
-        Priority=priority;
+        currentName = name ?? "";
     }
 
     public static void AddTaskComponent(ITaskComponent component)
     {
-        Components.Add(component);
+        components.Add(component);
     }
 
     public static void SetCategory(string selectedCategory)
@@ -68,23 +64,23 @@ public static class Builder
     }
     public static void Clear()
     {
-        Components.Clear();
-        CurrentName = "";
-        Content = "";
-        Priority = 0;
-        CurrentName = "";
+        components.Clear();
+        currentName = "";
+        content = "";
+        prioritie = 0;
+        currentName = "";
         Category = "";
         Tags = "";
     }
 
     public static void BuildNote()
     {
-        Note note = new Note(CurrentName, Content);
+        Note note = new Note(currentName, content);
         GlobalGroups.AllGroup.Add(note);
         GlobalGroups.AllNotesGroup.Add(note);
-        if(CurrentName == $"New note {Counter}")
+        if(currentName == $"New note {counter}")
         {
-            Counter++;
+            counter++;
         }
         if (Category != null)
         {
@@ -111,12 +107,12 @@ public static class Builder
 
     public static IComponent BuildTask()
     {
-        if (Components.Count == 0)
+        if (components.Count == 0)
             return null;
 
-        if (Components.Count == 1)
+        if (components.Count == 1)
         {
-            var result = Components.First();
+            var result = components.First();
 
             Clear();
             GlobalGroups.AllNotesGroup.Add(result);
@@ -124,13 +120,13 @@ public static class Builder
             return result;
         }
 
-        string name = string.IsNullOrEmpty(CurrentName) ? Components.First().Name : CurrentName;
+        string name = string.IsNullOrEmpty(currentName) ? components.First().Name : currentName;
         var taskList = new TaskList(name);
         taskList.SetCategory(Category);
         taskList.SetTags(Tags);
-        taskList.SetPriority(Priority);
+        taskList.SetPriority(prioritie);
 
-        foreach (var component in Components)
+        foreach (var component in components)
         {
             switch (component)
             {

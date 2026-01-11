@@ -6,8 +6,6 @@
     
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="styles/DefaultStyle.axaml"/>
-
 
         <Style Selector="Button">
             <!-- Podstawowy styl dla WSZYSTKICH przycisków -->

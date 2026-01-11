@@ -9,7 +9,7 @@
     <Grid RowDefinitions="Auto, *" Background="#fff">
         <Border Grid.Row="0" Background="#DCE0E8">
             <StackPanel Orientation="Horizontal">
-                    <!-- Przyciski główne -->
+                    <!-- Przyciski górne -->
                     <Button x:Name="BtnNew" Click="NewObject_Click" Classes="topMenuButton">Nowy</Button>
                     <Button x:Name="dd" Click="Save_Click" Classes="topMenuButton">Zapisz</Button>
                     <Button x:Name="ss" Click="Sych_Click" Classes="topMenuButton">Synch</Button>
@@ -21,7 +21,7 @@
         <Grid ColumnDefinitions="300, *" Grid.Row="1">
             <!-- Lewa kolumna - menu -->
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Padding="10" Background="#E6E9EF">
-                <StackPanel>
+                <StackPanel Margin="0,0,0,20">
                     <!-- Przyciski boczne -->
                     <Button x:Name="BtnAll" Click="MenuButton_Click" Classes="leftMenuButton">Wszystkie</Button>
                     <Button x:Name="BtnTasks" Click="MenuButton_Click" Classes="leftMenuButton">Zadania</Button>
@@ -37,7 +37,8 @@
                         HorizontalScrollBarVisibility="Disabled"
                         Grid.Column="1"
                         x:Name="Desktop"
-                        Padding="10">
+                        Padding="10,10,10,0"
+                        Margin="0,0,0,10">
                 <TextBlock x:Name="ContentText" 
                     Text= "Witamy :D"
                     VerticalAlignment="Center"
