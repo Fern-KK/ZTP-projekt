@@ -56,8 +56,8 @@
                         HorizontalScrollBarVisibility="Disabled"
                         Grid.Column="1"
                         x:Name="Desktop"
-                        Padding="10"
-                        Margin="0,0,0,10">
+                        Padding="10,10,10,0"
+                        Margin="0">
                 <TextBlock x:Name="ContentText" 
                     Text= "Witamy :D"
                     VerticalAlignment="Center"
