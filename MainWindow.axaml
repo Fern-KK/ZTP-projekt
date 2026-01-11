@@ -8,20 +8,39 @@
 
     <Grid RowDefinitions="Auto, *" Background="#fff">
         <Border Grid.Row="0" Background="#DCE0E8">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" x:Name="TopMenuSection">
                     <!-- Przyciski górne -->
                     <Button x:Name="BtnNew" Click="NewObject_Click" Classes="topMenuButton">Nowy</Button>
                     <Button x:Name="dd" Click="Save_Click" Classes="topMenuButton">Zapisz</Button>
                     <Button x:Name="ss" Click="Sych_Click" Classes="topMenuButton">Synch</Button>
-                    <TextBox x:Name="InputTextBox" HorizontalAlignment="Stretch" Watermark="Wpisz tekst..." Height="20" />
-                    <Button Click="SearchButton_Click" HorizontalAlignment="Center" Classes="topMenuButton" >Szukaj</Button>
+                    <TextBox x:Name="searchBox" HorizontalAlignment="Stretch" Watermark="Szykaj..." Height="20" Width="200"/>
+                    <Button x:Name="searchButton">Szukaj</Button>
+            <!-- // // Dodaj pola wyszukiwania
+            // var searchBox = new TextBox
+            // {
+            //     Watermark = "Szukaj...",
+            //     Width = 200,
+            //     Margin = new Thickness(10, 0, 5, 0)
+            // };
 
+            // var searchButton = new Button{Content = "Szukaj",};
+            // searchButton.Click += (s, e) => PerformSearch(searchBox.Text);
+
+            // var searchPanel = new StackPanel
+            // {
+            //     Orientation = Avalonia.Layout.Orientation.Horizontal,
+            //     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            //     Margin = new Thickness(0, 10, 0, 10)
+            // };
+            // searchPanel.Children.Add(searchBox);
+            // searchPanel.Children.Add(searchButton);
+            // ButtonSection.Children.Add(searchPanel); -->
             </StackPanel>
         </Border>
         <Grid ColumnDefinitions="300, *" Grid.Row="1">
             <!-- Lewa kolumna - menu -->
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Padding="10" Background="#E6E9EF">
-                <StackPanel Margin="0,0,0,20">
+                <StackPanel x:Name="ButtonSection" Margin="0,0,0,20">
                     <!-- Przyciski boczne -->
                     <Button x:Name="BtnAll" Click="MenuButton_Click" Classes="leftMenuButton">Wszystkie</Button>
                     <Button x:Name="BtnTasks" Click="MenuButton_Click" Classes="leftMenuButton">Zadania</Button>
@@ -37,7 +56,7 @@
                         HorizontalScrollBarVisibility="Disabled"
                         Grid.Column="1"
                         x:Name="Desktop"
-                        Padding="10,10,10,0"
+                        Padding="10"
                         Margin="0,0,0,10">
                 <TextBlock x:Name="ContentText" 
                     Text= "Witamy :D"

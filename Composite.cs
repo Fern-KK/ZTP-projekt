@@ -19,7 +19,7 @@ public enum Priorities
     Important
 }
 
-public interface IComponent
+public interface IComponent : IVisitedComponent
 {
     public string Name { get; }
     DateTime StartDate { get; }
@@ -178,6 +178,11 @@ public class Note : IComponent
         mainSection.Children.Add(dateBox);
         mainSection.Children.Add(saveButton);
         return mainSection;
+    }
+    
+    public void Accept(IVisitor visitor) //for Visitor use
+    {
+        visitor.Visit(this);
     }
     
 }
@@ -377,6 +382,10 @@ public class Task : ITaskComponent
             Priorities.Low => "⚪",
             _ => ""
         };
+    }
+    public void Accept(IVisitor visitor) //for Visitor use
+    {
+        visitor.Visit(this);
     }
 }
 
@@ -606,6 +615,10 @@ public class TaskList : ITaskComponent
     {
         return SimpleDisplay(1);
     }
+    public void Accept(IVisitor visitor) //for Visitor use
+    {
+        visitor.Visit(this);
+    }
 }
 
 public class Group : IComponent
@@ -737,6 +750,10 @@ public class Group : IComponent
                            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                            Background = Brushes.Transparent};
         return b;
+    }
+    public void Accept(IVisitor visitor) //for Visitor use
+    {
+        visitor.Visit(this);
     }
 
 }

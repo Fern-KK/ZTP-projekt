@@ -337,7 +337,7 @@ namespace ZTP
         // }
         private void InitializeMenu()
         {
-            var mainSectionTag = new StackPanel{};
+            var mainSectionTag = new StackPanel { };
             foreach (var button in GlobalGroups.GetTags())
             {
                 button.Click += (s, e) => DisplayContaing(button.Name);
@@ -345,7 +345,7 @@ namespace ZTP
             }
             TagsExtender.Content = mainSectionTag;
 
-            var mainSectionCategory = new StackPanel{};
+            var mainSectionCategory = new StackPanel { };
             foreach (var button in GlobalGroups.GetCategories())
             {
                 button.Click += (s, e) => DisplayContaing(button.Name);
@@ -353,18 +353,71 @@ namespace ZTP
             }
             CategoriesExtender.Content = mainSectionCategory;
 
-        }
-        private void DisplayContaing(string sssss)
-        {
-            
-        }
 
 
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
+            var statsButton = new Button
+            {
+                Content = "Statystyki",
+                Classes = { "menuButton" }
+            };
+            statsButton.Click += (s, e) => DisplayStatistics();
+            ButtonSection.Children.Add(statsButton);
+
+            // Dodaj przycisk raportów
+            var reportButton = new Button
+            {
+                Content = "Nadchodzące terminy",
+                Classes = { "menuButton" }
+            };
+            reportButton.Click += (s, e) => DisplayUpcomingTasks();
+            ButtonSection.Children.Add(reportButton);
+
+
+            searchButton.Click += (s, e) => PerformSearch(searchBox.Text);
+
+            // var searchPanel = new StackPanel
+            // {
+            //     Orientation = Avalonia.Layout.Orientation.Horizontal,
+            //     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            //     Margin = new Thickness(0, 10, 0, 10)
+            // };
+            // searchPanel.Children.Add(searchBox);
+            // searchPanel.Children.Add(searchButton);
+            // ButtonSection.Children.Add(searchPanel);
+
+
+
+
+
+
+
+
+
+
+
+        }
+        private void DisplayStatistics()
         {
-            GlobalGroups.AddCategory(InputTextBox.Text);
-            InitializeMenu();
-            
+            Desktop.Content = GlobalGroups.GetStatistics();
+        }
+
+        private void DisplayUpcomingTasks()
+        {
+            Desktop.Content = GlobalGroups.GetUpcomingTasksReport(7); // Na najbliższy tydzień
+        }
+
+        private void PerformSearch(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return;
+
+            Desktop.Content = GlobalGroups.Search(query, true); // true = szukaj również w treści
+        }
+
+        private void DisplayContaing(string tagOrCategory)
+        {
+            // Wyszukiwanie po tagach/kategoriach
+            Desktop.Content = GlobalGroups.Search(tagOrCategory);
         }
     }
 }

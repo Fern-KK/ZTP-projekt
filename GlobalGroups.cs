@@ -349,6 +349,75 @@ public static class GlobalGroups
     {
         return new ComboBox{ItemsSource = AllCategories };
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static StackPanel Search(string query, bool searchInContent = false)
+    {
+        var visitor = new SearchVisitor(query, searchInContent);
+        AllGroup.Accept(visitor);
+        
+        var results = visitor.GetResults();
+        var group = new Group($"Wyniki wyszukiwania: '{query}'");
+        
+        foreach (var result in results)
+        {
+            group.Add(result);
+        }
+        
+        return group.SimpleDisplay();
+    }
+    
+    public static StackPanel GetStatistics()
+    {
+        var visitor = new StatisticsVisitor();
+        AllGroup.Accept(visitor);
+        
+        return visitor.GetStatisticsPanel();
+    }
+    
+    public static StackPanel GetUpcomingTasksReport(int daysAhead = 7)
+    {
+        var startDate = DateTime.Today;
+        var endDate = DateTime.Today.AddDays(daysAhead);
+        
+        var visitor = new UpcomingDeadlinesVisitor(startDate, endDate);
+        AllGroup.Accept(visitor);
+        
+        return visitor.GetUpcomingTasksPanel();
+    }
+    
+    public static StackPanel GetTasksByPriority(Priorities priority)
+    {
+        var group = new Group($"Zadania z priorytetem: {priority}");
+        var components = AllGroup.GetComponents();
+        
+        foreach (var component in components)
+        {
+            if (component is ITaskComponent taskComponent && taskComponent.Priority == priority)
+            {
+                group.Add(component);
+            }
+            else if (component is Group g)
+            {
+                // Możesz dodać rekurencyjne przeszukiwanie
+            }
+        }
+        
+        return group.SimpleDisplay();
+    }
 }
 
 
