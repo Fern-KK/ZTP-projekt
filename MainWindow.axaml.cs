@@ -14,12 +14,16 @@ namespace ZTP
 {
     public partial class MainWindow : Window
     {
+        BuilderNote noteBuilder;
+        BuilderTask taskBuilder;
+
         public MainWindow()
         {
             InitializeComponent();
             GlobalGroups.Initialize();
+            noteBuilder = new BuilderNote();
+            taskBuilder = new BuilderTask();
             InitializeMenu();
-
         }
 
 
@@ -86,7 +90,7 @@ namespace ZTP
                                        Margin = new Thickness(20)};
 
             inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                                     Text = Builder.DefaultName()};
+                                     Text = noteBuilder.DefaultName()};
 
             inputContent = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                                         MinHeight = 200,
@@ -139,12 +143,12 @@ namespace ZTP
         private void NoteBuilder()
         {
             inputTitle.Classes.Remove("mustFill");
-            if (inputCategory.SelectedItem is string category) {Builder.SetCategory(category);}
-            if (inputTags.Text is string tag) {Builder.SetTags(tag);}
+            if (inputCategory.SelectedItem is string category) {noteBuilder.SetCategory(category);}
+            if (inputTags.Text is string tag) {noteBuilder.SetTags(tag);}
 
-            Builder.SetName(inputTitle.Text);
-            Builder.SetContent(inputContent.Text?.Trim() ?? "");
-            Builder.BuildNote();
+            noteBuilder.SetName(inputTitle.Text);
+            noteBuilder.SetContent(inputContent.Text?.Trim() ?? "");
+            noteBuilder.Build();
 
 
             // Wyczyść pola
@@ -198,7 +202,7 @@ namespace ZTP
 
 
 
-            saveEditingButton = new Button{Content = "Zapisz notatkę"};
+            saveEditingButton = new Button{Content = "Zapisz zadania"};
             saveEditingButton.Click += (s, e) => TaskBuilder();
 
             var rightSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right};
@@ -227,40 +231,74 @@ namespace ZTP
         }
         private void TaskBuilder()
         {
-            foreach(var date in taskEndDateList)
+            // Sprawdź poprawność dat
+            for (int i = 0; i < taskEndDateList.Count; i++)
             {
-                if (date.SelectedDate.HasValue && date.SelectedDate.Value.Date < DateTime.Today)
+                var date = taskEndDateList[i].SelectedDate;
+                if (date.HasValue && date.Value.Date < DateTime.Today)
                 {
-                    //date = BorderBrush =3 itp że zła data
+                    // do dodania
                     return;
                 }
             }
-            // if (inputEndDate.SelectedDate.Value < DateTime.Today)
-            // {
-            //     MessageBox.Show("Data nie może być z przeszłości!");
-            //     return;
-            // }
-            int i = 0;
-            foreach (var textBox in taskTextBoxesList)
+
+            // Dodaj Taski do Buildera
+            for (int i = 0; i < taskTextBoxesList.Count; i++)
             {
-                string text = textBox.Text?.Trim() ?? "";
+                string text = taskTextBoxesList[i].Text?.Trim() ?? "";
                 if (!string.IsNullOrEmpty(text))
                 {
-                    if(taskEndDateList[i].SelectedDate.HasValue)
+                    if (taskEndDateList[i].SelectedDate.HasValue)
                     {
-                      Builder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));  
+                        taskBuilder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));
                     }
-                    else{Builder.AddTaskComponent(new Task(text));}
-                    
+                    else
+                    {
+                        taskBuilder.AddTaskComponent(new Task(text));
+                    }
                 }
-                i++;
             }
-            Builder.BuildTask();
 
-            // Wyczyść pola
+            // Ustaw kategorię i tagi w Builderze
+            string selectedCategory = inputCategory.SelectedItem?.ToString();
+            if (!string.IsNullOrWhiteSpace(selectedCategory))
+            {
+                taskBuilder.SetCategory(selectedCategory);
+            }
+
+            string tagsInput = inputTags.Text?.Trim();
+            if (!string.IsNullOrWhiteSpace(tagsInput))
+            {
+                taskBuilder.SetTags(tagsInput);
+            }
+
+            // Ustaw priorytet
+            if (inputPriority.SelectedItem is Priorities p)
+            {
+                taskBuilder.SetPriority(p);
+            }
+
+            // Ustaw nazwę TaskListy
+            if (!string.IsNullOrWhiteSpace(inputTitle.Text))
+            {
+                taskBuilder.SetName(inputTitle.Text.Trim());
+            }
+
+            // Zbuduj Task/TaskList
+            taskBuilder.Build();
+
+            // Wyczyść pola i odśwież widok
             inputTitle.Text = "";
+            inputTags.Text = "";
+            inputCategory.SelectedIndex = -1;
+            inputPriority.SelectedIndex = -1;
+            taskTextBoxesList.Clear();
+            taskEndDateList.Clear();
+            inputTasksSection.Children.Clear();
+
             DisplayGroup(GlobalGroups.AllGroup);
         }
+
 
 
 
@@ -360,7 +398,7 @@ namespace ZTP
             if (string.IsNullOrWhiteSpace(query))
                 return;
 
-            Desktop.Content = GlobalGroups.Search(query, true); // true = szukaj również w treści
+            Desktop.Content = GlobalGroups.Search(query);
         }
 
         private void DisplayContaing(string tagOrCategory)

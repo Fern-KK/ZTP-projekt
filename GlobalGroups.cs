@@ -19,9 +19,10 @@ public static class GlobalGroups
     public static Group AllNotesGroup = new Group("Notatki");
     private static List<string> AllCategories { get; } = new List<string>();
     private static List<string> AllTags = new List<string>();
-
     public static void Initialize()
     {
+        ServerConnection client = ServerConnection.CreateServerConnection();
+        client.FetchContent();
         // Dodaj domyślne tagi
         AddTags("pilne");
         AddTags("ważne");
@@ -364,9 +365,9 @@ public static class GlobalGroups
 
 
 
-    public static StackPanel Search(string query, bool searchInContent = false)
+    public static StackPanel Search(string query)
     {
-        var visitor = new SearchVisitor(query, searchInContent);
+        var visitor = new SearchVisitor(query);
         AllGroup.Accept(visitor);
         
         var results = visitor.GetResults();

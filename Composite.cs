@@ -32,6 +32,7 @@ public interface IComponent : IVisitedComponent
 public class Note : IComponent
 {
     public string Name { get; }
+    public int NoteId {get; set;}
     public string Content { get; }
     public DateTime StartDate { get; }
     public List<string> Tags { get; set;} = new List<string>();
@@ -55,6 +56,10 @@ public class Note : IComponent
     {
         Category=category;
     }
+    public void SetId(int id)
+    {
+        NoteId = id;
+    }
     public void SetTags(List<string> tags)
     {
         Tags=tags;
@@ -65,7 +70,7 @@ public class Note : IComponent
     }
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł notatki jako TextBox
         var titleButton = new Button{Content = Name,
@@ -189,6 +194,7 @@ public interface ITaskComponent : IComponent
 public class Task : ITaskComponent
 {
     public string Name { get; }
+    public int TaskId {get; set;}
     public DateTime StartDate { get; }
     public DateTime? EndDate { get; }
     public Priorities Priority { get; private set; } = 0;
@@ -224,6 +230,10 @@ public class Task : ITaskComponent
     {
         Priority = priority;
     }
+    public void SetId(int id)
+    {
+        TaskId = id;
+    }
     public void SetTags(List<string> tags)
     {
         Tags=tags;
@@ -253,7 +263,7 @@ public class Task : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
@@ -269,6 +279,7 @@ public class Task : ITaskComponent
                 MarkAsCompleted(DateTime.Now);
         };
         Grid.SetColumn(checkBox, 0);
+        grid.Children.Add(checkBox);
 
         // Nazwa zadania
         var nameText = new TextBlock
@@ -279,16 +290,22 @@ public class Task : ITaskComponent
             TextDecorations = IsCompleted ? TextDecorations.Strikethrough : null
         };
         Grid.SetColumn(nameText, 1);
+        grid.Children.Add(nameText);
 
         // Data
-        var dateText = new TextBlock
+        if (EndDate != null)
         {
-            Text = $"({EndDate:dd.MM.yyyy})",
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            FontSize = 12,
-            Foreground = Brushes.Gray
-        };
-        Grid.SetColumn(dateText, 2);
+            var dateText = new TextBlock
+            {
+                Text = $"({EndDate:dd.MM.yyyy})",
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                FontSize = 12,
+                Foreground = Brushes.Gray
+            };
+            Grid.SetColumn(dateText, 2);
+
+            grid.Children.Add(dateText);
+        }
 
         // Kategoria
         if (Category != "")
@@ -325,10 +342,6 @@ public class Task : ITaskComponent
             Margin = new Thickness(10, 0, 0, 0)
         };
         Grid.SetColumn(priorityIcon, 3);
-
-        grid.Children.Add(checkBox);
-        grid.Children.Add(nameText);
-        grid.Children.Add(dateText);
         grid.Children.Add(priorityIcon);
 
         mainSection.Children.Add(grid);
@@ -370,7 +383,7 @@ public class Task : ITaskComponent
 public class TaskList : ITaskComponent
 {
     public string Name { get; }
-    private List<ITaskComponent> components = new List<ITaskComponent>();
+    public List<ITaskComponent> components { get; set; } = new List<ITaskComponent>();
     public List<string> Tags { get; set;} = new List<string>();
     public string Category { get; set;} = "";
 
@@ -508,7 +521,7 @@ public class TaskList : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł listy zadań
         var titleText = new TextBlock
@@ -522,9 +535,14 @@ public class TaskList : ITaskComponent
         mainSection.Children.Add(titleText);
 
         // Status i informacje
+        string infoTextValue;
+        if (EndDate.HasValue && EndDate != DateTime.MaxValue)
+            infoTextValue = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}";
+        else
+            infoTextValue = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy}";
         var infoText = new TextBlock
         {
-            Text = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}",
+            Text = infoTextValue,
             FontSize = 12,
             Foreground = Brushes.Gray,
             Margin = new Thickness(10*depth, 0, 0, 0)
@@ -532,7 +550,7 @@ public class TaskList : ITaskComponent
         mainSection.Children.Add(infoText);
 
         // Kategoria
-        if (Category != "")
+        if (Category != "" && Category != null)
         {
             var catText = new TextBlock
             {
@@ -640,7 +658,7 @@ public class Group : IComponent
     public StackPanel SimpleDisplay(int depth)
     {
 
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł grupy
         var titleText = new TextBlock{Text = $"📂 {Name}",
