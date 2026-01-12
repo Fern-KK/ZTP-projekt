@@ -30,6 +30,8 @@ public class ServerConnection
         {
             Instance = new ServerConnection();
             Instance.PersonalHttpClient = new HttpClient();
+            this.Username = "nexus";
+            this.Token = "17682096973829nexus";
         }
         return Instance;
     }
