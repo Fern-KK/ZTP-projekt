@@ -11,76 +11,61 @@ using System.Text;
 
 namespace ZTP;
 
-public static class Builder
+public interface IBuilder
 {
-    private static List<IComponent> components = new List<IComponent>();
-    private static string currentName = "";
-    private static int counter = 1;
-    private static string content = "";
-    private static Priorities prioritie = 0;
-    private static DateTime endDate;
-    private static string Category;
-    private static string Tags;
+    string CurrentName { get; set; }
+    string Category { get; set; }
+    string Tags { get; set; }
+    int Counter { get; set; }
 
-    public static string GetName()
-    {
-        if (string.IsNullOrEmpty(currentName) && components.Count > 0)
-            return components.First().Name;
-        return currentName;
-    }
-    public static string DefaultName()
-    {
-        return $"New note {counter}";
-    }
+    public void SetName(string s);
+    public void SetCategory(string c);
+    public void SetTags(string t);
+    public void Build();
+}
 
-    public static void SetName(string s)
+public class BuilderNote : IBuilder
+{
+    public int Counter { get; set; } = 1;
+    public string CurrentName {get; set;} = "";
+    public string Category { get; set; } = "";
+    public string Tags { get; set; } = "";
+    private string Content = "";
+    public void SetName(string s)
     {
-        currentName = s;
+        CurrentName = s;
     }
 
-    public static void SetContent(string s)
+    public void SetContent(string s)
     {
-        content = s;
+        Content = s;
+    }
+    public void SetCategory(string c)
+    {
+        Category=c;    
+    }
+    public void SetTags(string t)
+    {
+        Tags=t;
     }
 
-    public static void StartNew(string name = "")
+    public string GetName()
     {
-        Clear();
-        currentName = name ?? "";
+        return CurrentName;
+    }
+    public string DefaultName()
+    {
+        return $"Nowa notatka {Counter}";
     }
 
-    public static void AddTaskComponent(ITaskComponent component)
+    public void Build()
     {
-        components.Add(component);
-    }
-
-    public static void SetCategory(string selectedCategory)
-    {
-        Category=selectedCategory;    
-    }
-    public static void SetTags(string selectedTags)
-    {
-        Tags=selectedTags;
-    }
-    public static void Clear()
-    {
-        components.Clear();
-        currentName = "";
-        content = "";
-        prioritie = 0;
-        currentName = "";
-        Category = "";
-        Tags = "";
-    }
-
-    public static void BuildNote()
-    {
-        Note note = new Note(currentName, content);
+        Note note = new Note(CurrentName, Content);
         GlobalGroups.AllGroup.Add(note);
         GlobalGroups.AllNotesGroup.Add(note);
-        if(currentName == $"New note {counter}")
+        if(CurrentName == $"New note {Counter}")
         {
-            counter++;
+            Counter++;
         }
         if (Category != null)
         {
@@ -102,48 +87,136 @@ public static class Builder
 
         Clear();
     }
+
     
-
-
-    public static IComponent BuildTask()
+    public void Clear()
     {
-        if (components.Count == 0)
-            return null;
+        CurrentName = "";
+        Content = "";
+        CurrentName = "";
+        Category = "";
+        Tags = "";
+    }
+}
 
-        if (components.Count == 1 && components.First() is Task result)
+public class BuilderTask : IBuilder
+{
+    private List<IComponent> Components = new List<IComponent>();
+    public string CurrentName {get; set;} = "";
+    public int Counter { get; set; } = 1;
+    public string Category { get; set; } = "";
+    public string Tags { get; set; } = "";
+    private Priorities priority = 0;
+    private DateTime endDate;
+    public void SetName(string s)
+    {
+        CurrentName = s;
+    }
+    public void SetCategory(string c)
+    {
+        Category=c;    
+    }
+    public void SetTags(string t)
+    {
+        Tags=t;
+    }
+
+    public void SetPriority(Priorities p)
+    {
+        priority=p;
+    }
+
+    public string GetName()
+    {
+        if (string.IsNullOrEmpty(CurrentName) && Components.Count > 0)
+            return Components.First().Name;
+        return CurrentName;
+    }
+    public string DefaultName()
+    {
+        return $"Nowe zadanie {Counter}";
+    }
+
+    public void AddTaskComponent(ITaskComponent t)
+    {
+        Components.Add(t);
+    }
+    
+    public void Build()
+    {
+        if (Components.Count == 0) return;
+
+        // Pojedyńcze zadanie
+        if (Components.Count == 1 && Components.First() is Task result)
         {
             result.SetCategory(Category);
-            result.SetTags(Tags);
-            result.SetPriority(prioritie);
+
+            if (!string.IsNullOrWhiteSpace(Tags))
+            {
+                foreach (var t in Tags.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(x => x.Trim().ToLower()))
+                {
+                    result.SetTags(t);
+                }
+            }
+
+            result.SetPriority(priority);
             Clear();
-            GlobalGroups.AllNotesGroup.Add(result);
+            GlobalGroups.AllTasksGroup.Add(result);
             GlobalGroups.AllGroup.Add(result);
-            return result;
+            return;
         }
 
-        string name = string.IsNullOrEmpty(currentName) ? components.First().Name : currentName;
+        // Lista zadań
+        string name = CurrentName;
+        if (!string.IsNullOrEmpty(CurrentName))
+        {
+            name = DefaultName();
+            Counter++;
+        }
         var taskList = new TaskList(name);
         taskList.SetCategory(Category);
-        taskList.SetTags(Tags);
-        taskList.SetPriority(prioritie);
 
-        foreach (var component in components)
+        // Ustawianie tagów
+        if (!string.IsNullOrWhiteSpace(Tags))
+        {
+            foreach (var t in Tags.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(x => x.Trim().ToLower()))
+            {
+                taskList.SetTags(t);
+            }
+        }
+
+        taskList.SetPriority(priority);
+
+        // Dodawanie zadań do listy
+        foreach (var component in Components)
         {
             switch (component)
             {
                 case Task task:
                     taskList.Add(new Task(task));
                     break;
-                
                 case TaskList tl:
                     taskList.Add(new TaskList(tl));
                     break;
             }
         }
-        
+
         Clear();
         GlobalGroups.AllTasksGroup.Add(taskList);
         GlobalGroups.AllGroup.Add(taskList);
-        return taskList;
+        return;
+    }
+
+    
+    public void Clear()
+    {
+        Components.Clear();
+        CurrentName = "";
+        priority = 0;
+        CurrentName = "";
+        Category = "";
+        Tags = "";
     }
 }
