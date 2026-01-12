@@ -214,7 +214,7 @@ public class StatisticsVisitor : IVisitor
             TagStats[tag] = TagStats.GetValueOrDefault(tag) + 1;
         }
 
-        // Przejdź przez podzadania
+        // Sprawdza podzadania
         var components = taskList.GetType().GetProperty("components")?.GetValue(taskList) as List<ITaskComponent>;
         if (components != null)
         {
@@ -246,7 +246,7 @@ public class StatisticsVisitor : IVisitor
 
     public StackPanel GetStatisticsPanel()
     {
-        var mainSection = new StackPanel { Spacing = 10, Margin = new Thickness(20) };
+        var mainSection = new StackPanel { Spacing = 10, Margin = new Thickness(0,0,0,20) };
 
         mainSection.Children.Add(new TextBlock{Text = "Statystyki ogólne", FontSize = 18, FontWeight = FontWeight.Bold});
 
