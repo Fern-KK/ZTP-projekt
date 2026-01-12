@@ -18,7 +18,6 @@ namespace ZTP
         {
             InitializeComponent();
             GlobalGroups.Initialize();
-
             InitializeMenu();
 
         }
@@ -256,15 +255,6 @@ namespace ZTP
                 }
                 i++;
             }
-
-
-            // DateTimeOffset? wybranadata = inputEndDate.SelectedDate;
-            // if (wybranadata.HasValue)
-            // {
-            //     DateTime dateOnly = wybranadata.Value.DateTime; // Konwersja na zwykły DateTime
-            // }
-
-
             Builder.BuildTask();
 
             // Wyczyść pola

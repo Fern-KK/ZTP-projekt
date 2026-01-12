@@ -65,7 +65,7 @@ public class Note : IComponent
     }
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
 
         // Tytuł notatki jako TextBox
         var titleBox = new TextBox{Text = $"📝 {Name}",
@@ -129,8 +129,8 @@ public class Note : IComponent
     public StackPanel DisplayDetails()
     {
         var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
-                                   Spacing = 10,
-                                   Margin = new Thickness(20)};
+                                         Spacing = 10,
+                                         Margin = new Thickness(20)};
 
         var inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                                      Text = Name,
@@ -146,7 +146,7 @@ public class Note : IComponent
                                     Foreground = Brushes.Gray,
                                     Background = Brushes.Transparent};
 
-        var saveButton = new Button{Content = "Zapisz notatkę",
+        var saveButton = new Button{Content = "Zapisz",
                                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
                                     Width = 120,
                                     Margin = new Thickness(0, 10, 0, 0)};
@@ -246,7 +246,7 @@ public class Task : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel { Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
 
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
@@ -501,11 +501,7 @@ public class TaskList : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel
-        {
-            Spacing = 10,
-            Margin = new Thickness(10*depth, 5)
-        };
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
 
         // Tytuł listy zadań
         var titleText = new TextBlock
@@ -633,28 +629,11 @@ public class Group : IComponent
     {
         return components.AsReadOnly();
     }
-    public string GetFormattedList()
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"{Name}:");
-        sb.AppendLine();
-
-        int i = 1;
-        foreach (var component in components)
-        {
-            sb.AppendLine($"{i}. {component.Name}");
-            i++;
-        }
-
-        return sb.ToString();
-    }
-
-
 
     public StackPanel SimpleDisplay(int depth)
     {
 
-        var mainSection = new StackPanel{Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
 
         // Tytuł grupy
         var titleText = new TextBlock{Text = $"📂 {Name}",
@@ -679,15 +658,6 @@ public class Group : IComponent
     public StackPanel SimpleDisplay()
     {
         return SimpleDisplay(1);
-    }
-
-    public Button DisplayGUI()
-    {
-        // Tytuł notatki jako TextBox
-        var b = new Button{Content=Name,
-                           HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                           Background = Brushes.Transparent};
-        return b;
     }
     public void Accept(IVisitor visitor) //for Visitor use
     {

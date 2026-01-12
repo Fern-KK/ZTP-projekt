@@ -164,7 +164,6 @@ public class StatisticsVisitor : IVisitor
     public void Visit(Note note)
     {
         TotalNotes++;
-
         if (!string.IsNullOrEmpty(note.Category))
         {
             CategoryStats[note.Category] = CategoryStats.GetValueOrDefault(note.Category) + 1;
@@ -247,79 +246,51 @@ public class StatisticsVisitor : IVisitor
 
     public StackPanel GetStatisticsPanel()
     {
-        var panel = new StackPanel { Spacing = 10, Margin = new Thickness(20) };
+        var mainSection = new StackPanel { Spacing = 10, Margin = new Thickness(20) };
 
-        panel.Children.Add(new TextBlock
-        {
-            Text = "📊 Statystyki ogólne",
-            FontSize = 18,
-            FontWeight = FontWeight.Bold,
-            Margin = new Thickness(0, 0, 0, 10)
-        });
+        mainSection.Children.Add(new TextBlock{Text = "Statystyki ogólne", FontSize = 18, FontWeight = FontWeight.Bold});
 
-        panel.Children.Add(CreateStatRow("📝 Notatki:", TotalNotes.ToString()));
-        panel.Children.Add(CreateStatRow("✅ Zadania proste:", TotalTasks.ToString()));
-        panel.Children.Add(CreateStatRow("📋 Listy zadań:", TotalTaskLists.ToString()));
-        panel.Children.Add(CreateStatRow("✔️ Zadania wykonane:", $"{CompletedTasks} (w tym {LateTasks} spóźnionych)"));
-        panel.Children.Add(CreateStatRow("⏳ Zadania oczekujące:", PendingTasks.ToString()));
+        mainSection.Children.Add(CreateStatRow("Notatki:", TotalNotes.ToString()));
+        mainSection.Children.Add(CreateStatRow("Zadania pojedyńcze:", TotalTasks.ToString()));
+        mainSection.Children.Add(CreateStatRow("Listy zadań:", TotalTaskLists.ToString()));
+        mainSection.Children.Add(CreateStatRow("Zadania wykonane:", $"{CompletedTasks} (w tym {LateTasks} spóźnionych)"));
+        mainSection.Children.Add(CreateStatRow("Zadania oczekujące:", PendingTasks.ToString()));
 
         if (CategoryStats.Count > 0)
         {
-            panel.Children.Add(new TextBlock
-            {
-                Text = "🏷️ Kategorie:",
-                FontSize = 14,
-                FontWeight = FontWeight.SemiBold,
-                Margin = new Thickness(0, 20, 0, 5)
-            });
+            mainSection.Children.Add(new TextBlock{ Text = "Kategorie:", 
+                                                    FontSize = 14, 
+                                                    FontWeight = FontWeight.SemiBold, 
+                                                    Margin = new Thickness(0, 20, 0, 5) });
 
-            foreach (var kvp in CategoryStats.OrderByDescending(x => x.Value))
+            foreach (var category in CategoryStats.OrderByDescending(x => x.Value))
             {
-                panel.Children.Add(CreateStatRow($"  {kvp.Key}:", kvp.Value.ToString()));
+                mainSection.Children.Add(CreateStatRow($"  {category.Key}:", category.Value.ToString()));
             }
         }
 
         if (TagStats.Count > 0)
         {
-            panel.Children.Add(new TextBlock
-            {
-                Text = "🔖 Tagi:",
-                FontSize = 14,
-                FontWeight = FontWeight.SemiBold,
-                Margin = new Thickness(0, 20, 0, 5)
-            });
+            mainSection.Children.Add(new TextBlock { Text = "Tagi:", 
+                                                     FontSize = 14, 
+                                                     FontWeight = FontWeight.SemiBold, 
+                                                     Margin = new Thickness(0, 20, 0, 5) });
 
-            foreach (var kvp in TagStats.OrderByDescending(x => x.Value))
+            foreach (var tag in TagStats.OrderByDescending(x => x.Value))
             {
-                panel.Children.Add(CreateStatRow($"  #{kvp.Key}:", kvp.Value.ToString()));
+                mainSection.Children.Add(CreateStatRow($"  #{tag.Key}:", tag.Value.ToString()));
             }
         }
 
-        return panel;
+        return mainSection;
     }
 
     private StackPanel CreateStatRow(string label, string value)
     {
-        var row = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            Margin = new Thickness(0, 2, 0, 2)
-        };
+        var row = new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal };
 
-        row.Children.Add(new TextBlock
-        {
-            Text = label,
-            Width = 250,
-            FontSize = 12
-        });
-
-        row.Children.Add(new TextBlock
-        {
-            Text = value,
-            FontSize = 12,
-            FontWeight = FontWeight.Bold
-        });
-
+        row.Children.Add(new TextBlock {Text = label, Width = 250});
+        row.Children.Add(new TextBlock{ Text = value, FontWeight = FontWeight.Bold });
         return row;
     }
 }
