@@ -65,7 +65,7 @@ public class Note : IComponent
     }
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł notatki jako TextBox
         var titleBox = new TextBox{Text = $"📝 {Name}",
@@ -246,7 +246,7 @@ public class Task : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel { Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
@@ -363,7 +363,7 @@ public class Task : ITaskComponent
 public class TaskList : ITaskComponent
 {
     public string Name { get; }
-    private List<ITaskComponent> components = new List<ITaskComponent>();
+    public List<ITaskComponent> components { get; set; } = new List<ITaskComponent>();
     public List<string> Tags { get; set;} = new List<string>();
     public string Category { get; set;} = "";
 
@@ -501,11 +501,7 @@ public class TaskList : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel
-        {
-            Spacing = 10,
-            Margin = new Thickness(10*depth, 5)
-        };
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł listy zadań
         var titleText = new TextBlock
@@ -654,7 +650,7 @@ public class Group : IComponent
     public StackPanel SimpleDisplay(int depth)
     {
 
-        var mainSection = new StackPanel{Margin = new Thickness(10*depth, 5)};
+        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł grupy
         var titleText = new TextBlock{Text = $"📂 {Name}",

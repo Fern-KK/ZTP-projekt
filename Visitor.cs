@@ -30,12 +30,10 @@ public class SearchVisitor : IVisitor
 {
     private string _searchQuery;
     private List<IComponent> _searchResults = new List<IComponent>();
-    private bool _searchInContent;
 
-    public SearchVisitor(string query, bool searchInContent = false)
+    public SearchVisitor(string query)
     {
         _searchQuery = query.ToLower();
-        _searchInContent = searchInContent;
     }
 
     public List<IComponent> GetResults() => _searchResults;
@@ -68,10 +66,18 @@ public class SearchVisitor : IVisitor
         {
             foreach (var component in components)
             {
-                if (component is Task t)
-                    Visit(t);
-                else if (component is TaskList tl)
-                    Visit(tl);
+                switch(component)
+                {
+                    case Task t:
+                        if (MatchesSearch(t))
+                            _searchResults.Add(taskList);
+                        break;
+
+                    case TaskList tl:
+                        if (MatchesSearch(tl))
+                            _searchResults.Add(taskList);
+                        break;
+                }
             }
         }
     }
@@ -106,29 +112,27 @@ public class SearchVisitor : IVisitor
             return true;
 
         // Sprawdź kategorię
-        if (component is Note note)
+        if (component.Category?.ToLower().Contains(_searchQuery) == true)
+            return true;
+
+        // Sprawdź pola specjalne dla poszczególnych kategorii
+        switch (component)
         {
-            if (note.Category?.ToLower().Contains(_searchQuery) == true)
-                return true;
+            case Note note:
+                // Sprawdź opis
+                if (note.Content?.ToLower().Contains(_searchQuery) == true)
+                    return true;
 
-            if (_searchInContent && note.Content?.ToLower().Contains(_searchQuery) == true)
-                return true;
-
-            // Sprawdź tagi
-            if (note.Tags.Any(tag => tag.ToLower().Contains(_searchQuery)))
-                return true;
-        }
-        else if (component is ITaskComponent taskComponent)
-        {
-            // Sprawdź kategorię dla zadań
-            var category = taskComponent.GetType().GetProperty("Category")?.GetValue(taskComponent) as string;
-            if (category?.ToLower().Contains(_searchQuery) == true)
-                return true;
-
-            // Sprawdź tagi dla zadań
-            var tags = taskComponent.GetType().GetProperty("Tags")?.GetValue(taskComponent) as List<string>;
-            if (tags?.Any(tag => tag.ToLower().Contains(_searchQuery)) == true)
-                return true;
+                // Sprawdź tagi
+                if (note.Tags.Any(tag => tag.ToLower().Contains(_searchQuery)))
+                    return true;
+                break;
+            
+            case ITaskComponent task:
+                // Sprawdź tagi
+                if (task.Tags.Any(tag => tag.ToLower().Contains(_searchQuery)))
+                    return true;
+                break;
         }
 
         return false;

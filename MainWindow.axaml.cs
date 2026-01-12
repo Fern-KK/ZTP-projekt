@@ -370,7 +370,7 @@ namespace ZTP
             if (string.IsNullOrWhiteSpace(query))
                 return;
 
-            Desktop.Content = GlobalGroups.Search(query, true); // true = szukaj również w treści
+            Desktop.Content = GlobalGroups.Search(query);
         }
 
         private void DisplayContaing(string tagOrCategory)

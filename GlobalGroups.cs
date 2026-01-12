@@ -364,9 +364,9 @@ public static class GlobalGroups
 
 
 
-    public static StackPanel Search(string query, bool searchInContent = false)
+    public static StackPanel Search(string query)
     {
-        var visitor = new SearchVisitor(query, searchInContent);
+        var visitor = new SearchVisitor(query);
         AllGroup.Accept(visitor);
         
         var results = visitor.GetResults();
