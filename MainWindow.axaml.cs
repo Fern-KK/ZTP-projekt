@@ -14,13 +14,16 @@ namespace ZTP
 {
     public partial class MainWindow : Window
     {
+        BuilderNote noteBuilder;
+        BuilderTask taskBuilder;
+
         public MainWindow()
         {
             InitializeComponent();
             GlobalGroups.Initialize();
-
+            noteBuilder = new BuilderNote();
+            taskBuilder = new BuilderTask();
             InitializeMenu();
-
         }
 
 
@@ -87,7 +90,7 @@ namespace ZTP
                                        Margin = new Thickness(20)};
 
             inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                                     Text = Builder.DefaultName()};
+                                     Text = noteBuilder.DefaultName()};
 
             inputContent = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                                         MinHeight = 200,
@@ -140,12 +143,12 @@ namespace ZTP
         private void NoteBuilder()
         {
             inputTitle.Classes.Remove("mustFill");
-            if (inputCategory.SelectedItem is string category) {Builder.SetCategory(category);}
-            if (inputTags.Text is string tag) {Builder.SetTags(tag);}
+            if (inputCategory.SelectedItem is string category) {noteBuilder.SetCategory(category);}
+            if (inputTags.Text is string tag) {noteBuilder.SetTags(tag);}
 
-            Builder.SetName(inputTitle.Text);
-            Builder.SetContent(inputContent.Text?.Trim() ?? "");
-            Builder.BuildNote();
+            noteBuilder.SetName(inputTitle.Text);
+            noteBuilder.SetContent(inputContent.Text?.Trim() ?? "");
+            noteBuilder.Build();
 
 
             // Wyczyść pola
@@ -247,11 +250,11 @@ namespace ZTP
                 {
                     if (taskEndDateList[i].SelectedDate.HasValue)
                     {
-                        Builder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));
+                        taskBuilder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));
                     }
                     else
                     {
-                        Builder.AddTaskComponent(new Task(text));
+                        taskBuilder.AddTaskComponent(new Task(text));
                     }
                 }
             }
@@ -260,29 +263,29 @@ namespace ZTP
             string selectedCategory = inputCategory.SelectedItem?.ToString();
             if (!string.IsNullOrWhiteSpace(selectedCategory))
             {
-                Builder.SetCategory(selectedCategory);
+                taskBuilder.SetCategory(selectedCategory);
             }
 
             string tagsInput = inputTags.Text?.Trim();
             if (!string.IsNullOrWhiteSpace(tagsInput))
             {
-                Builder.SetTags(tagsInput);
+                taskBuilder.SetTags(tagsInput);
             }
 
             // Ustaw priorytet
             if (inputPriority.SelectedItem is Priorities p)
             {
-                Builder.SetPriority(p);
+                taskBuilder.SetPriority(p);
             }
 
             // Ustaw nazwę TaskListy
             if (!string.IsNullOrWhiteSpace(inputTitle.Text))
             {
-                Builder.SetName(inputTitle.Text.Trim());
+                taskBuilder.SetName(inputTitle.Text.Trim());
             }
 
             // Zbuduj Task/TaskList
-            var result = Builder.BuildTask();
+            taskBuilder.Build();
 
             // Wyczyść pola i odśwież widok
             inputTitle.Text = "";

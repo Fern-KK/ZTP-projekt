@@ -518,9 +518,14 @@ public class TaskList : ITaskComponent
         mainSection.Children.Add(titleText);
 
         // Status i informacje
+        string infoTextValue;
+        if (EndDate.HasValue && EndDate != DateTime.MaxValue)
+            infoTextValue = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}";
+        else
+            infoTextValue = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy}";
         var infoText = new TextBlock
         {
-            Text = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}",
+            Text = infoTextValue,
             FontSize = 12,
             Foreground = Brushes.Gray,
             Margin = new Thickness(10*depth, 0, 0, 0)
@@ -528,7 +533,7 @@ public class TaskList : ITaskComponent
         mainSection.Children.Add(infoText);
 
         // Kategoria
-        if (Category != "")
+        if (Category != "" && Category != null)
         {
             var catText = new TextBlock
             {
