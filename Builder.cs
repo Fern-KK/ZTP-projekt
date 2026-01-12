@@ -21,6 +21,23 @@ public static class Builder
     private static DateTime endDate;
     private static string Category;
     private static string Tags;
+    public static void SetName(string s)
+    {
+        currentName = s;
+    }
+
+    public static void SetContent(string s)
+    {
+        content = s;
+    }
+    public static void SetCategory(string selectedCategory)
+    {
+        Category=selectedCategory;    
+    }
+    public static void SetTags(string selectedTags)
+    {
+        Tags=selectedTags;
+    }
 
     public static string GetName()
     {
@@ -33,44 +50,9 @@ public static class Builder
         return $"New note {counter}";
     }
 
-    public static void SetName(string s)
-    {
-        currentName = s;
-    }
-
-    public static void SetContent(string s)
-    {
-        content = s;
-    }
-
-    public static void StartNew(string name = "")
-    {
-        Clear();
-        currentName = name ?? "";
-    }
-
     public static void AddTaskComponent(ITaskComponent component)
     {
         components.Add(component);
-    }
-
-    public static void SetCategory(string selectedCategory)
-    {
-        Category=selectedCategory;    
-    }
-    public static void SetTags(string selectedTags)
-    {
-        Tags=selectedTags;
-    }
-    public static void Clear()
-    {
-        components.Clear();
-        currentName = "";
-        content = "";
-        prioritie = 0;
-        currentName = "";
-        Category = "";
-        Tags = "";
     }
 
     public static void BuildNote()
@@ -103,8 +85,6 @@ public static class Builder
         Clear();
     }
     
-
-
     public static IComponent BuildTask()
     {
         if (components.Count == 0)
@@ -145,5 +125,16 @@ public static class Builder
         GlobalGroups.AllTasksGroup.Add(taskList);
         GlobalGroups.AllGroup.Add(taskList);
         return taskList;
+    }
+    
+    public static void Clear()
+    {
+        components.Clear();
+        currentName = "";
+        content = "";
+        prioritie = 0;
+        currentName = "";
+        Category = "";
+        Tags = "";
     }
 }

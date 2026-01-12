@@ -123,17 +123,6 @@ namespace ZTP
             downSection.Children.Add(leftSide);
             downSection.Children.Add(rightSide);
 
-            
-
-            
-
-            
-            
-            // inputTags = new ListBox{SelectionMode = SelectionMode.Multiple, // Ważne: wiele wyborów
-            //                        ItemsSource = Tags.GetTags(),
-            //                        DisplayMemberBinding = new Avalonia.Data.Binding("Name") };
-
-            
 
 
             
@@ -354,46 +343,17 @@ namespace ZTP
 
 
 
-            var statsButton = new Button
-            {
-                Content = "Statystyki",
-                Classes = { "menuButton" }
-            };
+            var statsButton = new Button { Content = "Statystyki", Classes = { "leftMenuButton" } };
             statsButton.Click += (s, e) => DisplayStatistics();
             ButtonSection.Children.Add(statsButton);
 
             // Dodaj przycisk raportów
-            var reportButton = new Button
-            {
-                Content = "Nadchodzące terminy",
-                Classes = { "menuButton" }
-            };
+            var reportButton = new Button {Content = "Nadchodzące terminy", Classes = { "leftMenuButton" }};
             reportButton.Click += (s, e) => DisplayUpcomingTasks();
             ButtonSection.Children.Add(reportButton);
 
 
             searchButton.Click += (s, e) => PerformSearch(searchBox.Text);
-
-            // var searchPanel = new StackPanel
-            // {
-            //     Orientation = Avalonia.Layout.Orientation.Horizontal,
-            //     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-            //     Margin = new Thickness(0, 10, 0, 10)
-            // };
-            // searchPanel.Children.Add(searchBox);
-            // searchPanel.Children.Add(searchButton);
-            // ButtonSection.Children.Add(searchPanel);
-
-
-
-
-
-
-
-
-
-
-
         }
         private void DisplayStatistics()
         {

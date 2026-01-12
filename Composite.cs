@@ -21,15 +21,12 @@ public enum Priorities
 
 public interface IComponent : IVisitedComponent
 {
-    public string Name { get; }
+    string Name { get; }
     DateTime StartDate { get; }
-    // public List<string> Tags { get; }
-    // public string Category { get; }
-    
-    public string Display(int depth);
-    public string Display();
-    public StackPanel SimpleDisplay(int depth);
-    public StackPanel SimpleDisplay();
+    List<string> Tags { get; }
+    string Category { get; }
+    StackPanel SimpleDisplay(int depth);
+    StackPanel SimpleDisplay();
 }
 
 public class Note : IComponent
@@ -66,24 +63,6 @@ public class Note : IComponent
     {
         Tags.Add(tag);
     }
-
-    public string Display()
-    {
-        return this.Display(1);
-    }
-
-    public string Display(int depth)
-    {
-        string indent = new string(' ', depth);
-        string dashPrefix = new string('-', depth);
-
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"{dashPrefix}{Name} ({StartDate:dd.MM.yyyy})");
-        sb.AppendLine($"{indent}Treść: {Content}");
-
-        return sb.ToString();
-    }
-
     public StackPanel SimpleDisplay(int depth)
     {
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5)};
@@ -217,6 +196,7 @@ public class Task : ITaskComponent
         StartDate = DateTime.Now;
         EndDate = endDate;
     }
+
     public Task(string name)
     {
         Name = name;
@@ -233,20 +213,6 @@ public class Task : ITaskComponent
         IsCompleted = other.IsCompleted;
         IsLate = other.IsLate;
     }
-
-    public void MarkAsCompleted(DateTime completionDate)
-    {
-        IsCompleted = true;
-        IsLate = completionDate > EndDate;
-    }
-
-    public string GetStatus()
-    {
-        if (IsCompleted)
-            return IsLate ? "[Completed Late]" : "[Completed]";
-        return "[Pending]";
-    }
-
     public void SetPriority(Priorities priority)
     {
         Priority = priority;
@@ -265,24 +231,22 @@ public class Task : ITaskComponent
         Category = category;
     }
 
-    public string Display()
+    public void MarkAsCompleted(DateTime completionDate)
     {
-        return this.Display(1);
+        IsCompleted = true;
+        IsLate = completionDate > EndDate;
     }
 
-    public string Display(int depth)
+    public string GetStatus()
     {
-        string dashPrefix = new string('-', depth);
-        return $"{dashPrefix}{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}\n";
+        if (IsCompleted)
+            return IsLate ? "[Completed Late]" : "[Completed]";
+        return "[Pending]";
     }
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel
-        {
-            Spacing = 10,
-            Margin = new Thickness(10*depth, 5)
-        };
+        var mainSection = new StackPanel { Margin = new Thickness(10*depth, 5)};
 
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
@@ -291,12 +255,7 @@ public class Task : ITaskComponent
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Priorytet
 
         // Checkbox dla statusu
-        var checkBox = new CheckBox
-        {
-            IsChecked = IsCompleted,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 10, 0)
-        };
+        var checkBox = new CheckBox {IsChecked = IsCompleted}; 
         checkBox.IsCheckedChanged += (s, e) =>
         {
             if (checkBox.IsChecked == true)
@@ -388,6 +347,18 @@ public class Task : ITaskComponent
         visitor.Visit(this);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 public class TaskList : ITaskComponent
 {
@@ -494,27 +465,6 @@ public class TaskList : ITaskComponent
             return IsLate ? "[Completed Late]" : "[Completed]";
         return "[Pending]";
     }
-
-    public string Display()
-    {
-        return this.Display(1);
-    }
-
-    public string Display(int depth)
-    {
-        StringBuilder sb = new StringBuilder();
-        string dashPrefix = new string('-', depth);
-
-        sb.AppendLine($"{dashPrefix}{Name} ({StartDate:dd.MM.yyyy} to {EndDate:dd.MM.yyyy}) - Status: {GetStatus()}");
-
-        foreach (var component in components)
-        {
-            sb.Append(component.Display(depth + 2));
-        }
-
-        return sb.ToString();
-    }
-
     private int[] getStatistics()
     {
         int[] statistics = new int[4] {
@@ -621,6 +571,23 @@ public class TaskList : ITaskComponent
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class Group : IComponent
 {
     public string Name { get; }
@@ -634,6 +601,9 @@ public class Group : IComponent
             return components.Min(component => component.StartDate);
         }
     }
+    public List<string> Tags { get; }
+    public string Category { get; }
+
     public Group(string name)
     {
         Name = name;
@@ -663,24 +633,6 @@ public class Group : IComponent
     {
         return components.AsReadOnly();
     }
-
-    public string Display()
-    {
-        return this.Display(1);
-    }
-
-    public string Display(int depth)
-    {
-        StringBuilder sb = new StringBuilder();
-
-        foreach (var component in components)
-        {
-            sb.Append(component.Display(depth + 2));
-        }
-
-        return sb.ToString();
-    }
-
     public string GetFormattedList()
     {
         StringBuilder sb = new StringBuilder();
@@ -697,21 +649,7 @@ public class Group : IComponent
         return sb.ToString();
     }
 
-    public string GetDetailedList()
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"{Name}:");
-        sb.AppendLine();
 
-        int i = 1;
-        foreach (var component in components)
-        {
-            sb.AppendLine($"{i}. {component.Display()}");
-            i++;
-        }
-
-        return sb.ToString();
-    }
 
     public StackPanel SimpleDisplay(int depth)
     {
