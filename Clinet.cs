@@ -16,9 +16,9 @@ namespace ZTP;
 public class ServerConnection
 {
     private static ServerConnection? Instance;
-    public string? Username;
-    private string? Token;
-    private HttpClient? PersonalHttpClient;
+    public string? Username; // Tak samo jak poniżej 
+    private string? Token; // Pole do potencjalnego przyszłego rozwoju na różnych użytkowników
+    private HttpClient PersonalHttpClient = new HttpClient();
     private string BaseLink = "https://logan667.pythonanywhere.com";
     private ServerConnection()
     {}
@@ -264,7 +264,7 @@ public class ServerConnection
             username = this.Username,
             token = this.Token,
             title = task.Name,
-            content = "Task content missing", //gdzie jest Content?
+            content = "-",
             category = task.Category,
             priority = task.Priority.ToString().ToLowerInvariant(),
             deadline = task.EndDate?.ToString("MM-dd-yyyy"),
