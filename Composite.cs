@@ -73,29 +73,21 @@ public class Note : IComponent
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł notatki jako TextBox
-        var titleBox = new TextBox{Text = $"📝 {Name}",
-                                   FontSize = 14,
-                                   FontWeight = FontWeight.SemiBold,
-                                   Margin = new Thickness(0, 0, 0, 5),
-                                   IsReadOnly = true,
-                                   BorderThickness = new Thickness(0),
-                                   Background = Brushes.Transparent};
-        mainSection.Children.Add(titleBox);
+        var titleButton = new Button{Content = Name,
+                                     FontSize = 14,
+                                     FontWeight = FontWeight.SemiBold,
+                                     };
+        titleButton.Classes.Add("leftMenuButton");
+        // titleButton.Click += (s, e) => D;
 
-        // Treść notatki
-        if (!string.IsNullOrEmpty(Content))
-        {
-            var contentBox = new TextBox
-            {
-                Text = Content,
-                IsReadOnly = true,
-                TextWrapping = TextWrapping.Wrap,
-                BorderThickness = new Thickness(0),
-                Background = Brushes.Transparent,
-                Margin = new Thickness(10, 0, 0, 0)
-            };
-            mainSection.Children.Add(contentBox);
-        }
+        // var titleBox = new TextBox{Text = Name,
+        //                            FontSize = 14,
+        //                            FontWeight = FontWeight.SemiBold,
+        //                            Margin = new Thickness(0, 0, 0, 5),
+        //                            IsReadOnly = true,
+        //                            BorderThickness = new Thickness(0),
+        //                            Background = Brushes.Transparent};
+        mainSection.Children.Add(titleButton);
 
         // Kategoria
         if (Category != "")
@@ -125,6 +117,21 @@ public class Note : IComponent
             mainSection.Children.Add(tagBox);
         }
 
+        // Treść notatki
+        if (!string.IsNullOrEmpty(Content))
+        {
+            var contentBox = new TextBox
+            {
+                Text = Content,
+                IsReadOnly = true,
+                TextWrapping = TextWrapping.Wrap,
+                BorderThickness = new Thickness(0),
+                Background = Brushes.Transparent,
+                Margin = new Thickness(10, 0, 0, 0)
+            };
+            mainSection.Children.Add(contentBox);
+        }
+
         return mainSection;
     }
     public StackPanel SimpleDisplay()
@@ -134,8 +141,8 @@ public class Note : IComponent
     public StackPanel DisplayDetails()
     {
         var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
-                                   Spacing = 10,
-                                   Margin = new Thickness(20)};
+                                         Spacing = 10,
+                                         Margin = new Thickness(20)};
 
         var inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                                      Text = Name,
@@ -151,7 +158,7 @@ public class Note : IComponent
                                     Foreground = Brushes.Gray,
                                     Background = Brushes.Transparent};
 
-        var saveButton = new Button{Content = "Zapisz notatkę",
+        var saveButton = new Button{Content = "Zapisz",
                                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
                                     Width = 120,
                                     Margin = new Thickness(0, 10, 0, 0)};
@@ -647,23 +654,6 @@ public class Group : IComponent
     {
         return components.AsReadOnly();
     }
-    public string GetFormattedList()
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"{Name}:");
-        sb.AppendLine();
-
-        int i = 1;
-        foreach (var component in components)
-        {
-            sb.AppendLine($"{i}. {component.Name}");
-            i++;
-        }
-
-        return sb.ToString();
-    }
-
-
 
     public StackPanel SimpleDisplay(int depth)
     {
@@ -693,15 +683,6 @@ public class Group : IComponent
     public StackPanel SimpleDisplay()
     {
         return SimpleDisplay(1);
-    }
-
-    public Button DisplayGUI()
-    {
-        // Tytuł notatki jako TextBox
-        var b = new Button{Content=Name,
-                           HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                           Background = Brushes.Transparent};
-        return b;
     }
     public void Accept(IVisitor visitor) //for Visitor use
     {

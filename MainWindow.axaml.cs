@@ -371,7 +371,7 @@ namespace ZTP
 
 
 
-            var statsButton = new Button { Content = "Statystyki", Classes = { "leftMenuButton" } };
+            var statsButton = new Button { Content = "Podsumowanie", Classes = { "leftMenuButton" } };
             statsButton.Click += (s, e) => DisplayStatistics();
             ButtonSection.Children.Add(statsButton);
 
