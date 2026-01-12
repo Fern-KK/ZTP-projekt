@@ -262,6 +262,7 @@ public class Task : ITaskComponent
                 MarkAsCompleted(DateTime.Now);
         };
         Grid.SetColumn(checkBox, 0);
+        grid.Children.Add(checkBox);
 
         // Nazwa zadania
         var nameText = new TextBlock
@@ -272,16 +273,22 @@ public class Task : ITaskComponent
             TextDecorations = IsCompleted ? TextDecorations.Strikethrough : null
         };
         Grid.SetColumn(nameText, 1);
+        grid.Children.Add(nameText);
 
         // Data
-        var dateText = new TextBlock
+        if (EndDate != null)
         {
-            Text = $"({EndDate:dd.MM.yyyy})",
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            FontSize = 12,
-            Foreground = Brushes.Gray
-        };
-        Grid.SetColumn(dateText, 2);
+            var dateText = new TextBlock
+            {
+                Text = $"({EndDate:dd.MM.yyyy})",
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                FontSize = 12,
+                Foreground = Brushes.Gray
+            };
+            Grid.SetColumn(dateText, 2);
+
+            grid.Children.Add(dateText);
+        }
 
         // Kategoria
         if (Category != "")
@@ -318,10 +325,6 @@ public class Task : ITaskComponent
             Margin = new Thickness(10, 0, 0, 0)
         };
         Grid.SetColumn(priorityIcon, 3);
-
-        grid.Children.Add(checkBox);
-        grid.Children.Add(nameText);
-        grid.Children.Add(dateText);
         grid.Children.Add(priorityIcon);
 
         mainSection.Children.Add(grid);

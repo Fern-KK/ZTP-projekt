@@ -199,7 +199,7 @@ namespace ZTP
 
 
 
-            saveEditingButton = new Button{Content = "Zapisz notatkę"};
+            saveEditingButton = new Button{Content = "Zapisz zadania"};
             saveEditingButton.Click += (s, e) => TaskBuilder();
 
             var rightSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right};
@@ -228,49 +228,74 @@ namespace ZTP
         }
         private void TaskBuilder()
         {
-            foreach(var date in taskEndDateList)
+            // Sprawdź poprawność dat
+            for (int i = 0; i < taskEndDateList.Count; i++)
             {
-                if (date.SelectedDate.HasValue && date.SelectedDate.Value.Date < DateTime.Today)
+                var date = taskEndDateList[i].SelectedDate;
+                if (date.HasValue && date.Value.Date < DateTime.Today)
                 {
-                    //date = BorderBrush =3 itp że zła data
+                    // do dodania
                     return;
                 }
             }
-            // if (inputEndDate.SelectedDate.Value < DateTime.Today)
-            // {
-            //     MessageBox.Show("Data nie może być z przeszłości!");
-            //     return;
-            // }
-            int i = 0;
-            foreach (var textBox in taskTextBoxesList)
+
+            // Dodaj Taski do Buildera
+            for (int i = 0; i < taskTextBoxesList.Count; i++)
             {
-                string text = textBox.Text?.Trim() ?? "";
+                string text = taskTextBoxesList[i].Text?.Trim() ?? "";
                 if (!string.IsNullOrEmpty(text))
                 {
-                    if(taskEndDateList[i].SelectedDate.HasValue)
+                    if (taskEndDateList[i].SelectedDate.HasValue)
                     {
-                      Builder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));  
+                        Builder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));
                     }
-                    else{Builder.AddTaskComponent(new Task(text));}
-                    
+                    else
+                    {
+                        Builder.AddTaskComponent(new Task(text));
+                    }
                 }
-                i++;
             }
 
+            // Ustaw kategorię i tagi w Builderze
+            string selectedCategory = inputCategory.SelectedItem?.ToString();
+            if (!string.IsNullOrWhiteSpace(selectedCategory))
+            {
+                Builder.SetCategory(selectedCategory);
+            }
 
-            // DateTimeOffset? wybranadata = inputEndDate.SelectedDate;
-            // if (wybranadata.HasValue)
-            // {
-            //     DateTime dateOnly = wybranadata.Value.DateTime; // Konwersja na zwykły DateTime
-            // }
+            string tagsInput = inputTags.Text?.Trim();
+            if (!string.IsNullOrWhiteSpace(tagsInput))
+            {
+                Builder.SetTags(tagsInput);
+            }
 
+            // Ustaw priorytet
+            if (inputPriority.SelectedItem is Priorities p)
+            {
+                Builder.SetPriority(p);
+            }
 
-            Builder.BuildTask();
+            // Ustaw nazwę TaskListy
+            if (!string.IsNullOrWhiteSpace(inputTitle.Text))
+            {
+                Builder.SetName(inputTitle.Text.Trim());
+            }
 
-            // Wyczyść pola
+            // Zbuduj Task/TaskList
+            var result = Builder.BuildTask();
+
+            // Wyczyść pola i odśwież widok
             inputTitle.Text = "";
+            inputTags.Text = "";
+            inputCategory.SelectedIndex = -1;
+            inputPriority.SelectedIndex = -1;
+            taskTextBoxesList.Clear();
+            taskEndDateList.Clear();
+            inputTasksSection.Children.Clear();
+
             DisplayGroup(GlobalGroups.AllGroup);
         }
+
 
 
 

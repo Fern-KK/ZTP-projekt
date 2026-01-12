@@ -122,7 +122,7 @@ public class SearchVisitor : IVisitor
                 // Sprawdź opis
                 if (note.Content?.ToLower().Contains(_searchQuery) == true)
                     return true;
-
+                
                 // Sprawdź tagi
                 if (note.Tags.Any(tag => tag.ToLower().Contains(_searchQuery)))
                     return true;

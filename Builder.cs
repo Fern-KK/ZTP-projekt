@@ -39,6 +39,11 @@ public static class Builder
         Tags=selectedTags;
     }
 
+    public static void SetPriority(Priorities selectedPriority)
+    {
+        prioritie=selectedPriority;
+    }
+
     public static string GetName()
     {
         if (string.IsNullOrEmpty(currentName) && components.Count > 0)
@@ -87,26 +92,47 @@ public static class Builder
     
     public static IComponent BuildTask()
     {
-        if (components.Count == 0)
-            return null;
+        if (components.Count == 0) return null;
 
+        // Pojedyńcze zadanie
         if (components.Count == 1 && components.First() is Task result)
         {
             result.SetCategory(Category);
-            result.SetTags(Tags);
+
+            if (!string.IsNullOrWhiteSpace(Tags))
+            {
+                foreach (var t in Tags.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(x => x.Trim().ToLower()))
+                {
+                    result.SetTags(t);
+                }
+            }
+
             result.SetPriority(prioritie);
             Clear();
-            GlobalGroups.AllNotesGroup.Add(result);
+            GlobalGroups.AllTasksGroup.Add(result);
             GlobalGroups.AllGroup.Add(result);
             return result;
         }
 
+        // Lista zadań
         string name = string.IsNullOrEmpty(currentName) ? components.First().Name : currentName;
         var taskList = new TaskList(name);
         taskList.SetCategory(Category);
-        taskList.SetTags(Tags);
+
+        // Ustawianie tagów
+        if (!string.IsNullOrWhiteSpace(Tags))
+        {
+            foreach (var t in Tags.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(x => x.Trim().ToLower()))
+            {
+                taskList.SetTags(t);
+            }
+        }
+
         taskList.SetPriority(prioritie);
 
+        // Dodawanie zadań do listy
         foreach (var component in components)
         {
             switch (component)
@@ -114,18 +140,18 @@ public static class Builder
                 case Task task:
                     taskList.Add(new Task(task));
                     break;
-                
                 case TaskList tl:
                     taskList.Add(new TaskList(tl));
                     break;
             }
         }
-        
+
         Clear();
         GlobalGroups.AllTasksGroup.Add(taskList);
         GlobalGroups.AllGroup.Add(taskList);
         return taskList;
     }
+
     
     public static void Clear()
     {
