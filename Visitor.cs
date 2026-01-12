@@ -29,21 +29,21 @@ public interface IVisitor
 // Visitor dla wyszukiwania
 public class SearchVisitor : IVisitor
 {
-    private string _searchQuery;
-    private List<IComponent> _searchResults = new List<IComponent>();
+    private string SearchQuery;
+    private List<IComponent> SearchResults = new List<IComponent>();
 
     public SearchVisitor(string query)
     {
-        _searchQuery = query.ToLower();
+        SearchQuery = query.ToLower();
     }
 
-    public List<IComponent> GetResults() => _searchResults;
+    public List<IComponent> GetResults() => SearchResults;
 
     public void Visit(Note note)
     {
         if (MatchesSearch(note))
         {
-            _searchResults.Add(note);
+            SearchResults.Add(note);
         }
     }
 
@@ -51,14 +51,14 @@ public class SearchVisitor : IVisitor
     {
         if (MatchesSearch(task))
         {
-            _searchResults.Add(task);
+            SearchResults.Add(task);
         }
     }
 
     public void Visit(TaskList taskList)
     {
         if (MatchesSearch(taskList))
-            _searchResults.Add(taskList);
+            SearchResults.Add(taskList);
 
         // Przeszukaj również podzadania
         var components = taskList.GetType().GetProperty("components")?.GetValue(taskList) as List<ITaskComponent>;
@@ -70,12 +70,12 @@ public class SearchVisitor : IVisitor
                 {
                     case Task t:
                         if (MatchesSearch(t))
-                            _searchResults.Add(taskList);
+                            SearchResults.Add(taskList);
                         break;
 
                     case TaskList tl:
                         if (MatchesSearch(tl))
-                            _searchResults.Add(taskList);
+                            SearchResults.Add(taskList);
                         break;
                 }
             }
@@ -85,7 +85,10 @@ public class SearchVisitor : IVisitor
     public void Visit(Group group)
     {
         if (MatchesSearch(group))
-            _searchResults.Add(group);
+        {
+            SearchResults.Add(group);
+        }
+            
 
         // Przeszukaj elementy grupy
         var components = group.GetComponents();
@@ -104,15 +107,15 @@ public class SearchVisitor : IVisitor
 
     private bool MatchesSearch(IComponent component)
     {
-        if (string.IsNullOrWhiteSpace(_searchQuery))
+        if (string.IsNullOrWhiteSpace(SearchQuery))
             return false;
 
         // Sprawdź nazwę
-        if (component.Name.ToLower().Contains(_searchQuery))
+        if (component.Name.ToLower().Contains(SearchQuery))
             return true;
 
         // Sprawdź kategorię
-        if (component.Category?.ToLower().Contains(_searchQuery) == true)
+        if (component.Category?.ToLower().Contains(SearchQuery) == true)
             return true;
 
         // Sprawdź pola specjalne dla poszczególnych kategorii
@@ -120,17 +123,17 @@ public class SearchVisitor : IVisitor
         {
             case Note note:
                 // Sprawdź opis
-                if (note.Content?.ToLower().Contains(_searchQuery) == true)
+                if (note.Content?.ToLower().Contains(SearchQuery) == true)
                     return true;
                 
                 // Sprawdź tagi
-                if (note.Tags.Any(tag => tag.ToLower().Contains(_searchQuery)))
+                if (note.Tags.Any(tag => tag.ToLower().Contains(SearchQuery)))
                     return true;
                 break;
             
             case ITaskComponent task:
                 // Sprawdź tagi
-                if (task.Tags.Any(tag => tag.ToLower().Contains(_searchQuery)))
+                if (task.Tags.Any(tag => tag.ToLower().Contains(SearchQuery)))
                     return true;
                 break;
         }
@@ -265,7 +268,7 @@ public class StatisticsVisitor : IVisitor
             mainSection.Children.Add(new TextBlock{ Text = "Kategorie:", 
                                                     FontSize = 14, 
                                                     FontWeight = FontWeight.SemiBold, 
-                                                    Margin = new Thickness(0, 20, 0, 5) });
+                                                    Margin = new Thickness(0, 10, 0, 10) });
 
             foreach (var category in CategoryStats.OrderByDescending(x => x.Value))
             {
@@ -278,7 +281,7 @@ public class StatisticsVisitor : IVisitor
             mainSection.Children.Add(new TextBlock { Text = "Tagi:", 
                                                      FontSize = 14, 
                                                      FontWeight = FontWeight.SemiBold, 
-                                                     Margin = new Thickness(0, 20, 0, 5) });
+                                                     Margin = new Thickness(0, 10, 0, 10) });
 
             foreach (var tag in TagStats.OrderByDescending(x => x.Value))
             {

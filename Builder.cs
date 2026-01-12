@@ -93,7 +93,6 @@ public class BuilderNote : IBuilder
     {
         CurrentName = "";
         Content = "";
-        CurrentName = "";
         Category = "";
         Tags = "";
     }
@@ -215,7 +214,6 @@ public class BuilderTask : IBuilder
         Components.Clear();
         CurrentName = "";
         priority = 0;
-        CurrentName = "";
         Category = "";
         Tags = "";
     }
