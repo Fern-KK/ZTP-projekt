@@ -35,6 +35,7 @@ public interface IComponent : IVisitedComponent
 public class Note : IComponent
 {
     public string Name { get; }
+    public int NoteId {get; set;}
     public string Content { get; }
     public DateTime StartDate { get; }
     public List<string> Tags { get; set;} = new List<string>();
@@ -57,6 +58,10 @@ public class Note : IComponent
     public void SetCategory(string category)
     {
         Category=category;
+    }
+    public void SetId(int id)
+    {
+        NoteId = id;
     }
     public void SetTags(List<string> tags)
     {
@@ -203,6 +208,7 @@ public interface ITaskComponent : IComponent
 public class Task : ITaskComponent
 {
     public string Name { get; }
+    public int TaskId {get; set;}
     public DateTime StartDate { get; }
     public DateTime? EndDate { get; }
     public Priorities Priority { get; private set; } = 0;
@@ -250,6 +256,10 @@ public class Task : ITaskComponent
     public void SetPriority(Priorities priority)
     {
         Priority = priority;
+    }
+    public void SetId(int id)
+    {
+        TaskId = id;
     }
     public void SetTags(List<string> tags)
     {
