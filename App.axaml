@@ -13,7 +13,7 @@
         </Style>
 
         <Style Selector="Button.leftMenuButton">
-            <Setter Property="Background" Value="#E6E9EF"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
         </Style>
 

@@ -11,6 +11,7 @@ using System.Text;
 
 namespace ZTP;
 
+// Interfejs obiektu odwiedzanego 
 public interface IVisitedComponent
 {
     void Accept(IVisitor visitor);
@@ -46,7 +47,6 @@ public class SearchVisitor : IVisitor
         {
             _searchResults.Add(note);
         }
-
     }
 
     public void Visit(Task task)

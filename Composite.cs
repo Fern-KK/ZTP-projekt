@@ -68,29 +68,21 @@ public class Note : IComponent
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5,5,10)};
 
         // Tytuł notatki jako TextBox
-        var titleBox = new TextBox{Text = $"📝 {Name}",
-                                   FontSize = 14,
-                                   FontWeight = FontWeight.SemiBold,
-                                   Margin = new Thickness(0, 0, 0, 5),
-                                   IsReadOnly = true,
-                                   BorderThickness = new Thickness(0),
-                                   Background = Brushes.Transparent};
-        mainSection.Children.Add(titleBox);
+        var titleButton = new Button{Content = Name,
+                                     FontSize = 14,
+                                     FontWeight = FontWeight.SemiBold,
+                                     };
+        titleButton.Classes.Add("leftMenuButton");
+        // titleButton.Click += (s, e) => D;
 
-        // Treść notatki
-        if (!string.IsNullOrEmpty(Content))
-        {
-            var contentBox = new TextBox
-            {
-                Text = Content,
-                IsReadOnly = true,
-                TextWrapping = TextWrapping.Wrap,
-                BorderThickness = new Thickness(0),
-                Background = Brushes.Transparent,
-                Margin = new Thickness(10, 0, 0, 0)
-            };
-            mainSection.Children.Add(contentBox);
-        }
+        // var titleBox = new TextBox{Text = Name,
+        //                            FontSize = 14,
+        //                            FontWeight = FontWeight.SemiBold,
+        //                            Margin = new Thickness(0, 0, 0, 5),
+        //                            IsReadOnly = true,
+        //                            BorderThickness = new Thickness(0),
+        //                            Background = Brushes.Transparent};
+        mainSection.Children.Add(titleButton);
 
         // Kategoria
         if (Category != "")
@@ -118,6 +110,21 @@ public class Note : IComponent
                 Margin = new Thickness(10, 0, 0, 0)
             };
             mainSection.Children.Add(tagBox);
+        }
+
+        // Treść notatki
+        if (!string.IsNullOrEmpty(Content))
+        {
+            var contentBox = new TextBox
+            {
+                Text = Content,
+                IsReadOnly = true,
+                TextWrapping = TextWrapping.Wrap,
+                BorderThickness = new Thickness(0),
+                Background = Brushes.Transparent,
+                Margin = new Thickness(10, 0, 0, 0)
+            };
+            mainSection.Children.Add(contentBox);
         }
 
         return mainSection;
