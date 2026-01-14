@@ -76,6 +76,8 @@ public class BuilderNote : IBuilder
         Note note = new Note(GetName(), Content);
         GlobalGroups.AllGroup.Add(note);
         GlobalGroups.AllNotesGroup.Add(note);
+        ServerConnection client = ServerConnection.CreateServerConnection();
+        
         if (Category != null)
         {
             note.SetCategory(Category);
@@ -93,7 +95,7 @@ public class BuilderNote : IBuilder
                 }
             }
         }
-
+        client.NewNote(note);
         Clear();
 
         return this;
@@ -203,6 +205,8 @@ public class BuilderTask : IBuilder
             Clear();
             GlobalGroups.AllTasksGroup.Add(result);
             GlobalGroups.AllGroup.Add(result);
+            ServerConnection client = ServerConnection.CreateServerConnection();
+            client.NewTask(result);
             return this;
         }
 
