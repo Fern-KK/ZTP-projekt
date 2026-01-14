@@ -126,11 +126,6 @@ namespace ZTP
             downSection.Children.Add(leftSide);
             downSection.Children.Add(rightSide);
 
-
-
-            
-            
-
             mainSection.Children.Add(inputTitle);
             mainSection.Children.Add(inputContent);
         
@@ -170,7 +165,7 @@ namespace ZTP
                                        Margin = new Thickness(20)};
             
 
-            inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Watermark="Tytuł listy"};
+            inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Text = taskBuilder.DefaultName()};
 
             taskTextBoxesList = new List<TextBox>();
             inputTasksSection = new StackPanel{Spacing=5};

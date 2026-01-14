@@ -18,39 +18,52 @@ public interface IBuilder
     string Tags { get; set; }
     int Counter { get; set; }
 
-    public void SetName(string s);
-    public void SetCategory(string c);
-    public void SetTags(string t);
-    public void Build();
+    public string GetName();
+    public string DefaultName();
+    public IBuilder SetName(string s);
+    public IBuilder SetCategory(string c);
+    public IBuilder SetTags(string t);
+    public IBuilder Build();
+    public IBuilder Clear();
 }
 
 public class BuilderNote : IBuilder
 {
     public int Counter { get; set; } = 1;
-    public string CurrentName {get; set;} = "";
+    public string CurrentName {get; set; } = "";
     public string Category { get; set; } = "";
     public string Tags { get; set; } = "";
     private string Content = "";
-    public void SetName(string s)
+    public IBuilder SetName(string s)
     {
         CurrentName = s;
+        return this;
     }
 
-    public void SetContent(string s)
+    public IBuilder SetContent(string s)
     {
         Content = s;
+        return this;
     }
-    public void SetCategory(string c)
+    public IBuilder SetCategory(string c)
     {
-        Category=c;    
+        Category=c;
+        return this;
     }
-    public void SetTags(string t)
+    public IBuilder SetTags(string t)
     {
         Tags=t;
+        return this;
     }
 
     public string GetName()
     {
+        if (string.IsNullOrEmpty(CurrentName) || CurrentName == DefaultName())
+        {
+            string NewName = DefaultName();
+            Counter++;
+            return NewName;
+        }
         return CurrentName;
     }
     public string DefaultName()
@@ -58,15 +71,11 @@ public class BuilderNote : IBuilder
         return $"Nowa notatka {Counter}";
     }
 
-    public void Build()
+    public IBuilder Build()
     {
-        Note note = new Note(CurrentName, Content);
+        Note note = new Note(GetName(), Content);
         GlobalGroups.AllGroup.Add(note);
         GlobalGroups.AllNotesGroup.Add(note);
-        if(CurrentName == $"New note {Counter}")
-        {
-            Counter++;
-        }
         if (Category != null)
         {
             note.SetCategory(Category);
@@ -86,64 +95,78 @@ public class BuilderNote : IBuilder
         }
 
         Clear();
+
+        return this;
     }
 
     
-    public void Clear()
+    public IBuilder Clear()
     {
         CurrentName = "";
         Content = "";
         Category = "";
         Tags = "";
+
+        return this;
     }
 }
 
 public class BuilderTask : IBuilder
 {
     private List<IComponent> Components = new List<IComponent>();
-    public string CurrentName {get; set;} = "";
+    public string CurrentName {get; set; } = "";
     public int Counter { get; set; } = 1;
     public string Category { get; set; } = "";
     public string Tags { get; set; } = "";
     private Priorities priority = 0;
     private DateTime endDate;
-    public void SetName(string s)
+    public IBuilder SetName(string s)
     {
         CurrentName = s;
+        return this;
     }
-    public void SetCategory(string c)
+    public IBuilder SetCategory(string c)
     {
-        Category=c;    
+        Category=c;
+        return this;
     }
-    public void SetTags(string t)
+    public IBuilder SetTags(string t)
     {
         Tags=t;
+        return this;
     }
 
-    public void SetPriority(Priorities p)
+    public IBuilder SetPriority(Priorities p)
     {
         priority=p;
+        return this;
     }
 
     public string GetName()
     {
-        if (string.IsNullOrEmpty(CurrentName) && Components.Count > 0)
-            return Components.First().Name;
+        if (string.IsNullOrEmpty(CurrentName) || CurrentName == DefaultName())
+        {
+            string NewName = DefaultName();
+            Counter++;
+            return NewName;
+        }
         return CurrentName;
     }
+
     public string DefaultName()
     {
-        return $"Nowe zadanie {Counter}";
+        return $"Nowa lista zadań {Counter}";
     }
 
-    public void AddTaskComponent(ITaskComponent t)
+    public IBuilder AddTaskComponent(ITaskComponent t)
     {
         Components.Add(t);
+        return this;
     }
     
-    public void Build()
+    public IBuilder Build()
     {
-        if (Components.Count == 0) return;
+        if (Components.Count == 0) return this;
 
         // Pojedyńcze zadanie
         if (Components.Count == 1 && Components.First() is Task result)
@@ -163,17 +186,12 @@ public class BuilderTask : IBuilder
             Clear();
             GlobalGroups.AllTasksGroup.Add(result);
             GlobalGroups.AllGroup.Add(result);
-            return;
+            return this;
         }
 
         // Lista zadań
-        string name = CurrentName;
-        if (!string.IsNullOrEmpty(CurrentName))
-        {
-            name = DefaultName();
-            Counter++;
-        }
-        var taskList = new TaskList(name);
+        // Ustaw nazwę
+        var taskList = new TaskList(GetName());
         taskList.SetCategory(Category);
 
         // Ustawianie tagów
@@ -205,16 +223,18 @@ public class BuilderTask : IBuilder
         Clear();
         GlobalGroups.AllTasksGroup.Add(taskList);
         GlobalGroups.AllGroup.Add(taskList);
-        return;
+        return this;
     }
 
     
-    public void Clear()
+    public IBuilder Clear()
     {
         Components.Clear();
         CurrentName = "";
         priority = 0;
         Category = "";
         Tags = "";
+
+        return this;
     }
 }
