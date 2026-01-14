@@ -158,9 +158,26 @@ public class BuilderTask : IBuilder
         return $"Nowa lista zadań {Counter}";
     }
 
-    public IBuilder AddTaskComponent(ITaskComponent t)
+    public IBuilder AddTaskComponent(ITaskComponent task)
     {
-        Components.Add(t);
+        Components.Add(task);
+        return this;
+    }
+    
+    public IBuilder AddTaskComponent(List<TextBox> tasklist, List<DatePicker> datelist)
+    {
+        // Dodaj Taski do Buildera
+        for (int i = 0; i < tasklist.Count; i++)
+        {
+            string text = tasklist[i].Text?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(text))
+            {
+                if (datelist[i].SelectedDate.HasValue)
+                    Components.Add(new Task(text, datelist[i].SelectedDate.Value.Date));
+                else
+                    Components.Add(new Task(text));
+            }
+        }
         return this;
     }
     

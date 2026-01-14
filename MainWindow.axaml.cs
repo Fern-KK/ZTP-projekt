@@ -238,21 +238,7 @@ namespace ZTP
             }
 
             // Dodaj Taski do Buildera
-            for (int i = 0; i < taskTextBoxesList.Count; i++)
-            {
-                string text = taskTextBoxesList[i].Text?.Trim() ?? "";
-                if (!string.IsNullOrEmpty(text))
-                {
-                    if (taskEndDateList[i].SelectedDate.HasValue)
-                    {
-                        taskBuilder.AddTaskComponent(new Task(text, taskEndDateList[i].SelectedDate.Value.Date));
-                    }
-                    else
-                    {
-                        taskBuilder.AddTaskComponent(new Task(text));
-                    }
-                }
-            }
+            taskBuilder.AddTaskComponent(taskTextBoxesList, taskEndDateList);
 
             // Ustaw kategorię i tagi w Builderze
             string selectedCategory = inputCategory.SelectedItem?.ToString();
