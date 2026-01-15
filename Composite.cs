@@ -31,9 +31,9 @@ public interface IComponent : IVisitedComponent
 
 public class Note : IComponent
 {
-    public string Name { get; }
+    public string Name { get; set;}
     public int NoteId {get; set;}
-    public string Content { get; }
+    public string Content { get; set;}
     public DateTime StartDate { get; }
     public List<string> Tags { get; set;} = new List<string>();
     public string Category { get; set;} = "";
@@ -75,18 +75,10 @@ public class Note : IComponent
         // Tytuł notatki jako TextBox
         var titleButton = new Button{Content = Name,
                                      FontSize = 14,
-                                     FontWeight = FontWeight.SemiBold,
+                                     FontWeight = FontWeight.Bold,
                                      };
         titleButton.Classes.Add("leftMenuButton");
-        // titleButton.Click += (s, e) => D;
-
-        // var titleBox = new TextBox{Text = Name,
-        //                            FontSize = 14,
-        //                            FontWeight = FontWeight.SemiBold,
-        //                            Margin = new Thickness(0, 0, 0, 5),
-        //                            IsReadOnly = true,
-        //                            BorderThickness = new Thickness(0),
-        //                            Background = Brushes.Transparent};
+        titleButton.Click += (s, e) => MainWindow.Instance.EditDisplay(this);
         mainSection.Children.Add(titleButton);
 
         // Kategoria
@@ -141,8 +133,7 @@ public class Note : IComponent
     public StackPanel DisplayDetails()
     {
         var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
-                                         Spacing = 10,
-                                         Margin = new Thickness(20)};
+                                         Spacing = 10};
 
         var inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                                      Text = Name,
@@ -158,11 +149,10 @@ public class Note : IComponent
                                     Foreground = Brushes.Gray,
                                     Background = Brushes.Transparent};
 
-        var saveButton = new Button{Content = "Zapisz",
-                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                                    Width = 120,
-                                    Margin = new Thickness(0, 10, 0, 0)};
-        // saveButton.Click += (s, e) => NoteBuilder();
+        var saveButton = new Button{Content = "Zapisz", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right};
+        saveButton.Click += (s, e) =>{ Name = inputTitle.Text;
+                                       Content = inputContent.Text;
+                                     };
         
         mainSection.Children.Add(inputTitle);
         mainSection.Children.Add(inputContent);
@@ -194,14 +184,14 @@ public interface ITaskComponent : IComponent
 public class Task : ITaskComponent
 {
     public string Name { get; }
-    public int TaskId {get; set;}
+    public int TaskId { get; set; }
     public DateTime StartDate { get; }
     public DateTime? EndDate { get; }
     public Priorities Priority { get; private set; } = 0;
     public bool IsCompleted { get; private set; } = false;
     public bool IsLate { get; private set; } = false;
-    public List<string> Tags { get; set;} = new List<string>();
-    public string Category { get; set;} = "";
+    public List<string> Tags { get; set; } = new List<string>();
+    public string Category { get; set; } = "";
 
     public Task(string name, DateTime endDate)
     {
@@ -236,7 +226,7 @@ public class Task : ITaskComponent
     }
     public void SetTags(List<string> tags)
     {
-        Tags=tags;
+        Tags = tags;
     }
     public void SetTags(string tag)
     {
@@ -263,7 +253,7 @@ public class Task : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
+        var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
@@ -271,26 +261,31 @@ public class Task : ITaskComponent
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Data
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Priorytet
 
-        // Checkbox dla statusu
-        var checkBox = new CheckBox {IsChecked = IsCompleted}; 
-        checkBox.IsCheckedChanged += (s, e) =>
-        {
-            if (checkBox.IsChecked == true)
-                MarkAsCompleted(DateTime.Now);
-        };
-        Grid.SetColumn(checkBox, 0);
-        grid.Children.Add(checkBox);
-
-        // Nazwa zadania
         var nameText = new TextBlock
         {
             Text = Name,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            FontWeight = IsCompleted ? FontWeight.Normal : FontWeight.Bold,
-            TextDecorations = IsCompleted ? TextDecorations.Strikethrough : null
+            Classes = { IsCompleted ? "checkTrue" : "checkFalse" }
         };
         Grid.SetColumn(nameText, 1);
+
+        // Checkbox dla statusu
+        var checkBox = new CheckBox { IsChecked = IsCompleted };
+        checkBox.IsCheckedChanged += (s, e) =>
+        {
+            if (checkBox.IsChecked == true)
+            {
+                MarkAsCompleted(DateTime.Now);
+                // Zmień klasę na checkTrue i usuń checkFalse
+                nameText.Classes.Remove("checkFalse");
+                nameText.Classes.Add("checkTrue");
+            }
+        };
+
+        Grid.SetColumn(checkBox, 0);
+        grid.Children.Add(checkBox);
         grid.Children.Add(nameText);
+
 
         // Data
         if (EndDate != null)
@@ -325,7 +320,7 @@ public class Task : ITaskComponent
         {
             var catText = new TextBlock
             {
-                Text = $"Tagi: {string.Join( ",", Tags.ToArray() )}",
+                Text = $"Tagi: {string.Join(",", Tags.ToArray())}",
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 FontSize = 12,
                 Foreground = Brushes.Gray
@@ -356,7 +351,7 @@ public class Task : ITaskComponent
     {
         return Priority switch
         {
-            Priorities.Important => "⚠️",
+            Priorities.Important => "🔴",
             Priorities.Normal => "🔵",
             Priorities.Low => "⚪",
             _ => ""
@@ -506,33 +501,43 @@ public class TaskList : ITaskComponent
         return statistics;
     }
 
-    public string Report()
-    {
-        int[] stat = this.getStatistics();
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine("\nPodsumowanie zadań:");
-        sb.AppendLine($"Zadania wykonane na czas: {stat[0]}");
-        sb.AppendLine($"Zadania wykonane z opóźnieniem: {stat[1]}");
-        sb.AppendLine($"Zadania oczekujące: {stat[2]}");
-        sb.AppendLine($"Zadania oczekujące z przekroczonym terminem: {stat[3]}");
 
-        return sb.ToString();
-    }
 
     public StackPanel SimpleDisplay(int depth)
     {
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł listy zadań
-        var titleText = new TextBlock
-        {
-            Text = $"📋 {Name}",
-            FontSize = 14,
-            FontWeight = FontWeight.SemiBold,
-            Margin = new Thickness(0, 0, 0, 5)
-        };
+        var grid = new Grid();
+    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
+    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));  // Nazwa
 
-        mainSection.Children.Add(titleText);
+    // Nazwa listy zadań
+    var nameText = new TextBlock
+    {
+        Text = Name,
+        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+        Classes = { IsCompleted ? "checkTrue" : "checkFalse" }
+    };
+    Grid.SetColumn(nameText, 1);
+
+    // Checkbox dla statusu
+    var checkBox = new CheckBox { IsChecked = IsCompleted };
+    checkBox.IsCheckedChanged += (s, e) =>
+    {
+        if (checkBox.IsChecked == true)
+        {
+            MarkAsCompleted(DateTime.Now);
+            nameText.Classes.Remove("checkFalse");
+            nameText.Classes.Add("checkTrue");
+        }
+    };
+
+    Grid.SetColumn(checkBox, 0);
+    grid.Children.Add(checkBox);
+    grid.Children.Add(nameText);
+
+    mainSection.Children.Add(grid);
 
         // Status i informacje
         string infoTextValue;
@@ -661,9 +666,9 @@ public class Group : IComponent
         var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
 
         // Tytuł grupy
-        var titleText = new TextBlock{Text = $"📂 {Name}",
+        var titleText = new TextBlock{Text = Name,
                                       FontSize = 14,
-                                      FontWeight = FontWeight.SemiBold};
+                                      FontWeight = FontWeight.Bold};
         mainSection.Children.Add(titleText);
 
         // Licznik elementów

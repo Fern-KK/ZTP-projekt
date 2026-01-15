@@ -20,11 +20,6 @@ public interface IBuilder
 
     public string GetName();
     public string DefaultName();
-    public IBuilder SetName(string s);
-    public IBuilder SetCategory(string c);
-    public IBuilder SetTags(string t);
-    public IBuilder Build();
-    public IBuilder Clear();
 }
 
 public class BuilderNote : IBuilder
@@ -34,23 +29,23 @@ public class BuilderNote : IBuilder
     public string Category { get; set; } = "";
     public string Tags { get; set; } = "";
     private string Content = "";
-    public IBuilder SetName(string s)
+    public BuilderNote SetName(string s)
     {
         CurrentName = s;
         return this;
     }
 
-    public IBuilder SetContent(string s)
+    public BuilderNote SetContent(string s)
     {
         Content = s;
         return this;
     }
-    public IBuilder SetCategory(string c)
+    public BuilderNote SetCategory(string c)
     {
         Category=c;
         return this;
     }
-    public IBuilder SetTags(string t)
+    public BuilderNote SetTags(string t)
     {
         Tags=t;
         return this;
@@ -71,7 +66,7 @@ public class BuilderNote : IBuilder
         return $"Nowa notatka {Counter}";
     }
 
-    public IBuilder Build()
+    public BuilderNote Build()
     {
         Note note = new Note(GetName(), Content);
         GlobalGroups.AllGroup.Add(note);
@@ -102,7 +97,7 @@ public class BuilderNote : IBuilder
     }
 
     
-    public IBuilder Clear()
+    public BuilderNote Clear()
     {
         CurrentName = "";
         Content = "";
@@ -122,23 +117,23 @@ public class BuilderTask : IBuilder
     public string Tags { get; set; } = "";
     private Priorities priority = 0;
     private DateTime endDate;
-    public IBuilder SetName(string s)
+    public BuilderTask SetName(string s)
     {
         CurrentName = s;
         return this;
     }
-    public IBuilder SetCategory(string c)
+    public BuilderTask SetCategory(string c)
     {
         Category=c;
         return this;
     }
-    public IBuilder SetTags(string t)
+    public BuilderTask SetTags(string t)
     {
         Tags=t;
         return this;
     }
 
-    public IBuilder SetPriority(Priorities p)
+    public BuilderTask SetPriority(Priorities p)
     {
         priority=p;
         return this;
@@ -160,13 +155,13 @@ public class BuilderTask : IBuilder
         return $"Nowa lista zadań {Counter}";
     }
 
-    public IBuilder AddTaskComponent(ITaskComponent task)
+    public BuilderTask AddTaskComponent(ITaskComponent task)
     {
         Components.Add(task);
         return this;
     }
     
-    public IBuilder AddTaskComponent(List<TextBox> tasklist, List<DatePicker> datelist)
+    public BuilderTask AddTaskComponent(List<TextBox> tasklist, List<DatePicker> datelist)
     {
         // Dodaj Taski do Buildera
         for (int i = 0; i < tasklist.Count; i++)
@@ -183,7 +178,7 @@ public class BuilderTask : IBuilder
         return this;
     }
     
-    public IBuilder Build()
+    public BuilderTask Build()
     {
         if (Components.Count == 0) return this;
 
@@ -248,7 +243,7 @@ public class BuilderTask : IBuilder
     }
 
     
-    public IBuilder Clear()
+    public BuilderTask Clear()
     {
         Components.Clear();
         CurrentName = "";

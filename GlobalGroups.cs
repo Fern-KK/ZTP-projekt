@@ -58,6 +58,7 @@ public static class GlobalGroups
         zadanie2.SetCategory("praca");
         AllTasksGroup.Add(zadanie2);
         AllGroup.Add(zadanie2);
+        zadanie2.MarkAsCompleted(new DateTime(2026, 1, 22));
 
         // Zadanie 3 - Zdrowie
         var zadanie3 = new Task("Wizyta u dentysty", new DateTime(2026, 1, 30));

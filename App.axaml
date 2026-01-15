@@ -30,6 +30,23 @@
             <Setter Property="Watermark" Value="Nie może być puste" />
         </Style>
 
+        <!-- Styles for TextBoxes (text section for eneternig user input)  -->
+        <Style Selector="DatePicker.wrongDate">
+            <Setter Property="BorderBrush" Value="Red" />
+            <Setter Property="BorderThickness" Value="3" />
+        </Style>
+
+        <Style Selector="TextBlock.checkTrue">
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="TextDecorations" Value="Strikethrough" />
+            <Setter Property="Foreground" Value="Gray" />
+            
+        </Style>
+
+        <Style Selector="TextBlock.checkFlase">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
         <!-- Styles for Extenders (list of objects that can be extendet by clicking arrow icon)  -->
         <Style Selector="Expander.menuExpander">
             <Setter Property="Background" Value="Transparent"/>

@@ -16,10 +16,23 @@ namespace ZTP
     {
         BuilderNote noteBuilder;
         BuilderTask taskBuilder;
+        public static MainWindow Instance { get; private set; }
+        
+        // Dodaj pola dla kontrolek
+        private TextBox? inputTitle;
+        private TextBox? inputContent;
+        private TextBox? inputTags;
+        private ComboBox? inputCategory;
+        private ComboBox? inputPriority;
+        private Button? saveEditingButton;
+        private StackPanel? inputTasksSection;
+        private List<TextBox>? taskTextBoxesList;
+        private List<DatePicker>? taskEndDateList = new List<DatePicker>();
 
         public MainWindow()
         {
             InitializeComponent();
+            Instance = this;
             GlobalGroups.Initialize();
             noteBuilder = new BuilderNote();
             taskBuilder = new BuilderTask();
@@ -50,6 +63,14 @@ namespace ZTP
             }
         }
 
+        public void EditDisplay(Object o)
+        {
+            if(o is Note note)
+            {
+                Desktop.Content= note.DisplayDetails();
+            }
+        }
+
         private void DisplayGroup(Group group)
         {
             Desktop.Content = group.SimpleDisplay();
@@ -70,17 +91,7 @@ namespace ZTP
             mainSection.Children.Add(button2);
             Desktop.Content = mainSection;
         }
-        
-        // Dodaj pola dla kontrolek
-        private TextBox? inputTitle;
-        private TextBox? inputContent;
-        private TextBox? inputTags;
-        private ComboBox? inputCategory;
-        private ComboBox? inputPriority;
-        private Button? saveEditingButton;
-        private StackPanel? inputTasksSection;
-        private List<TextBox>? taskTextBoxesList;
-        private List<DatePicker>? taskEndDateList = new List<DatePicker>();
+    
         
 
         private void CreateNoteView()
@@ -141,9 +152,7 @@ namespace ZTP
             if (inputCategory.SelectedItem is string category) {noteBuilder.SetCategory(category);}
             if (inputTags.Text is string tag) {noteBuilder.SetTags(tag);}
 
-            noteBuilder.SetName(inputTitle.Text);
-            noteBuilder.SetContent(inputContent.Text?.Trim() ?? "");
-            noteBuilder.Build();
+            noteBuilder.SetName(inputTitle.Text).SetContent(inputContent.Text?.Trim() ?? "").Build();
 
 
             // Wyczyść pola
@@ -197,8 +206,24 @@ namespace ZTP
 
 
 
-            saveEditingButton = new Button{Content = "Zapisz zadania"};
-            saveEditingButton.Click += (s, e) => TaskBuilder();
+            saveEditingButton = new Button { Content = "Zapisz zadania" };
+            saveEditingButton.Click += (s, e) => {   // Sprawdź poprawność dat
+                                                     bool wrongDate = false;
+                                                     for (int i = 0; i < taskEndDateList.Count; i++)
+                                                     {
+                                                         var date = taskEndDateList[i].SelectedDate;
+                                                         if (date.HasValue && date.Value.Date < DateTime.Today)
+                                                         {
+                                                             // do dodania
+                                                             taskEndDateList[i].Classes.Add("wrongDate");
+                                                             wrongDate = true;
+                                                         }
+                                                     }
+                                                     if(wrongDate) {return;}
+                                                     TaskBuilder();
+                                                 };
+
+
 
             var rightSide = new StackPanel{ HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right};
             Grid.SetColumn(rightSide, 1);
@@ -226,47 +251,18 @@ namespace ZTP
         }
         private void TaskBuilder()
         {
-            // Sprawdź poprawność dat
-            for (int i = 0; i < taskEndDateList.Count; i++)
-            {
-                var date = taskEndDateList[i].SelectedDate;
-                if (date.HasValue && date.Value.Date < DateTime.Today)
-                {
-                    // do dodania
-                    return;
-                }
-            }
 
-            // Dodaj Taski do Buildera
-            taskBuilder.AddTaskComponent(taskTextBoxesList, taskEndDateList);
-
-            // Ustaw kategorię i tagi w Builderze
-            string selectedCategory = inputCategory.SelectedItem?.ToString();
-            if (!string.IsNullOrWhiteSpace(selectedCategory))
-            {
-                taskBuilder.SetCategory(selectedCategory);
-            }
-
-            string tagsInput = inputTags.Text?.Trim();
-            if (!string.IsNullOrWhiteSpace(tagsInput))
-            {
-                taskBuilder.SetTags(tagsInput);
-            }
-
-            // Ustaw priorytet
+            // Tworzenie Zadań i List zadań
             if (inputPriority.SelectedItem is Priorities p)
             {
                 taskBuilder.SetPriority(p);
             }
-
-            // Ustaw nazwę TaskListy
-            if (!string.IsNullOrWhiteSpace(inputTitle.Text))
-            {
-                taskBuilder.SetName(inputTitle.Text.Trim());
-            }
-
-            // Zbuduj Task/TaskList
-            taskBuilder.Build();
+            
+            taskBuilder.AddTaskComponent(taskTextBoxesList, taskEndDateList)
+                       .SetCategory(inputCategory.SelectedItem?.ToString())
+                       .SetTags(inputTags.Text?.Trim())
+                       .SetName(inputTitle.Text.Trim())
+                       .Build();
 
             // Wyczyść pola i odśwież widok
             inputTitle.Text = "";
@@ -312,26 +308,6 @@ namespace ZTP
             mainSection.Children.Add(button);
             Desktop.Content = mainSection;
         }
-
-
-
-
-        // private void SaveCategoriesToCloud()
-        // {
-        //     var categories = Categories.GetCategories();
-        //     // Tutaj kod zapisu do chmury (np. do pliku JSON, bazy danych itp.)
-        //     // Przykład: Serializacja do JSON
-        //     var json = System.Text.Json.JsonSerializer.Serialize(categories);
-        //     // Zapisz gdzieś (plik, API, etc.)
-        // }
-
-        // private void LoadCategoriesFromCloud()
-        // {
-        //     // Tutaj kod wczytywania z chmury
-        //     // Przykład: Deserializacja z JSON
-        //     // var json = ... // wczytaj z chmury
-        //     // var categories = System.Text.Json.JsonSerializer.Deserialize<List<Group>>(json);
-        // }
         private void InitializeMenu()
         {
             var mainSectionTag = new StackPanel { };
