@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Globalization;
 using System;
 using System.Collections.Generic;
 namespace ZTP;
@@ -94,7 +95,8 @@ public class ServerConnection
                 .GetProperty("tasks");
             foreach(var task in tasks.EnumerateArray())
             {                
-                var new_task = new Task(task.GetProperty("title").GetString(), task.GetProperty("deadline").GetDateTime());
+                DateTime deadline = DateTime.ParseExact(task.GetProperty("deadline").GetString(),"dd.MM.yyyy",CultureInfo.InvariantCulture);
+                var new_task = new Task(task.GetProperty("title").GetString(), deadline);
                 new_task.SetCategory(task.GetProperty("category").GetString ());
                 new_task.SetTags(task.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
                 var priorityString = task.GetProperty("priority").GetString();
