@@ -87,6 +87,7 @@ public class ServerConnection
                 var new_note = new Note(note.GetProperty("title").GetString(), note.GetProperty("content").GetString());
                 new_note.SetCategory(note.GetProperty("category").GetString());
                 new_note.SetTags(note.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
+                new_note.SetId(note.GetProperty("note_id").GetInt32());
                 GlobalGroups.AllGroup.Add(new_note);
                 GlobalGroups.AllNotesGroup.Add(new_note);
             }
@@ -104,6 +105,7 @@ public class ServerConnection
                     {
                         priority = Priorities.None;
                     }
+                
                 new_task.SetPriority(priority);
                 GlobalGroups.AllGroup.Add(new_task);
                 GlobalGroups.AllTasksGroup.Add(new_task);

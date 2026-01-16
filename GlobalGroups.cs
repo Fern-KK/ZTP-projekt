@@ -368,20 +368,21 @@ public static class GlobalGroups
 
     public static StackPanel Search(string query)
     {
-        var visitor = new SearchVisitor(query);
-        AllGroup.Accept(visitor);
-        
-        var results = visitor.GetResults();
+        string[] queryList = query.Split("+");
         var group = new Group($"Wyniki wyszukiwania: '{query}'");
-        
-        foreach (var result in results)
+        foreach (var q in queryList)
         {
-            group.Add(result);
+            var visitor = new SearchVisitor(q);
+            AllGroup.Accept(visitor);
+            var results = visitor.GetResults();
+            foreach (var result in results)
+            {
+                group.Add(result);
+            }
         }
-        
         return group.SimpleDisplay();
     }
-    
+
     public static StackPanel GetStatistics()
     {
         var visitor = new StatisticsVisitor();
@@ -401,25 +402,6 @@ public static class GlobalGroups
         return visitor.GetUpcomingTasksPanel();
     }
     
-    public static StackPanel GetTasksByPriority(Priorities priority)
-    {
-        var group = new Group($"Zadania z priorytetem: {priority}");
-        var components = AllGroup.GetComponents();
-        
-        foreach (var component in components)
-        {
-            if (component is ITaskComponent taskComponent && taskComponent.Priority == priority)
-            {
-                group.Add(component);
-            }
-            else if (component is Group g)
-            {
-                // Możesz dodać rekurencyjne przeszukiwanie
-            }
-        }
-        
-        return group.SimpleDisplay();
-    }
 }
 
 

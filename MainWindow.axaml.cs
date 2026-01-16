@@ -279,35 +279,6 @@ namespace ZTP
 
 
 
-
-
-
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            Save();
-            // Builder.AddComponent
-        }
-        private void Save()
-        {
-            Desktop.Content = new TextBlock{VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                                            Text = "Zapisywanie..."};
-        }
-        private void Sych_Click(object sender, RoutedEventArgs e)
-        {
-            Save();
-
-            var button = new Button { Content = "Zaloguj się", Name = "BtnLogIn" };
-            // button2.Classes.Add("menuButton"); NIE POTRZEBNY TU STYL TEN, MOZE BYĆ DOMYŚLNY
-            button.Click += (s, e) => Save_Click(s, e);
-
-            var mainSection = new StackPanel{VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                                             Orientation = Avalonia.Layout.Orientation.Horizontal,
-                                             Spacing = 10};
-            mainSection.Children.Add(button);
-            Desktop.Content = mainSection;
-        }
         private void InitializeMenu()
         {
             var mainSectionTag = new StackPanel { };
