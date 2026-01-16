@@ -152,6 +152,8 @@ public class Note : IComponent
         var saveButton = new Button{Content = "Zapisz", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right};
         saveButton.Click += (s, e) =>{ Name = inputTitle.Text;
                                        Content = inputContent.Text;
+                                       ServerConnection client = ServerConnection.CreateServerConnection();
+                                       client.UpdateNote(this, this.NoteId);
                                      };
         
         mainSection.Children.Add(inputTitle);
