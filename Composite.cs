@@ -31,12 +31,12 @@ public interface IComponent : IVisitedComponent
 
 public class Note : IComponent
 {
-    public string Name { get; set;}
-    public int NoteId {get; set;}
-    public string Content { get; set;}
+    public string Name { get; set; }
+    public int NoteId { get; set; }
+    public string Content { get; set; }
     public DateTime StartDate { get; }
-    public List<string> Tags { get; set;} = new List<string>();
-    public string Category { get; set;} = "";
+    public List<string> Tags { get; set; } = new List<string>();
+    public string Category { get; set; } = "";
 
     public Note(string name, string content)
     {
@@ -54,7 +54,7 @@ public class Note : IComponent
 
     public void SetCategory(string category)
     {
-        Category=category;
+        Category = category;
     }
     public void SetId(int id)
     {
@@ -62,7 +62,7 @@ public class Note : IComponent
     }
     public void SetTags(List<string> tags)
     {
-        Tags=tags;
+        Tags = tags;
     }
     public void SetTags(string tag)
     {
@@ -70,13 +70,15 @@ public class Note : IComponent
     }
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
+        var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
         // Tytuł notatki jako TextBox
-        var titleButton = new Button{Content = Name,
-                                     FontSize = 14,
-                                     FontWeight = FontWeight.Bold,
-                                     };
+        var titleButton = new Button
+        {
+            Content = Name,
+            FontSize = 14,
+            FontWeight = FontWeight.Bold,
+        };
         titleButton.Classes.Add("leftMenuButton");
         titleButton.Click += (s, e) => MainWindow.Instance.EditDisplay(this);
         mainSection.Children.Add(titleButton);
@@ -100,7 +102,7 @@ public class Note : IComponent
         {
             var tagBox = new TextBlock
             {
-                Text = $"Tagi: #{string.Join( ", #", Tags.ToArray() )}",
+                Text = $"Tagi: #{string.Join(", #", Tags.ToArray())}",
                 FontSize = 11,
                 Foreground = Brushes.Gray,
                 Background = Brushes.Transparent,
@@ -132,42 +134,97 @@ public class Note : IComponent
     }
     public StackPanel DisplayDetails()
     {
-        var mainSection = new StackPanel{Orientation = Avalonia.Layout.Orientation.Vertical,
-                                         Spacing = 10};
+        var mainSection = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Spacing = 10
+        };
 
-        var inputTitle = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                                     Text = Name,
-                                     AcceptsReturn = true};
+        var inputTitle = new TextBox
+        {
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            Text = Name,
+            AcceptsReturn = true
+        };
 
-        var inputContent = new TextBox{HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                                       MinHeight = 300,
-                                       Text = Content,
-                                       AcceptsReturn = true};
+        var inputContent = new TextBox
+        {
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            MinHeight = 300,
+            Text = Content,
+            AcceptsReturn = true
+        };
+
+        var dateBox = new TextBlock
+        {
+            Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
+            FontSize = 11,
+            Foreground = Brushes.Gray,
+            Background = Brushes.Transparent
+        };
+
         
-        var dateBox = new TextBlock{Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
-                                    FontSize = 11,
-                                    Foreground = Brushes.Gray,
-                                    Background = Brushes.Transparent};
 
-        var saveButton = new Button{Content = "Zapisz", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right};
-        saveButton.Click += (s, e) =>{ Name = inputTitle.Text;
-                                       Content = inputContent.Text;
-                                       ServerConnection client = ServerConnection.CreateServerConnection();
-                                       client.UpdateNote(this, this.NoteId);
-                                     };
-        
+
+
+
+        var downSection = new Grid { ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") };
+
+        var inputCategory = GlobalGroups.SelectableCategoryList();
+        inputCategory.SelectedItem = Category;
+        var inputTags = new TextBox { Text = string.Join(",", Tags) , MaxWidth = 200 };
+        //var inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>() };
+
+        var leftSide = new StackPanel
+        {
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Spacing = 5
+        };
+        Grid.SetColumn(leftSide, 0);
+        leftSide.Children.Add(inputCategory);
+        leftSide.Children.Add(inputTags);
+        //leftSide.Children.Add(inputPriority);
+
+        var saveButton = new Button { Content = "Zapisz", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
+        saveButton.Click += (s, e) =>
+        {
+            Name = inputTitle.Text;
+            Content = inputContent.Text;
+            Category = inputCategory.SelectedItem?.ToString().ToLower().Trim();
+            if(inputTags.Text != string.Join(",", Tags))
+            {
+                string[] tags = inputTags.Text.Split(',');
+                foreach(var t in tags)
+                {
+                    t.Trim().ToLower();
+                    if(t != null) SetTags(t);
+                }
+            }
+            ServerConnection client = ServerConnection.CreateServerConnection();
+            client.UpdateNote(this, this.NoteId);
+        };
+
+
+        var rightSide = new StackPanel { HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
+        Grid.SetColumn(rightSide, 1);
+        rightSide.Children.Add(saveButton);
+
+        downSection.Children.Add(leftSide);
+        downSection.Children.Add(rightSide);
+
         mainSection.Children.Add(inputTitle);
         mainSection.Children.Add(inputContent);
         mainSection.Children.Add(dateBox);
-        mainSection.Children.Add(saveButton);
+        mainSection.Children.Add(downSection);
         return mainSection;
     }
-    
+
     public void Accept(IVisitor visitor) //for Visitor use
     {
         visitor.Visit(this);
     }
-    
+
 }
 
 public interface ITaskComponent : IComponent
@@ -381,8 +438,8 @@ public class TaskList : ITaskComponent
 {
     public string Name { get; }
     public List<ITaskComponent> components { get; set; } = new List<ITaskComponent>();
-    public List<string> Tags { get; set;} = new List<string>();
-    public string Category { get; set;} = "";
+    public List<string> Tags { get; set; } = new List<string>();
+    public string Category { get; set; } = "";
 
     public DateTime StartDate
     {
@@ -464,7 +521,7 @@ public class TaskList : ITaskComponent
 
     public void SetTags(List<string> tags)
     {
-        Tags=tags;
+        Tags = tags;
     }
     public void SetTags(string tag)
     {
@@ -507,39 +564,39 @@ public class TaskList : ITaskComponent
 
     public StackPanel SimpleDisplay(int depth)
     {
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
+        var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
         // Tytuł listy zadań
         var grid = new Grid();
-    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
-    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));  // Nazwa
+        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
+        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));  // Nazwa
 
-    // Nazwa listy zadań
-    var nameText = new TextBlock
-    {
-        Text = Name,
-        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-        Classes = { IsCompleted ? "checkTrue" : "checkFalse" }
-    };
-    Grid.SetColumn(nameText, 1);
-
-    // Checkbox dla statusu
-    var checkBox = new CheckBox { IsChecked = IsCompleted };
-    checkBox.IsCheckedChanged += (s, e) =>
-    {
-        if (checkBox.IsChecked == true)
+        // Nazwa listy zadań
+        var nameText = new TextBlock
         {
-            MarkAsCompleted(DateTime.Now);
-            nameText.Classes.Remove("checkFalse");
-            nameText.Classes.Add("checkTrue");
-        }
-    };
+            Text = Name,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Classes = { IsCompleted ? "checkTrue" : "checkFalse" }
+        };
+        Grid.SetColumn(nameText, 1);
 
-    Grid.SetColumn(checkBox, 0);
-    grid.Children.Add(checkBox);
-    grid.Children.Add(nameText);
+        // Checkbox dla statusu
+        var checkBox = new CheckBox { IsChecked = IsCompleted };
+        checkBox.IsCheckedChanged += (s, e) =>
+        {
+            if (checkBox.IsChecked == true)
+            {
+                MarkAsCompleted(DateTime.Now);
+                nameText.Classes.Remove("checkFalse");
+                nameText.Classes.Add("checkTrue");
+            }
+        };
 
-    mainSection.Children.Add(grid);
+        Grid.SetColumn(checkBox, 0);
+        grid.Children.Add(checkBox);
+        grid.Children.Add(nameText);
+
+        mainSection.Children.Add(grid);
 
         // Status i informacje
         string infoTextValue;
@@ -552,7 +609,7 @@ public class TaskList : ITaskComponent
             Text = infoTextValue,
             FontSize = 12,
             Foreground = Brushes.Gray,
-            Margin = new Thickness(10*depth, 0, 0, 0)
+            Margin = new Thickness(10 * depth, 0, 0, 0)
         };
         mainSection.Children.Add(infoText);
 
@@ -564,7 +621,7 @@ public class TaskList : ITaskComponent
                 Text = $"Kategoria: {Category}",
                 FontSize = 12,
                 Foreground = Brushes.Gray,
-                Margin = new Thickness(10*depth, 0, 0, 0)
+                Margin = new Thickness(10 * depth, 0, 0, 0)
             };
             mainSection.Children.Add(catText);
         }
@@ -574,18 +631,18 @@ public class TaskList : ITaskComponent
         {
             var tagText = new TextBlock
             {
-                Text = $"Tagi: #{string.Join( ", #", Tags.ToArray())}",
+                Text = $"Tagi: #{string.Join(", #", Tags.ToArray())}",
                 FontSize = 12,
                 Foreground = Brushes.Gray,
-                Margin = new Thickness(10*depth, 0, 0, 0)
+                Margin = new Thickness(10 * depth, 0, 0, 0)
             };
             mainSection.Children.Add(tagText);
         }
 
         // Zadania w liście
-        foreach(var c in components)
+        foreach (var c in components)
         {
-            mainSection.Children.Add(c.SimpleDisplay(depth+1));
+            mainSection.Children.Add(c.SimpleDisplay(depth + 1));
         }
         return mainSection;
     }
@@ -665,25 +722,31 @@ public class Group : IComponent
     public StackPanel SimpleDisplay(int depth)
     {
 
-        var mainSection = new StackPanel{ Margin = new Thickness(10*depth, 5, 5, 10) };
+        var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
         // Tytuł grupy
-        var titleText = new TextBlock{Text = Name,
-                                      FontSize = 14,
-                                      FontWeight = FontWeight.Bold};
+        var titleText = new TextBlock
+        {
+            Text = Name,
+            FontSize = 14,
+            FontWeight = FontWeight.Bold
+        };
         mainSection.Children.Add(titleText);
 
         // Licznik elementów
-        var counterText = new TextBlock{Text = $"({Count()} elementów)",
-                                        FontSize = 12,
-                                        Foreground = Brushes.Gray,
-                                        Margin = new Thickness(10, 0, 0, 10)};
+        var counterText = new TextBlock
+        {
+            Text = $"({Count()} elementów)",
+            FontSize = 12,
+            Foreground = Brushes.Gray,
+            Margin = new Thickness(10, 0, 0, 10)
+        };
         mainSection.Children.Add(counterText);
 
         // Elementy grupy
-        foreach(var c in components)
+        foreach (var c in components)
         {
-            mainSection.Children.Add(c.SimpleDisplay(depth+1));
+            mainSection.Children.Add(c.SimpleDisplay(depth + 1));
         }
         return mainSection;
     }
