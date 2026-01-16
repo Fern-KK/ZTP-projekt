@@ -4,7 +4,7 @@ Aplikacja umożliwia użytkownikowi tworzenie, edytowanie i organizowanie notate
 #### Autorzy
 - [@Fern-KK](https://github.com/Fern-KK)
 - [@hiko667](https://github.com/hiko667) 
-- [@Marchewer]([pb.edu.pl](https://github.com/Marchewer))
+- [@Marchewer](https://github.com/Marchewer)
 
 
 
