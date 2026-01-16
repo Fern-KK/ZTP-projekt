@@ -114,12 +114,10 @@ public class Note : IComponent
         // Treść notatki
         if (!string.IsNullOrEmpty(Content))
         {
-            var contentBox = new TextBox
+            var contentBox = new TextBlock
             {
                 Text = Content,
-                IsReadOnly = true,
                 TextWrapping = TextWrapping.Wrap,
-                BorderThickness = new Thickness(0),
                 Background = Brushes.Transparent,
                 Margin = new Thickness(10, 0, 0, 0)
             };
