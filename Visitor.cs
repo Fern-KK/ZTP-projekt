@@ -325,39 +325,39 @@ public class StatisticsVisitor : IVisitor
 // Visitor dla raportu zbliżających się terminów
 public class UpcomingDeadlinesVisitor : IVisitor
 {
-    private DateTime _startDate;
-    private DateTime _endDate;
-    private List<ITaskComponent> _upcomingTasks = new List<ITaskComponent>();
+    private DateTime StartDate;
+    private DateTime EndDate;
+    private List<ITaskComponent> UpcomingTasks = new List<ITaskComponent>();
 
     public UpcomingDeadlinesVisitor(DateTime startDate, DateTime endDate)
     {
-        _startDate = startDate;
-        _endDate = endDate;
+        StartDate = startDate;
+        EndDate = endDate;
     }
 
-    public List<ITaskComponent> GetUpcomingTasks() => _upcomingTasks;
+    public List<ITaskComponent> GetUpcomingTasks() => UpcomingTasks;
 
     public void Visit(Note note) { }
 
     public void Visit(Task task)
     {
         if (task.EndDate.HasValue &&
-            task.EndDate.Value.Date >= _startDate.Date &&
-            task.EndDate.Value.Date <= _endDate.Date &&
+            task.EndDate.Value.Date >= StartDate.Date &&
+            task.EndDate.Value.Date <= EndDate.Date &&
             !task.IsCompleted)
         {
-            _upcomingTasks.Add(task);
+            UpcomingTasks.Add(task);
         }
     }
 
     public void Visit(TaskList taskList)
     {
         if (taskList.EndDate.HasValue &&
-            taskList.EndDate.Value.Date >= _startDate.Date &&
-            taskList.EndDate.Value.Date <= _endDate.Date &&
+            taskList.EndDate.Value.Date >= StartDate.Date &&
+            taskList.EndDate.Value.Date <= EndDate.Date &&
             !taskList.IsCompleted)
         {
-            _upcomingTasks.Add(taskList);
+            UpcomingTasks.Add(taskList);
         }
 
         // Sprawdź podzadania
@@ -394,13 +394,13 @@ public class UpcomingDeadlinesVisitor : IVisitor
 
         panel.Children.Add(new TextBlock
         {
-            Text = $"📅 Zadania na okres {_startDate:dd.MM.yyyy} - {_endDate:dd.MM.yyyy}",
+            Text = $"📅 Zadania na okres {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}",
             FontSize = 18,
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
-        if (_upcomingTasks.Count == 0)
+        if (UpcomingTasks.Count == 0)
         {
             panel.Children.Add(new TextBlock
             {
@@ -411,7 +411,7 @@ public class UpcomingDeadlinesVisitor : IVisitor
             return panel;
         }
 
-        var sortedTasks = _upcomingTasks
+        var sortedTasks = UpcomingTasks
             .OrderBy(t => t.EndDate)
             .ThenBy(t => t is TaskList ? 0 : 1)
             .ThenBy(t => t.Name);
@@ -434,20 +434,11 @@ public class UpcomingDeadlinesVisitor : IVisitor
             Background = task is TaskList ? Brushes.AliceBlue : Brushes.Transparent,
         };
 
-        string icon = task is TaskList ? "📋" : "✅";
         string type = task is TaskList ? "Lista" : "Zadanie";
 
         row.Children.Add(new TextBlock
         {
-            Text = icon,
-            FontSize = 14,
-            Width = 30
-        });
-
-        row.Children.Add(new TextBlock
-        {
             Text = task.Name,
-            FontSize = 12,
             FontWeight = FontWeight.SemiBold,
             Width = 200,
             TextWrapping = TextWrapping.Wrap

@@ -136,20 +136,24 @@ public class Note : IComponent
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Spacing = 10
+            
         };
 
         var inputTitle = new TextBox
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             Text = Name,
+            Margin =  new Thickness(0,0,10,0),
             AcceptsReturn = true
         };
 
         var inputContent = new TextBox
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            MinHeight = 300,
+            MinHeight = 200,
             Text = Content,
+            Margin =  new Thickness(0,0,10,0),
+            TextWrapping = TextWrapping.Wrap,
             AcceptsReturn = true
         };
 
