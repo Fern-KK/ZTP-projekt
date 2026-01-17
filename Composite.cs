@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +12,7 @@ using System.Text;
 
 namespace ZTP;
 
+// Poziomy ważności dla zadań
 public enum Priorities
 {
     None,
@@ -19,6 +21,7 @@ public enum Priorities
     Important
 }
 
+// Podstawowy interfejs dla wszystkich elementów systemu (notatek, zadań, grup)
 public interface IComponent : IVisitedComponent
 {
     string Name { get; }
@@ -29,6 +32,7 @@ public interface IComponent : IVisitedComponent
     StackPanel SimpleDisplay();
 }
 
+// Pojedyncza notatka
 public class Note : IComponent
 {
     public string Name { get; set; }
@@ -38,6 +42,7 @@ public class Note : IComponent
     public List<string> Tags { get; set; } = new List<string>();
     public string Category { get; set; } = "";
 
+    // Konstruktory
     public Note(string name, string content)
     {
         Name = name;
@@ -52,27 +57,18 @@ public class Note : IComponent
         StartDate = other.StartDate;
     }
 
-    public void SetCategory(string category)
-    {
-        Category = category;
-    }
-    public void SetId(int id)
-    {
-        NoteId = id;
-    }
-    public void SetTags(List<string> tags)
-    {
-        Tags = tags;
-    }
-    public void SetTags(string tag)
-    {
-        Tags.Add(tag);
-    }
+    // Metody modyfikujące stan notatki
+    public void SetCategory(string category) => Category = category;
+    public void SetId(int id) => NoteId = id;
+    public void SetTags(List<string> tags) => Tags = tags;
+    public void SetTags(string tag) => Tags.Add(tag);
+
+    // Uproszczony podgląd notatki do wyświetlenia na liście
     public StackPanel SimpleDisplay(int depth)
     {
         var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
-        // Tytuł notatki jako TextBox
+        // Przycisk z tytułem
         var titleButton = new Button
         {
             Content = Name,
@@ -83,135 +79,67 @@ public class Note : IComponent
         titleButton.Click += (s, e) => MainWindow.Instance.EditDisplay(this);
         mainSection.Children.Add(titleButton);
 
-        // Kategoria
-        if (Category != "")
-        {
-            var catBox = new TextBlock
-            {
-                Text = $"Kategoria: {Category}",
-                FontSize = 11,
-                Foreground = Brushes.Gray,
-                Background = Brushes.Transparent,
-                Margin = new Thickness(10, 0, 0, 0)
-            };
-            mainSection.Children.Add(catBox);
-        }
-
-        // Tagi
+        // Wyświetlanie kategorii i tagów (jeśli istnieją)
+        if (Category != "" && Category != null)
+            mainSection.Children.Add(new TextBlock { Text = $"Kategoria: {Category}", FontSize = 11, Foreground = Brushes.Gray, Margin = new Thickness(10, 0, 0, 0) });
         if (Tags.Count > 0)
-        {
-            var tagBox = new TextBlock
-            {
-                Text = $"Tagi: #{string.Join(", #", Tags.ToArray())}",
-                FontSize = 11,
-                Foreground = Brushes.Gray,
-                Background = Brushes.Transparent,
-                Margin = new Thickness(10, 0, 0, 0)
-            };
-            mainSection.Children.Add(tagBox);
-        }
+            mainSection.Children.Add(new TextBlock { Text = $"Tagi: #{string.Join(", #", Tags)}", FontSize = 11, Foreground = Brushes.Gray, Margin = new Thickness(10, 0, 0, 0) });
 
-        // Treść notatki
+        // Krótki podgląd treści
         if (!string.IsNullOrEmpty(Content))
-        {
-            var contentBox = new TextBlock
-            {
-                Text = Content,
-                TextWrapping = TextWrapping.Wrap,
-                Background = Brushes.Transparent,
-                Margin = new Thickness(10, 0, 0, 0)
-            };
-            mainSection.Children.Add(contentBox);
-        }
+            mainSection.Children.Add(new TextBlock { Text = Content, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(10, 0, 0, 0) });
 
         return mainSection;
     }
-    public StackPanel SimpleDisplay()
-    {
-        return SimpleDisplay(1);
-    }
+    public StackPanel SimpleDisplay() => SimpleDisplay(1);
+    
+    // Pełny formularz edycji notatki z polami wejściowymi i przyciskiem zapisu
     public StackPanel DisplayDetails()
     {
-        var mainSection = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            Spacing = 10
-            
-        };
+        var mainSection = new StackPanel { Spacing = 10 };
 
-        var inputTitle = new TextBox
-        {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            Text = Name,
-            Margin =  new Thickness(0,0,10,0),
-            AcceptsReturn = true
-        };
+        var inputTitle = new TextBox { Text = Name, AcceptsReturn = true };
+        var inputContent = new TextBox { MinHeight = 200, Text = Content, TextWrapping = TextWrapping.Wrap, AcceptsReturn = true };
+        var dateBox = new TextBlock { Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}", FontSize = 11, Foreground = Brushes.Gray };
 
-        var inputContent = new TextBox
-        {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            MinHeight = 200,
-            Text = Content,
-            Margin =  new Thickness(0,0,10,0),
-            TextWrapping = TextWrapping.Wrap,
-            AcceptsReturn = true
-        };
-
-        var dateBox = new TextBlock
-        {
-            Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
-            FontSize = 11,
-            Foreground = Brushes.Gray,
-            Background = Brushes.Transparent
-        };
-
-        
-
-
-
-
+        // Sekcja dolna - kategoria, tagi i przycisk zapisu
         var downSection = new Grid { ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") };
-
         var inputCategory = GlobalGroups.SelectableCategoryList();
         inputCategory.SelectedItem = Category;
-        var inputTags = new TextBox { Text = string.Join(",", Tags) , MaxWidth = 200 };
-        //var inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>() };
+        var inputTags = new TextBox { Text = string.Join(",", Tags), MaxWidth = 200 };
 
-        var leftSide = new StackPanel
-        {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            Spacing = 5
-        };
-        Grid.SetColumn(leftSide, 0);
+        var leftSide = new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal, Spacing = 5 };
         leftSide.Children.Add(inputCategory);
         leftSide.Children.Add(inputTags);
-        //leftSide.Children.Add(inputPriority);
 
+       // Obsługa zapisu i aktualizacji serwera
         var saveButton = new Button { Content = "Zapisz", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
         saveButton.Click += (s, e) =>
         {
             Name = inputTitle.Text;
             Content = inputContent.Text;
             Category = inputCategory.SelectedItem?.ToString().ToLower().Trim();
-            if(inputTags.Text != string.Join(",", Tags))
+            
+            // Logika aktualizacji tagów
+            if (inputTags.Text != string.Join(",", Tags))
             {
+                Tags.Clear();
                 string[] tags = inputTags.Text.Split(',');
-                foreach(var t in tags)
+                foreach (var t in tags)
                 {
-                    t.Trim().ToLower();
-                    if(t != null) SetTags(t);
+                    if(!string.IsNullOrWhiteSpace(t)) SetTags(t.Trim().ToLower());
                 }
             }
-            ServerConnection client = ServerConnection.CreateServerConnection();
-            client.UpdateNote(this, this.NoteId);
+            
+            ServerConnection.CreateServerConnection().UpdateNote(this, this.NoteId);
+            UIManager.DisplayGroup(GlobalGroups.AllGroup);      // Powrót do widoku głównego
         };
 
-
         var rightSide = new StackPanel { HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
-        Grid.SetColumn(rightSide, 1);
         rightSide.Children.Add(saveButton);
 
+        Grid.SetColumn(leftSide, 0);
+        Grid.SetColumn(rightSide, 1);
         downSection.Children.Add(leftSide);
         downSection.Children.Add(rightSide);
 
@@ -219,29 +147,30 @@ public class Note : IComponent
         mainSection.Children.Add(inputContent);
         mainSection.Children.Add(dateBox);
         mainSection.Children.Add(downSection);
+
         return mainSection;
     }
 
-    public void Accept(IVisitor visitor) //for Visitor use
-    {
-        visitor.Visit(this);
-    }
-
+    public void Accept(IVisitor visitor) => visitor.Visit(this);
 }
 
+// Interfejs rozszerzający komponent o dodatkowe funkcjonalności zadań
 public interface ITaskComponent : IComponent
 {
     DateTime? EndDate { get; }
     bool IsCompleted { get; }
     bool IsLate { get; }
     Priorities Priority { get; }
-    public void MarkAsCompleted(DateTime completionDate);
-    public string GetStatus();
+    void MarkAsCompleted(DateTime completionDate);
+    void MarkAsIncomplete();
+    string GetStatus();
     void SetPriority(Priorities priority);
-    public void SetTags(string tag);
-    public void SetCategory(string category);
+    void SetTags(string tag);
+    void SetTags(List<string> tags);
+    void SetCategory(string category);
 }
 
+// Pojedyncze zadanie do wykonania
 public class Task : ITaskComponent
 {
     public string Name { get; }
@@ -251,8 +180,8 @@ public class Task : ITaskComponent
     public Priorities Priority { get; private set; } = 0;
     public bool IsCompleted { get; private set; } = false;
     public bool IsLate { get; private set; } = false;
-    public List<string> Tags { get; set; } = new List<string>();
     public string Category { get; set; } = "";
+    public List<string> Tags { get; set; } = new List<string>();
 
     public Task(string name, DateTime endDate)
     {
@@ -277,89 +206,58 @@ public class Task : ITaskComponent
         IsCompleted = other.IsCompleted;
         IsLate = other.IsLate;
     }
-    public void SetPriority(Priorities priority)
-    {
-        Priority = priority;
-    }
-    public void SetId(int id)
-    {
-        TaskId = id;
-    }
-    public void SetTags(List<string> tags)
-    {
-        Tags = tags;
-    }
-    public void SetTags(string tag)
-    {
-        Tags.Add(tag);
-    }
-
-    public void SetCategory(string category)
-    {
-        Category = category;
-    }
+    public void SetPriority(Priorities priority) => Priority = priority;
+    public void SetId(int id) => TaskId = id;
+    public void SetTags(string tag) => Tags.Add(tag);
+    public void SetTags(List<string> tags) => Tags = tags;
+    public void SetCategory(string category) => Category = category;
 
     public void MarkAsCompleted(DateTime completionDate)
     {
         IsCompleted = true;
         IsLate = completionDate > EndDate;
     }
+    public void MarkAsIncomplete() => IsCompleted = false;
 
-    public string GetStatus()
-    {
-        if (IsCompleted)
-            return IsLate ? "[Completed Late]" : "[Completed]";
-        return "[Pending]";
-    }
+    public string GetStatus() => IsCompleted ? (IsLate ? "[Spóźnione, zakończone]" : "[Zakończone]") : "[W toku]";
 
+    // Wyświetla zadanie z Checkboxem i ikoną priorytetu
     public StackPanel SimpleDisplay(int depth)
     {
         var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
-        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));  // Nazwa
+        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star)); // Nazwa
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Data
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Priorytet
 
-        var nameText = new TextBlock
-        {
-            Text = Name,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Classes = { IsCompleted ? "checkTrue" : "checkFalse" }
-        };
+        var nameText = new TextBlock { Text = Name, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Classes = { IsCompleted ? "checkTrue" : "checkFalse" } };
         Grid.SetColumn(nameText, 1);
 
         // Checkbox dla statusu
         var checkBox = new CheckBox { IsChecked = IsCompleted };
+        checkBox.Classes.Add("taskCheckbox");
         checkBox.IsCheckedChanged += (s, e) =>
         {
-            if (checkBox.IsChecked == true)
-            {
-                MarkAsCompleted(DateTime.Now);
-                // Zmień klasę na checkTrue i usuń checkFalse
-                nameText.Classes.Remove("checkFalse");
-                nameText.Classes.Add("checkTrue");
-            }
+            bool isDone = checkBox.IsChecked == true;
+            if (isDone) MarkAsCompleted(DateTime.Now);
+            else MarkAsIncomplete();
+
+            // Aktualizacja wyglądu
+            nameText.Classes.Set("checkTrue", isDone);
+            nameText.Classes.Set("checkFalse", !isDone);
         };
 
         Grid.SetColumn(checkBox, 0);
         grid.Children.Add(checkBox);
         grid.Children.Add(nameText);
 
-
         // Data
         if (EndDate != null)
         {
-            var dateText = new TextBlock
-            {
-                Text = $"({EndDate:dd.MM.yyyy})",
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                FontSize = 12,
-                Foreground = Brushes.Gray
-            };
+            var dateText = new TextBlock { Text = $"({EndDate:dd.MM.yyyy})", VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, FontSize = 12, Foreground = Brushes.Gray };
             Grid.SetColumn(dateText, 2);
-
             grid.Children.Add(dateText);
         }
 
@@ -403,10 +301,7 @@ public class Task : ITaskComponent
         mainSection.Children.Add(grid);
         return mainSection;
     }
-    public StackPanel SimpleDisplay()
-    {
-        return SimpleDisplay(1);
-    }
+    public StackPanel SimpleDisplay() => SimpleDisplay(1);
 
     private string GetPriorityIcon()
     {
@@ -418,129 +313,47 @@ public class Task : ITaskComponent
             _ => ""
         };
     }
-    public void Accept(IVisitor visitor) //for Visitor use
-    {
-        visitor.Visit(this);
-    }
+    public void Accept(IVisitor visitor) => visitor.Visit(this);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+// Lista zadań do wykonania
 public class TaskList : ITaskComponent
 {
     public string Name { get; }
     public List<ITaskComponent> components { get; set; } = new List<ITaskComponent>();
     public List<string> Tags { get; set; } = new List<string>();
     public string Category { get; set; } = "";
-
-    public DateTime StartDate
-    {
-        get
-        {
-            if (components.Count == 0)
-                return DateTime.MinValue;
-            return components.Min(component => component.StartDate);
-        }
-    }
-
-    public DateTime? EndDate
-    {
-        get
-        {
-            if (components.Count == 0)
-                return DateTime.MaxValue;
-            return components.Min(component => component.EndDate);
-        }
-    }
-
-    public bool IsCompleted
-    {
-        get
-        {
-            return components.Count > 0 && components.All(component => component.IsCompleted);
-        }
-    }
-
-    public bool IsLate
-    {
-        get
-        {
-            return components.Count > 0 && components.Any(component => component.IsLate);
-        }
-    }
-
-    public Priorities Priority { get; private set; } = 0;
+    public DateTime StartDate => components.Count == 0 ? DateTime.MinValue : components.Min(c => c.StartDate);
+    public DateTime? EndDate => components.Count == 0 ? DateTime.MaxValue : components.Min(c => c.EndDate);
+    public bool IsCompleted => components.Count > 0 && components.All(c => c.IsCompleted);
+    public bool IsLate => components.Any(c => c.IsLate);
+    public Priorities Priority { get; private set; } = Priorities.None;
 
     public TaskList(string name)
     {
         Name = name;
     }
-
     public TaskList(string name, List<ITaskComponent> list)
     {
         Name = name;
         components = list;
     }
-
     public TaskList(TaskList other)
     {
         Name = other.Name;
         components = other.components;
     }
 
-    public void Add(ITaskComponent component)
-    {
-        components.Add(component);
-    }
+    public void Add(ITaskComponent component) => components.Add(component);
+    public void MarkAsCompleted(DateTime completionDate) => components.ForEach(c => c.MarkAsCompleted(completionDate));
+    public void MarkAsIncomplete() => components.ForEach(c => c.MarkAsIncomplete());
+    public string GetStatus() => IsCompleted ? (IsLate ? "[Spóźnione, zakończone]" : "[Zakończone]") : "[W toku]";
+    public void SetPriority(Priorities priority) => Priority = priority;
 
-    public void Remove(ITaskComponent component)
-    {
-        components.Remove(component);
-    }
+    public void SetTags(string tag) => Tags.Add(tag);
+    public void SetTags(List<string> tags) => Tags = tags;
+    public void SetCategory(string category) => Category = category;
 
-    public void SetPriority(Priorities priority)
-    {
-        Priority = priority;
-    }
-
-    public void MarkAsCompleted(DateTime completionDate)
-    {
-        foreach (var component in components)
-        {
-            component.MarkAsCompleted(completionDate);
-        }
-    }
-
-    public void SetTags(List<string> tags)
-    {
-        Tags = tags;
-    }
-    public void SetTags(string tag)
-    {
-        Tags.Add(tag);
-    }
-
-    public void SetCategory(string category)
-    {
-        Category = category;
-    }
-
-    public string GetStatus()
-    {
-        if (IsCompleted)
-            return IsLate ? "[Completed Late]" : "[Completed]";
-        return "[Pending]";
-    }
     private int[] getStatistics()
     {
         int[] statistics = new int[4] {
@@ -562,8 +375,31 @@ public class TaskList : ITaskComponent
         return statistics;
     }
 
+    // Pomocnicza metoda do aktualizacji zadań w liście
+    private void UpdateChildrenStyles(StackPanel container, bool isDone)
+    {
+        // Szukanie wszystkich TextBlocków do dynamicznego aktualizowania UI
+        var descendants = container.GetVisualDescendants();
+        foreach (var textBlock in descendants.OfType<TextBlock>())
+        {
+            if (textBlock.Classes.Contains("taskNameLabel"))
+            {
+                textBlock.Classes.Set("checkTrue", isDone);
+                textBlock.Classes.Set("checkFalse", !isDone);
+            }
+        }
+        // To samo dla checkboxów
+        foreach (var checkBox in descendants.OfType<CheckBox>())
+        {
+            if (checkBox.Classes.Contains("taskCheckbox"))
+            {
+                if (checkBox.IsChecked != isDone)
+                    checkBox.IsChecked = isDone;
+            }
+        }
+    }
 
-
+    // Wyświetla listę zadań oraz wszystkie zadania wewnątrz niej
     public StackPanel SimpleDisplay(int depth)
     {
         var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
@@ -571,7 +407,7 @@ public class TaskList : ITaskComponent
         // Tytuł listy zadań
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
-        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));  // Nazwa
+        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star)); // Nazwa
 
         // Nazwa listy zadań
         var nameText = new TextBlock
@@ -582,16 +418,43 @@ public class TaskList : ITaskComponent
         };
         Grid.SetColumn(nameText, 1);
 
+        // Status i informacje
+        var infoText = new TextBlock
+        {
+            FontSize = 12,
+            Foreground = Brushes.Gray,
+            Margin = new Thickness(10 * depth, 0, 0, 0)
+        };
+
+        // Dynamiczna aktualizacja statusu
+        void RefreshStatusLabel()
+        {
+            infoText.Text = EndDate.HasValue && EndDate != DateTime.MaxValue
+                ? $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}"
+                : $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy}";
+        }
+
+        RefreshStatusLabel();
+
         // Checkbox dla statusu
         var checkBox = new CheckBox { IsChecked = IsCompleted };
+        checkBox.Classes.Add("taskCheckbox");
         checkBox.IsCheckedChanged += (s, e) =>
         {
-            if (checkBox.IsChecked == true)
+            bool isDone = checkBox.IsChecked == true;
+
+            if (checkBox.IsPressed || checkBox.IsFocused)
             {
-                MarkAsCompleted(DateTime.Now);
-                nameText.Classes.Remove("checkFalse");
-                nameText.Classes.Add("checkTrue");
+                if (isDone) MarkAsCompleted(DateTime.Now);
+                else MarkAsIncomplete();
+
+                UpdateChildrenStyles(mainSection, isDone);
             }
+
+            // Zmiana wizualna checkboxa rodzica
+            nameText.Classes.Set("checkTrue", isDone);
+            nameText.Classes.Set("checkFalse", !isDone);
+            RefreshStatusLabel();
         };
 
         Grid.SetColumn(checkBox, 0);
@@ -599,20 +462,6 @@ public class TaskList : ITaskComponent
         grid.Children.Add(nameText);
 
         mainSection.Children.Add(grid);
-
-        // Status i informacje
-        string infoTextValue;
-        if (EndDate.HasValue && EndDate != DateTime.MaxValue)
-            infoTextValue = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}";
-        else
-            infoTextValue = $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy}";
-        var infoText = new TextBlock
-        {
-            Text = infoTextValue,
-            FontSize = 12,
-            Foreground = Brushes.Gray,
-            Margin = new Thickness(10 * depth, 0, 0, 0)
-        };
         mainSection.Children.Add(infoText);
 
         // Kategoria
@@ -644,7 +493,26 @@ public class TaskList : ITaskComponent
         // Zadania w liście
         foreach (var c in components)
         {
-            mainSection.Children.Add(c.SimpleDisplay(depth + 1));
+            var childView = c.SimpleDisplay(depth + 1);
+
+            var childCheckBox = childView.GetVisualDescendants()
+                                        .OfType<CheckBox>()
+                                        .FirstOrDefault(x => x.Classes.Contains("taskCheckbox"));
+
+           if (childCheckBox != null)
+            {
+                childCheckBox.IsCheckedChanged += (sender, args) =>
+                {
+                    bool areAllCompleted = components.All(comp => comp.IsCompleted);
+
+                    if (checkBox.IsChecked != areAllCompleted)
+                        checkBox.IsChecked = areAllCompleted;
+
+                    RefreshStatusLabel();
+                };
+            }
+
+            mainSection.Children.Add(childView);
         }
         return mainSection;
     }
@@ -658,72 +526,26 @@ public class TaskList : ITaskComponent
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Reprezentuje ogólną grupę przechowującą dowolne elementy IComponent
 public class Group : IComponent
 {
     public string Name { get; }
     private List<IComponent> components = new List<IComponent>();
-    public DateTime StartDate
-    {
-        get
-        {
-            if (components.Count == 0)
-                return DateTime.MinValue;
-            return components.Min(component => component.StartDate);
-        }
-    }
+    public DateTime StartDate => components.Count == 0 ? DateTime.MinValue : components.Min(c => c.StartDate);
     public List<string> Tags { get; }
     public string Category { get; }
 
-    public Group(string name)
-    {
-        Name = name;
-    }
+    public Group(string name) => Name = name;
 
-    public void Add(IComponent component)
-    {
-        components.Add(component);
-    }
+    public void Add(IComponent component) => components.Add(component);
+    public int Count() => components.Count;
+    public void Remove(IComponent component) => components.Remove(component);
+    public bool Contains(IComponent component) => components.Contains(component);
+    public IReadOnlyList<IComponent> GetComponents() => components.AsReadOnly();
 
-    public void Remove(IComponent component)
-    {
-        components.Remove(component);
-    }
-
-    public bool Contains(IComponent component)
-    {
-        return components.Contains(component);
-    }
-
-    public int Count()
-    {
-        return components.Count();
-    }
-
-    public IReadOnlyList<IComponent> GetComponents()
-    {
-        return components.AsReadOnly();
-    }
-
+    // Wyświetla nagłówek grupy i renderuje całą zawartość
     public StackPanel SimpleDisplay(int depth)
     {
-
         var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
         // Tytuł grupy
@@ -752,13 +574,7 @@ public class Group : IComponent
         }
         return mainSection;
     }
-    public StackPanel SimpleDisplay()
-    {
-        return SimpleDisplay(1);
-    }
-    public void Accept(IVisitor visitor) //for Visitor use
-    {
-        visitor.Visit(this);
-    }
+    public StackPanel SimpleDisplay() => SimpleDisplay(1);
+    public void Accept(IVisitor visitor) => visitor.Visit(this);
 
 }

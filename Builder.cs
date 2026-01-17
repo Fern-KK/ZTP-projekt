@@ -29,6 +29,7 @@ public class BuilderNote : IBuilder
     public string Category { get; set; } = "";
     public string Tags { get; set; } = "";
     private string Content = "";
+    
     public BuilderNote SetName(string s)
     {
         CurrentName = s;

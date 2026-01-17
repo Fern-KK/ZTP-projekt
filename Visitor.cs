@@ -143,19 +143,6 @@ public class SearchVisitor : IVisitor
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Visitor dla statystyk
 public class StatisticsVisitor : IVisitor
 {
@@ -301,25 +288,6 @@ public class StatisticsVisitor : IVisitor
         return row;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Visitor dla raportu zbliżających się terminów

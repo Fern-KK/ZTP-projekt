@@ -8,13 +8,17 @@ using System.Linq;
 
 namespace ZTP
 {
+    // Główne okno aplikacji
     public partial class MainWindow : Window
     {
+        // Instancje builderów
         BuilderNote noteBuilder;
         BuilderTask taskBuilder;
+
+        // Statyczna instancja okna dla łatwego dostępu z innych części programu
         public static MainWindow Instance { get; private set; }
         
-        // Kontrolki dla tworzenia notatek/zadań
+        // Pola przechowujące referencje do kontrolek formularzy tworzenia obiektów
         private TextBox? inputTitle;
         private TextBox? inputContent;
         private TextBox? inputTags;
@@ -28,13 +32,18 @@ namespace ZTP
         {
             InitializeComponent();
             Instance = this;
+
+            // Inicjalizacja danych globalnych i budowniczych
             GlobalGroups.Initialize();
             noteBuilder = new BuilderNote();
             taskBuilder = new BuilderTask();
+
+            // Konfiguracja interfejsu użytkownika
             InitializeMenu();
             UIManager.InitializeMainWindow(this);
         }
 
+        // Obsługa kliknięć przycisków w menu bocznym (Główne filtry)
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
@@ -54,6 +63,7 @@ namespace ZTP
             }
         }
 
+        // Przełącza widok główny na tryb edycji konkretnego obiektu (np. notatki)
         public void EditDisplay(object o)
         {
             if (o is Note note)
@@ -62,16 +72,19 @@ namespace ZTP
             }
         }
 
+        // Wyświetla menu wyboru typu nowego obiektu (Notatka/Zadanie)
         private void NewObject_Click(object sender, RoutedEventArgs e)
         {
             UIManager.DisplayNewObjectSelection();
         }
         
+        // Przygotowuje i wyświetla formularz tworzenia nowej notatki
         public void CreateNoteView()
         {
             inputCategory = GlobalGroups.SelectableCategoryList();
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
             
+            // Wywołanie managera UI do wygenerowania layoutu edytora
             var editor = UIManager.CreateNoteEditor(
                 noteBuilder.DefaultName(),
                 out inputTitle,
@@ -84,9 +97,12 @@ namespace ZTP
             Desktop.Content = editor;
         }
 
+        // Metoda kończąca proces budowania notatki - pobiera dane z UI i tworzy obiekt
         private void NoteBuilder()
         {
             var title = inputTitle?.Text?.Trim() ?? "";
+
+            // Walidacja tytułu
             if (string.IsNullOrWhiteSpace(title))
             {
                 UIManager.ShowValidationError(inputTitle, true);
@@ -95,6 +111,7 @@ namespace ZTP
             
             UIManager.ShowValidationError(inputTitle, false);
             
+            // Ustawianie parametrów w budowniczym
             if (inputCategory?.SelectedItem is string category)
                 noteBuilder.SetCategory(category);
             
@@ -105,7 +122,7 @@ namespace ZTP
                       .SetContent(inputContent?.Text?.Trim() ?? "")
                       .Build();
             
-            // Wyczyść i pokaż wszystkie
+            // Czyszczenie referencji i powrót do widoku głównego
             inputTitle = null;
             inputContent = null;
             inputTags = null;
@@ -114,6 +131,7 @@ namespace ZTP
             UIManager.DisplayGroup(GlobalGroups.AllGroup);
         }
 
+        // Przygotowuje i wyświetla formularz tworzenia nowej listy zadań
         public void CreateTaskView()
         {
             taskTextBoxesList = new List<TextBox>();
@@ -122,6 +140,7 @@ namespace ZTP
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
             inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>() };
             
+            // Dodanie pierwszego wiersza zadania na start
             AddTaskButtons();
             
             var editor = UIManager.CreateTaskEditor(
@@ -138,6 +157,7 @@ namespace ZTP
             Desktop.Content = editor;
         }
         
+        // Dodaje nowy wiersz (TextBox i DatePicker) do sekcji tworzenia zadań
         private void AddTaskButtons()
         {
             var row = UIManager.CreateTaskInputRow(
@@ -150,9 +170,10 @@ namespace ZTP
             inputTasksSection?.Children.Add(row);
         }
 
+        // Metoda kończąca proces budowania zadania - waliduje daty i tworzy obiekty.
         private void TaskBuilder()
         {
-            // Sprawdź poprawność dat
+            // Sprawdź poprawność dat (czy nie są z przeszłości)
             bool hasInvalidDate = false;
             if (taskEndDateList != null)
             {
@@ -168,9 +189,11 @@ namespace ZTP
             if (hasInvalidDate)
                 return;
             
+            // Ustawienie priorytetu
             if (inputPriority?.SelectedItem is Priorities priority)
                 taskBuilder.SetPriority(priority);
             
+            // Przekazanie list kontrolek do budowniczego w celu ekstrakcji danych
             if (taskTextBoxesList != null && taskEndDateList != null)
             {
                 taskBuilder.AddTaskComponent(taskTextBoxesList, taskEndDateList)
@@ -180,7 +203,7 @@ namespace ZTP
                           .Build();
             }
             
-            // Wyczyść
+            // Czyszczenie formularza
             taskTextBoxesList?.Clear();
             taskEndDateList?.Clear();
             inputTasksSection?.Children.Clear();
@@ -192,23 +215,24 @@ namespace ZTP
             UIManager.DisplayGroup(GlobalGroups.AllGroup);
         }
         
+        // Konfiguruje menu boczne: tagi, kategorie, statystyki i wyszukiwarkę.
         private void InitializeMenu()
         {
-            // Tagi
+            // Sekcja dynamicznych tagów
             var tagsSection = UIManager.CreateMenuSection(
                 GlobalGroups.GetTags(),
                 UIManager.DisplayByTagOrCategory
             );
             TagsExtender.Content = tagsSection;
             
-            // Kategorie
+            // Sekcja dynamicznych kategorii
             var categoriesSection = UIManager.CreateMenuSection(
                 GlobalGroups.GetCategories(),
                 UIManager.DisplayByTagOrCategory
             );
             CategoriesExtender.Content = categoriesSection;
             
-            // Statystyki
+            // Przycisk statystyk (wykorzystuje Visitora wewnątrz UIManager)
             var statsButton = new Button { 
                 Content = "Podsumowanie", 
                 Classes = { "leftMenuButton" } 
@@ -216,7 +240,7 @@ namespace ZTP
             statsButton.Click += (s, e) => UIManager.DisplayStatistics();
             ButtonSection.Children.Add(statsButton);
             
-            // Raporty
+            // Przycisk raportu nadchodzących terminów
             var reportButton = new Button {
                 Content = "Nadchodzące terminy", 
                 Classes = { "leftMenuButton" } 
@@ -224,7 +248,7 @@ namespace ZTP
             reportButton.Click += (s, e) => UIManager.DisplayUpcomingTasks();
             ButtonSection.Children.Add(reportButton);
             
-            // Wyszukiwanie
+            // Obsługa pola wyszukiwania
             searchButton.Click += (s, e) => 
                 UIManager.DisplaySearchResults(searchBox.Text);
         }    

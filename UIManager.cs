@@ -8,8 +8,10 @@ using System.Linq;
 
 namespace ZTP;
 
+// Statyczna klasa pomocnicza zarządzająca dynamicznym tworzeniem i wyświetlaniem UI w głównym oknie aplikacji
 public static class UIManager
 {
+    // Skrót do głównego okna aplikacji
     private static MainWindow MainWindow => MainWindow.Instance;
     
     public static void InitializeMainWindow(MainWindow window)
@@ -17,11 +19,13 @@ public static class UIManager
         // Inicjalizacja jeśli potrzebna
     }
     
+    // Główna metoda podmieniająca zawartość centralnego obszaru roboczego
     public static void DisplayContent(Control content)
     {
         MainWindow.Desktop.Content = content;
     }
     
+    // Wyświetla prosty tekst na środku ekranu
     public static void DisplayText(string text)
     {
         DisplayContent(new TextBlock
@@ -33,11 +37,13 @@ public static class UIManager
         });
     }
     
+    // Wyświetla strukturę grupy (zadań/notatek) pobierając jej graficzną reprezentację
     public static void DisplayGroup(Group group)
     {
         DisplayContent(group.SimpleDisplay());
     }
     
+    // Wyświetla widok wyboru: czy użytkownik chce stworzyć nową notatkę, czy zadanie
     public static void DisplayNewObjectSelection()
     {
         var noteButton = CreateButton("Nowa notatka", () => MainWindow.Instance.CreateNoteView());
@@ -57,16 +63,19 @@ public static class UIManager
         DisplayContent(panel);
     }
     
+    // Pobiera i wyświetla panel statystyk (wygenerowany przez wzorzec Visitor w GlobalGroups)
     public static void DisplayStatistics()
     {
         DisplayContent(GlobalGroups.GetStatistics());
     }
     
+    // Pobiera i wyświetla raport nadchodzących terminów (domyślnie z 7 dni)
     public static void DisplayUpcomingTasks()
     {
         DisplayContent(GlobalGroups.GetUpcomingTasksReport(7));
     }
     
+    // Wyświetla wyniki wyszukiwania na podstawie wpisanej frazy
     public static void DisplaySearchResults(string query)
     {
         if (string.IsNullOrWhiteSpace(query))
@@ -75,11 +84,13 @@ public static class UIManager
         DisplayContent(GlobalGroups.Search(query));
     }
     
+    // Wyświetla elementy przefiltrowane po konkretnym tagu lub kategorii
     public static void DisplayByTagOrCategory(string tagOrCategory)
     {
         DisplayContent(GlobalGroups.Search(tagOrCategory));
     }
     
+    // Buduje dynamicznie formularz edycji/tworzenia notatki
     public static StackPanel CreateNoteEditor(
         string defaultTitle,
         out TextBox titleBox,
@@ -110,6 +121,7 @@ public static class UIManager
             Margin =  new Thickness(0,0,10,0),
         };
         
+        // Tworzenie dolnego paska (kategorie, tagi, zapis)
         var bottomPanel = CreateBottomPanel(categoryComboBox, tagsTextBox, onSave, null);
         
         panel.Children.Add(titleBox);
@@ -119,6 +131,7 @@ public static class UIManager
         return panel;
     }
     
+    // Buduje dynamicznie formularz edycji/tworzenia listy zadań
     public static StackPanel CreateTaskEditor(
         string defaultTitle,
         out TextBox titleBox,
@@ -147,6 +160,7 @@ public static class UIManager
             HorizontalAlignment = HorizontalAlignment.Center
         };
         
+        // Przycisk pozwalający dynamicznie dodawać kolejne wiersze zadań do tasksSection
         var addButton = CreateButton("Dodaj zadanie", onAddTask);
         addButtonSection.Children.Add(addButton);
         
@@ -160,6 +174,7 @@ public static class UIManager
         return panel;
     }
     
+    // Tworzy pojedynczy wiersz dla zadania (tekst + wybór daty) wewnątrz listy zadań
     public static StackPanel CreateTaskInputRow(
         out TextBox taskTextBox,
         out DatePicker datePicker)
@@ -185,6 +200,7 @@ public static class UIManager
         return panel;
     }
     
+    // Funkcja pomocnicza do szybkiego tworzenia przycisku z akcją
     private static Button CreateButton(string content, Action onClick)
     {
         var button = new Button { Content = content };
@@ -192,6 +208,7 @@ public static class UIManager
         return button;
     }
     
+    // Wspólna metoda tworząca dolny pasek formularza (Grid z dwiema kolumnami)
     private static StackPanel CreateBottomPanel(
         ComboBox categoryComboBox,
         TextBox tagsTextBox,
@@ -203,6 +220,7 @@ public static class UIManager
             ColumnDefinitions = ColumnDefinitions.Parse("Auto, *")
         };
         
+        // Lewa strona: Metadane (Kategoria, Tagi, Priorytet)
         var leftPanel = new StackPanel
         {
             HorizontalAlignment = HorizontalAlignment.Left,
@@ -219,6 +237,7 @@ public static class UIManager
             leftPanel.Children.Add(priorityComboBox);
         }
         
+        // Prawa strona: Przycisk zapisu
         var rightPanel = new StackPanel
         {
             HorizontalAlignment = HorizontalAlignment.Right
@@ -239,22 +258,26 @@ public static class UIManager
         return wrapper;
     }
     
+    // Wizualizuje błąd walidacji
     public static void ShowValidationError(Control control, bool hasError)
     {
         if (control == null) return;
         
+        // Wybór klasy stylu w zależności od typu błędu (data vs brak tekstu)
         if (hasError)
             control.Classes.Add(control is DatePicker ? "wrongDate" : "mustFill");
         else
             control.Classes.Remove(control is DatePicker ? "wrongDate" : "mustFill");
     }
     
+    // Tworzy sekcję menu bocznego na podstawie listy przycisków (np. tagów lub kategorii)
     public static StackPanel CreateMenuSection(List<Button> buttons, Action<string> onButtonClick)
     {
         var panel = new StackPanel();
         
         foreach (var button in buttons)
         {
+            // Podpięcie wspólnego zdarzenia kliknięcia, które przekazuje nazwę przycisku (np. nazwę tagu)
             button.Click += (s, e) => onButtonClick(button.Name);
             panel.Children.Add(button);
         }

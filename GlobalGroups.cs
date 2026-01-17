@@ -12,6 +12,8 @@ using System.Text;
 
 namespace ZTP;
 
+// Statyczny magazyn danych i logiki dla całej aplikacji
+// Przechowuje globalne listy notatek, zadań, tagów oraz kategorii
 public static class GlobalGroups
 {
     public static Group AllGroup = new Group("Wszystko");
@@ -23,6 +25,7 @@ public static class GlobalGroups
     {
         ServerConnection client = ServerConnection.CreateServerConnection();
         client.FetchContent();
+
         // Dodaj domyślne tagi
         AddTags("pilne");
         AddTags("ważne");
@@ -274,6 +277,7 @@ public static class GlobalGroups
         // AllGroup.Add(listaZadan4_dzieci);
     }
 
+    // Dodaje listę tagów do globalnego słownika, dbając o unikalność i formatowanie
     public static void AddTags(List<string> tags)
     {
         foreach (var t in tags)
@@ -286,6 +290,8 @@ public static class GlobalGroups
 
         }
     }
+
+    // Przeciążenie metody AddTags: pozwala dodać pojedynczy tag lub ciąg oddzielony przecinkami
     public static void AddTags(string tag)
     {
         if (tag.Contains(','))
@@ -304,6 +310,8 @@ public static class GlobalGroups
         }
         
     }
+
+    // Generuje listę przycisków do menu bocznego na podstawie wszystkich dostępnych tagów
     public static List<Button> GetTags()
     {
         var buttons = new List<Button>();
@@ -316,7 +324,7 @@ public static class GlobalGroups
         return buttons;
     }
 
-
+    // Dodaje listę kategorii do globalnego słownika
     public static void AddCategory(List<string> categories)
     {
         foreach (var c in categories)
@@ -329,6 +337,8 @@ public static class GlobalGroups
 
         }
     }
+
+    // Przeciążenie metody AddCategory: parsuje ciąg kategorii oddzielonych przecinkami
     public static void AddCategory(string category)
     {
             if(category==null){return;};
@@ -336,6 +346,8 @@ public static class GlobalGroups
             AddCategory(categories);
         
     }
+
+    // Generuje listę przycisków do menu bocznego na podstawie wszystkich kategorii
     public static List<Button> GetCategories()
     {
         var buttons = new List<Button>();
@@ -347,33 +359,26 @@ public static class GlobalGroups
         }
         return buttons;
     }
+
+    // Zwraca komponent ComboBox wypełniony wszystkimi dostępnymi kategoriami
     public static ComboBox SelectableCategoryList()
     {
         return new ComboBox{ItemsSource = AllCategories };
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // Realizuje wyszukiwanie obiektów wewnątrz AllGroup przy użyciu wzorca Visitor
+    // Obsługuje wyszukiwanie złożone (oddzielone znakiem '+')
     public static StackPanel Search(string query)
     {
         string[] queryList = query.Split("+");
         var group = new Group($"Wyniki wyszukiwania: '{query}'");
         foreach (var q in queryList)
         {
+            // Inicjalizacja wizytatora wyszukiwania dla każdego słowa kluczowego
             var visitor = new SearchVisitor(q);
+            // Uruchomienie mechanizmu Accept na głównej grupie (przejście po drzewie obiektów)
             AllGroup.Accept(visitor);
+
             var results = visitor.GetResults();
             foreach (var result in results)
             {
@@ -383,6 +388,8 @@ public static class GlobalGroups
         return group.SimpleDisplay();
     }
 
+    // Generuje statystyki całej aplikacji przy użyciu wzorca Visitor
+    // Zlicza m.in. liczbę notatek i zadań
     public static StackPanel GetStatistics()
     {
         var visitor = new StatisticsVisitor();
@@ -391,6 +398,8 @@ public static class GlobalGroups
         return visitor.GetStatisticsPanel();
     }
     
+    // Generuje raport nadchodzących zadań, których termin upływa w zadanym przedziale czasu
+    // Wykorzystuje dedykowanego wizytatora UpcomingDeadlinesVisitor
     public static StackPanel GetUpcomingTasksReport(int daysAhead = 7)
     {
         var startDate = DateTime.Today;
@@ -403,7 +412,3 @@ public static class GlobalGroups
     }
     
 }
-
-
-
-
