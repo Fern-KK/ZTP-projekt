@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ZTP;
 
-// Statyczna klasa pomocnicza zarządzająca dynamicznym tworzeniem i wyświetlaniem UI w głównym oknie aplikacji
+// Statyczna klasa pomocnicza zarządzająca dynamicznym tworzeniem i wyświetlaniem UI w głównym oknie aplikacj
 public static class UIManager
 {
     // Skrót do głównego okna aplikacji
