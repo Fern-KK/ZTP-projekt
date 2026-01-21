@@ -8,6 +8,14 @@ Aplikacja wykorzystuje [NotesUserServer](https://github.com/hiko667/NotesUserSer
 - [@hiko667](https://github.com/hiko667) 
 - [@Marchewer](https://github.com/Marchewer)
 
+### Użyte wzorce:
+## Composite
+Tworzy obiekty Note, Task, TaskList, Group
+## Builder
+pomaga w budowie Note, Task, TaskList,
+## Visitor
+odwiedza obiekty composite i przeprowadza na nich operacje bez ingerencji w ich stróktórę (głównie zlicza rzeczy do statystyk lub pomaga w wyszukiwaniu)
+
 
 
 dotnet publish -c Release -r win-x64 --self-contained true  -p:PublishSingleFile=true  -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
