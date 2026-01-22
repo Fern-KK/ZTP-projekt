@@ -15,15 +15,24 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 namespace ZTP;
+
+/*
+                                            ︵‿︵‿୨♡୧‿︵‿︵
+                                    Hello and welcome to my codebase
+                                'm a big time C# antifan, so please be patient 
+        ServerConnection class is an simple way to communicate with out python server (https://logan667.pythonanywhere.com)
+            It uses a Singleton design pattern, guaranteeing that there is no more than one HttpClient per aplication
+                                            ︵‿︵‿୨♡୧‿︵‿︵
+*/
 public class ServerConnection
 {
     private static ServerConnection? Instance;
-    public string? Username; // Tak samo jak poniżej 
-    private string? Token; // Pole do potencjalnego przyszłego rozwoju na różnych użytkowników
+    public string? Username; // TThis field is not in use right now, it's for future development
+    private string? Token; // This one just as the username field
     private HttpClient PersonalHttpClient = new HttpClient();
-    private string BaseLink = "https://logan667.pythonanywhere.com";
+    private string BaseLink = "https://logan667.pythonanywhere.com"; //the base link leading to our server. Paste it into google, and see what happens
     private ServerConnection()
-    {}
+    {} //private constructor, as Singleton should have
     public static ServerConnection CreateServerConnection()
     {
         if (Instance == null)
@@ -34,7 +43,11 @@ public class ServerConnection
             Instance.Token = "17682096973829nexus";
         }
         return Instance;
-    }
+    } // This method allows client proces to get an instance of ServerConnection
+
+    //Below: user handling code. Not in use right now, because
+    //accounts are the future feture
+    //For now, we are using the "nexus" account, which we can treat as a sort of admin account
     public async Tasks.Task<bool> SignIn(string username, string password)
     {
         var payload = new
@@ -63,7 +76,8 @@ public class ServerConnection
         this.Token = json.GetProperty("data").GetProperty("token").GetString();
         return true;
     }
-
+    //FetchContent function fetches all the task, all the notes and all the tasklists from the server
+    //It sends users username and token, which they normaly would get from server using LogIn function
     public async Tasks.Task<bool> FetchContent()
     {
         var payload = new
@@ -113,6 +127,8 @@ public class ServerConnection
             }
             return json.GetProperty("status").GetString() == "success";
         }
+        //This style of error handling is used by every function of our code
+        // In case of any errors, they are logged into the errors.txt file
         catch (Exception ex)
         {
             try
@@ -121,14 +137,11 @@ public class ServerConnection
                 File.AppendAllText("errors.txt", log);
             }
             catch
-            {
-                
-            }
-
+            {}//this empty "catch" statement is used to make sure no errors make the code loop infinitly
             return false;
         }
     }
-    
+    //Below: notes handling. NoweNote send notes to the server, and UpdateNote updates it. DeleteNote is not in use right now (future feture)
     public async Tasks.Task<bool> NewNote(Note note)
     {
         var payload = new
@@ -244,6 +257,7 @@ public class ServerConnection
             return false;
         }
     }
+    //Below: tasks handling. The content = "-" part is beacuse of the server issue, which will be fixed in the future
     public async Tasks.Task<bool> NewTask(Task task)
     {
         var payload = new
@@ -251,7 +265,7 @@ public class ServerConnection
             username = this.Username,
             token = this.Token,
             title = task.Name,
-            content = "-", //gdzie jest Content?
+            content = "-",
             category = task.Category,
             tags = task.Tags,
             priority = task.Priority.ToString(),
@@ -363,7 +377,7 @@ public class ServerConnection
             return false;
         }
     }
-    //https://youtu.be/jraBbrB9TOs?si=3HfjNXVzbisyWkTk dosłownie my
+    //Below: TaskList handling. There is just NewTaskList function working right now, but the deletion and editing are future fetures
     public async Tasks.Task<bool> NewTaskList(TaskList task_list)
     {
         var payload = new
