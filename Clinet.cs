@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Globalization;
 using System;
+using System.IO;
 using System.Collections.Generic;
 namespace ZTP;
 public class ServerConnection
@@ -112,8 +113,18 @@ public class ServerConnection
             }
             return json.GetProperty("status").GetString() == "success";
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {
+                
+            }
+
             return false;
         }
     }
@@ -146,8 +157,18 @@ public class ServerConnection
             note.SetId(id);
             return json.GetProperty("status").GetString() == "success";
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {
+                
+            }
+
             return false;
         }
     }
@@ -170,8 +191,18 @@ public class ServerConnection
             var res = await PersonalHttpClient.SendAsync(req);
             return res.IsSuccessStatusCode;
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {
+                
+            }
+
             return false;
         }
     }
@@ -198,8 +229,18 @@ public class ServerConnection
             var res = await PersonalHttpClient.SendAsync(req);
             return res.IsSuccessStatusCode;
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {
+                
+            }
+
             return false;
         }
     }
@@ -232,8 +273,18 @@ public class ServerConnection
             task.SetId(id);
             return json.GetProperty("status").GetString() == "success";
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {
+                
+            }
+
             return false;
         }
     }
@@ -256,8 +307,18 @@ public class ServerConnection
             var res = await PersonalHttpClient.SendAsync(req);
             return res.IsSuccessStatusCode;
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {
+                
+            }
+
             return false;
         }
     }
@@ -285,8 +346,18 @@ public class ServerConnection
             var res = await PersonalHttpClient.SendAsync(req);
             return res.IsSuccessStatusCode;
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {
+                
+            }
+
             return false;
         }
     }
