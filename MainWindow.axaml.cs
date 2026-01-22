@@ -19,6 +19,7 @@ namespace ZTP
         public static MainWindow Instance { get; private set; }
         
         // Pola przechowujące referencje do kontrolek formularzy tworzenia obiektów
+        //https://en.wikipedia.org/wiki/VeggieTales
         private TextBox? inputTitle;
         private TextBox? inputContent;
         private TextBox? inputTags;
