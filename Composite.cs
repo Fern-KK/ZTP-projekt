@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using System;
@@ -92,7 +93,7 @@ public class Note : IComponent
         return mainSection;
     }
     public StackPanel SimpleDisplay() => SimpleDisplay(1);
-    
+
     // Pełny formularz edycji notatki z polami wejściowymi i przyciskiem zapisu
     public StackPanel DisplayDetails()
     {
@@ -112,14 +113,14 @@ public class Note : IComponent
         leftSide.Children.Add(inputCategory);
         leftSide.Children.Add(inputTags);
 
-       // Obsługa zapisu i aktualizacji serwera
+        // Obsługa zapisu i aktualizacji serwera
         var saveButton = new Button { Content = "Zapisz", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
         saveButton.Click += (s, e) =>
         {
             Name = inputTitle.Text;
             Content = inputContent.Text;
             Category = inputCategory.SelectedItem?.ToString().ToLower().Trim();
-            
+
             // Logika aktualizacji tagów
             if (inputTags.Text != string.Join(",", Tags))
             {
@@ -127,10 +128,10 @@ public class Note : IComponent
                 string[] tags = inputTags.Text.Split(',');
                 foreach (var t in tags)
                 {
-                    if(!string.IsNullOrWhiteSpace(t)) SetTags(t.Trim().ToLower());
+                    if (!string.IsNullOrWhiteSpace(t)) SetTags(t.Trim().ToLower());
                 }
             }
-            
+
             ServerConnection.CreateServerConnection().UpdateNote(this, this.NoteId);
             UIManager.DisplayGroup(GlobalGroups.AllGroup);      // Powrót do widoku głównego
         };
@@ -407,9 +408,11 @@ public class TaskList : ITaskComponent
         // Tytuł listy zadań
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Checkbox
-        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star)); // Nazwa
+        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star)); // Nazwa 
+        grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // Priorytet
 
-        // Nazwa listy zadań
+
+        // Nazwa listy zadań 
         var nameText = new TextBlock
         {
             Text = Name,
@@ -417,6 +420,19 @@ public class TaskList : ITaskComponent
             Classes = { IsCompleted ? "checkTrue" : "checkFalse" }
         };
         Grid.SetColumn(nameText, 1);
+
+        // Priorytet
+        var priorityIcon = new TextBlock
+        {
+            Text = GetPriorityIcon(),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            FontSize = 14,
+        };
+        Grid.SetColumn(priorityIcon, 2);
+
+
+
+
 
         // Status i informacje
         var infoText = new TextBlock
@@ -460,6 +476,7 @@ public class TaskList : ITaskComponent
         Grid.SetColumn(checkBox, 0);
         grid.Children.Add(checkBox);
         grid.Children.Add(nameText);
+        grid.Children.Add(priorityIcon);
 
         mainSection.Children.Add(grid);
         mainSection.Children.Add(infoText);
@@ -499,7 +516,7 @@ public class TaskList : ITaskComponent
                                         .OfType<CheckBox>()
                                         .FirstOrDefault(x => x.Classes.Contains("taskCheckbox"));
 
-           if (childCheckBox != null)
+            if (childCheckBox != null)
             {
                 childCheckBox.IsCheckedChanged += (sender, args) =>
                 {
@@ -520,6 +537,16 @@ public class TaskList : ITaskComponent
     {
         return SimpleDisplay(1);
     }
+    private string GetPriorityIcon()
+    {
+        return Priority switch
+        {
+            Priorities.Important => "🔴",
+            Priorities.Normal => "🔵",
+            Priorities.Low => "⚪",
+            _ => ""
+        };
+    }
     public void Accept(IVisitor visitor) //for Visitor use
     {
         visitor.Visit(this);
@@ -534,7 +561,6 @@ public class Group : IComponent
     public DateTime StartDate => components.Count == 0 ? DateTime.MinValue : components.Min(c => c.StartDate);
     public List<string> Tags { get; }
     public string Category { get; }
-    private ISortingStrategy _sortingStrategy = new SortByNameStrategy();
 
     public Group(string name) => Name = name;
 
@@ -543,21 +569,59 @@ public class Group : IComponent
     public void Remove(IComponent component) => components.Remove(component);
     public bool Contains(IComponent component) => components.Contains(component);
     public IReadOnlyList<IComponent> GetComponents() => components.AsReadOnly();
-    public void SetSortingStrategy(ISortingStrategy strategy) => _sortingStrategy = strategy;
 
     // Wyświetla nagłówek grupy i renderuje całą zawartość
     public StackPanel SimpleDisplay(int depth)
     {
         var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
-        // Tytuł grupy
+        // Górna sekcja z tytułem i ComboBox
+        var topSection = new Grid
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        };
+
+        // Dwie kolumny: lewa na tytuł, prawa na ComboBox
+        topSection.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star)); // Tytuł (rozciąga się)
+        topSection.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // ComboBox (auto szerokość)
+
+        // Tytuł po lewej stronie
         var titleText = new TextBlock
         {
             Text = Name,
             FontSize = 14,
-            FontWeight = FontWeight.Bold
+            FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center
         };
-        mainSection.Children.Add(titleText);
+        Grid.SetColumn(titleText, 0);
+
+        // ComboBox do sortowania po prawej stronie
+        var sortComboBox = new ComboBox
+        {
+            ItemsSource = GlobalGroups.AvailableStrategies,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            SelectedItem = GlobalGroups.SortingStrategy,
+            DisplayMemberBinding = new Avalonia.Data.Binding("DisplayName"),
+            VerticalAlignment = VerticalAlignment.Center,
+            Width = 150,
+            Margin = new Thickness(10, 0, 0, 0),
+            PlaceholderText = GlobalGroups.SortingStrategy.DisplayName
+        };
+
+        sortComboBox.SelectionChanged += (s, e) =>
+        {
+            if (sortComboBox.SelectedItem is ISortingStrategy selectedStrategy)
+            {
+                GlobalGroups.SetSortingStrategy(selectedStrategy);
+                UIManager.DisplayGroup(this);
+            }
+        };
+        Grid.SetColumn(sortComboBox, 1);
+
+        topSection.Children.Add(titleText);
+        topSection.Children.Add(sortComboBox);
+        mainSection.Children.Add(topSection);
 
         // Licznik elementów
         var counterText = new TextBlock
@@ -565,23 +629,19 @@ public class Group : IComponent
             Text = $"({Count()} elementów)",
             FontSize = 12,
             Foreground = Brushes.Gray,
-            Margin = new Thickness(10, 0, 0, 10)
+            Margin = new Thickness(0, 0, 0, 10)
         };
         mainSection.Children.Add(counterText);
 
         // Użycie strategii przed renderowaniem
-        var sortedComponents = _sortingStrategy.Sort(components);
-
-        foreach (var c in sortedComponents)
-        {
-            mainSection.Children.Add(c.SimpleDisplay(depth + 1));
-        }
+        var sortedComponents = GlobalGroups.SortingStrategy.Sort(components);
 
         // Elementy grupy
         foreach (var c in sortedComponents)
         {
             mainSection.Children.Add(c.SimpleDisplay(depth + 1));
         }
+
         return mainSection;
     }
     public StackPanel SimpleDisplay() => SimpleDisplay(1);
