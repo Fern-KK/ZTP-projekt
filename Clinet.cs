@@ -254,7 +254,7 @@ public class ServerConnection
             content = "-", //gdzie jest Content?
             category = task.Category,
             priority = task.Priority.ToString(),
-            deadline = task.EndDate?.ToString("MM-dd-yyyy")
+            deadline = task.EndDate?.ToString("dd.MM.yyyy")
         };
 
         try
