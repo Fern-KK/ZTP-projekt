@@ -82,6 +82,7 @@ namespace ZTP
         public void CreateNoteView()
         {
             inputCategory = GlobalGroups.SelectableCategoryList();
+            inputCategory.PlaceholderText = "Kategoria";
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
             
             // Wywołanie managera UI do wygenerowania layoutu edytora
@@ -137,8 +138,9 @@ namespace ZTP
             taskTextBoxesList = new List<TextBox>();
             inputTasksSection = new StackPanel { Spacing = 5 };
             inputCategory = GlobalGroups.SelectableCategoryList();
+            inputCategory.PlaceholderText = "Kategoria";
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
-            inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>() };
+            inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>(), PlaceholderText = "None"};
             
             // Dodanie pierwszego wiersza zadania na start
             AddTaskButtons();

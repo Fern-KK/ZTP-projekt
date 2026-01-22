@@ -21,6 +21,15 @@ public static class GlobalGroups
     public static Group AllNotesGroup = new Group("Notatki");
     private static List<string> AllCategories { get; } = new List<string>();
     private static List<string> AllTags = new List<string>();
+    public static ISortingStrategy SortingStrategy { get; private set; } = new SortByNameStrategy(); // Aktualna strategia sortowania
+    public static List<ISortingStrategy> AvailableStrategies { get; } = new List<ISortingStrategy>     // Lista dostępnych strategii
+    {
+        new SortByNameStrategy(),
+        new SortByEndDateStrategy(),
+        new SortByPriorityStrategy(),
+    };
+    public static void SetSortingStrategy(ISortingStrategy strategy) => SortingStrategy = strategy;
+
     public static void Initialize()
     {
         ServerConnection client = ServerConnection.CreateServerConnection();
@@ -410,5 +419,5 @@ public static class GlobalGroups
         
         return visitor.GetUpcomingTasksPanel();
     }
-    
+
 }
