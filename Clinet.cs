@@ -253,6 +253,7 @@ public class ServerConnection
             title = task.Name,
             content = "-", //gdzie jest Content?
             category = task.Category,
+            tags = task.Tags,
             priority = task.Priority.ToString(),
             deadline = task.EndDate?.ToString("dd.MM.yyyy")
         };
@@ -330,9 +331,10 @@ public class ServerConnection
             token = this.Token,
             title = task.Name,
             content = "-",
+            tags = task.Tags,
             category = task.Category,
             priority = task.Priority.ToString().ToLowerInvariant(),
-            deadline = task.EndDate?.ToString("MM-dd-yyyy"),
+            deadline = task.EndDate?.ToString("dd.MM.yyyy"),
             task_id = TaskId
         };
         try
@@ -358,6 +360,52 @@ public class ServerConnection
                 
             }
 
+            return false;
+        }
+    }
+    //https://youtu.be/jraBbrB9TOs?si=3HfjNXVzbisyWkTk dosłownie my
+    public async Tasks.Task<bool> NewTaskList(TaskList task_list)
+    {
+        var payload = new
+        {
+            username = this.Username,
+            token = this.Token,
+            title = task_list.Name,
+            tags = task_list.Tags,
+            category = task_list.Category,
+            priority = task_list.Priority.ToString().ToLowerInvariant(),
+            tasks = task_list.components.OfType<Task>().Select(t => new
+            {
+                title = t.Name,
+                deadline = t.EndDate?.ToString("dd.MM.yyyy"),
+            }).ToList()
+        };
+
+        try
+        {
+            var response = await PersonalHttpClient.PostAsJsonAsync(
+                $"{BaseLink}/api/lists/new",
+                payload
+            );
+
+            if (!response.IsSuccessStatusCode) return false;
+            var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+            var id = json
+                .GetProperty("data")
+                .GetProperty("task_id")
+                .GetInt32();
+            task_list.SetId(id);
+            return json.GetProperty("status").GetString() == "success";
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]\n{ex}\n\n";
+                File.AppendAllText("errors.txt", log);
+            }
+            catch
+            {}
             return false;
         }
     }
