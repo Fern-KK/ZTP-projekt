@@ -63,6 +63,15 @@ namespace ZTP
             }
         }
 
+        private void OnSortChanged(ISortingStrategy selectedStrategy)
+        {
+            // Ustaw strategię dla głównej grupy
+            GlobalGroups.AllGroup.SetSortingStrategy(selectedStrategy);
+            
+            // Odśwież widok
+            UIManager.DisplayGroup(GlobalGroups.AllGroup);
+        }
+
         // Przełącza widok główny na tryb edycji konkretnego obiektu (np. notatki)
         public void EditDisplay(object o)
         {
