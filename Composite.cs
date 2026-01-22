@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -534,6 +534,7 @@ public class Group : IComponent
     public DateTime StartDate => components.Count == 0 ? DateTime.MinValue : components.Min(c => c.StartDate);
     public List<string> Tags { get; }
     public string Category { get; }
+    private ISortingStrategy _sortingStrategy = new SortByNameStrategy();
 
     public Group(string name) => Name = name;
 
@@ -542,6 +543,7 @@ public class Group : IComponent
     public void Remove(IComponent component) => components.Remove(component);
     public bool Contains(IComponent component) => components.Contains(component);
     public IReadOnlyList<IComponent> GetComponents() => components.AsReadOnly();
+    public void SetSortingStrategy(ISortingStrategy strategy) => _sortingStrategy = strategy;
 
     // Wyświetla nagłówek grupy i renderuje całą zawartość
     public StackPanel SimpleDisplay(int depth)
@@ -567,8 +569,16 @@ public class Group : IComponent
         };
         mainSection.Children.Add(counterText);
 
+        // Użycie strategii przed renderowaniem
+        var sortedComponents = _sortingStrategy.Sort(components);
+
+        foreach (var c in sortedComponents)
+        {
+            mainSection.Children.Add(c.SimpleDisplay(depth + 1));
+        }
+
         // Elementy grupy
-        foreach (var c in components)
+        foreach (var c in sortedComponents)
         {
             mainSection.Children.Add(c.SimpleDisplay(depth + 1));
         }
