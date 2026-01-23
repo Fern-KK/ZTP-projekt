@@ -125,6 +125,32 @@ public class ServerConnection
                 GlobalGroups.AllGroup.Add(new_task);
                 GlobalGroups.AllTasksGroup.Add(new_task);
             }
+            var task_lists = json
+                .GetProperty("data")
+                .GetProperty("task_lists");
+            foreach(var task_list in task_lists.EnumerateArray())
+            {
+                var new_task_list = new TaskList(task_list.GetProperty("title").GetString());
+                var priorityString = task_list.GetProperty("priority").GetString();
+                if (!Enum.TryParse<Priorities>(priorityString, out var priority))
+                {
+                    priority = Priorities.None;
+                }
+                new_task_list.SetPriority(priority);
+                if(task_list.GetProperty("category").GetString() != null){new_task_list.SetCategory(task_list.GetProperty("category").GetString());}
+                new_task_list.SetTags(task_list.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
+                foreach (var task in task_list.GetProperty("tasks").EnumerateArray())
+                {
+                    var deadline = DateTime.ParseExact(task.GetProperty("deadline").GetString(),"dd.MM.yyyy",CultureInfo.InvariantCulture);
+                    var new_task_list_task = new Task(task.GetProperty("title").ToString(), deadline);
+                    new_task_list.Add(new_task_list_task);
+                }
+                GlobalGroups.AllGroup.Add(new_task_list);
+                GlobalGroups.AllTasksGroup.Add(new_task_list);
+            }
+
+
+
             return json.GetProperty("status").GetString() == "success";
         }
         //This style of error handling is used by every function of our code
@@ -347,7 +373,7 @@ public class ServerConnection
             content = "-",
             tags = task.Tags,
             category = task.Category,
-            priority = task.Priority.ToString().ToLowerInvariant(),
+            priority = task.Priority.ToString(),
             deadline = task.EndDate?.ToString("dd.MM.yyyy"),
             task_id = TaskId
         };
@@ -387,7 +413,7 @@ public class ServerConnection
             title = task_list.Name,
             tags = task_list.Tags,
             category = task_list.Category,
-            priority = task_list.Priority.ToString().ToLowerInvariant(),
+            priority = task_list.Priority.ToString(),
             tasks = task_list.components.OfType<Task>().Select(t => new
             {
                 title = t.Name,
