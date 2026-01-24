@@ -19,14 +19,14 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ZTP
-build_property.ProjectDir = C:\Users\hp\Desktop\nowy\
+build_property.ProjectDir = C:\Users\Studenciak\Desktop\projekt\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/hp/Desktop/nowy/App.axaml]
+[C:/Users/Studenciak/Desktop/projekt/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/hp/Desktop/nowy/MainWindow.axaml]
+[C:/Users/Studenciak/Desktop/projekt/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

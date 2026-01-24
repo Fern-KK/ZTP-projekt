@@ -317,16 +317,16 @@ public static class GlobalGroups
                 AllTags.Add(t);
             }
         }
-        
+
     }
 
     // Generuje listę przycisków do menu bocznego na podstawie wszystkich dostępnych tagów
     public static List<Button> GetTags()
     {
         var buttons = new List<Button>();
-        foreach(var tag in AllTags)
+        foreach (var tag in AllTags)
         {
-            var tagButton = new Button{Content = $"#{tag}", Name=tag};
+            var tagButton = new Button { Content = $"#{tag}", Name = tag };
             tagButton.Classes.Add("leftMenuButton");
             buttons.Add(tagButton);
         }
@@ -350,19 +350,20 @@ public static class GlobalGroups
     // Przeciążenie metody AddCategory: parsuje ciąg kategorii oddzielonych przecinkami
     public static void AddCategory(string category)
     {
-            if(category==null){return;};
-            List<string> categories = new List<string>(category.Split(','));
-            AddCategory(categories);
-        
+        if (category == null) { return; }
+        ;
+        List<string> categories = new List<string>(category.Split(','));
+        AddCategory(categories);
+
     }
 
     // Generuje listę przycisków do menu bocznego na podstawie wszystkich kategorii
     public static List<Button> GetCategories()
     {
         var buttons = new List<Button>();
-        foreach(var category in AllCategories)
+        foreach (var category in AllCategories)
         {
-            var categoryButton = new Button{Content = $"{category}", Name=category};
+            var categoryButton = new Button { Content = $"{category}", Name = category };
             categoryButton.Classes.Add("leftMenuButton");
             buttons.Add(categoryButton);
         }
@@ -372,7 +373,10 @@ public static class GlobalGroups
     // Zwraca komponent ComboBox wypełniony wszystkimi dostępnymi kategoriami
     public static ComboBox SelectableCategoryList()
     {
-        return new ComboBox{ItemsSource = AllCategories };
+        var comboBox = new ComboBox();
+        // Wypełnij comboBox danymi (kategoriami)
+        comboBox.ItemsSource = AllCategories; // Ta metoda powinna zwracać listę kategorii
+        return comboBox;
     }
 
     // Realizuje wyszukiwanie obiektów wewnątrz AllGroup przy użyciu wzorca Visitor
@@ -403,20 +407,20 @@ public static class GlobalGroups
     {
         var visitor = new StatisticsVisitor();
         AllGroup.Accept(visitor);
-        
+
         return visitor.GetStatisticsPanel();
     }
-    
+
     // Generuje raport nadchodzących zadań, których termin upływa w zadanym przedziale czasu
     // Wykorzystuje dedykowanego wizytatora UpcomingDeadlinesVisitor
     public static StackPanel GetUpcomingTasksReport(int daysAhead = 7)
     {
         var startDate = DateTime.Today;
         var endDate = DateTime.Today.AddDays(daysAhead);
-        
+
         var visitor = new UpcomingDeadlinesVisitor(startDate, endDate);
         AllGroup.Accept(visitor);
-        
+
         return visitor.GetUpcomingTasksPanel();
     }
 

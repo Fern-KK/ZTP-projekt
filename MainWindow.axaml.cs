@@ -17,7 +17,7 @@ namespace ZTP
 
         // Statyczna instancja okna dla łatwego dostępu z innych części programu
         public static MainWindow Instance { get; private set; }
-        
+
         // Pola przechowujące referencje do kontrolek formularzy tworzenia obiektów
         private TextBox? inputTitle;
         private TextBox? inputContent;
@@ -64,11 +64,20 @@ namespace ZTP
         }
 
         // Przełącza widok główny na tryb edycji konkretnego obiektu (np. notatki)
+        // W MainWindow, zaktualizuj metodę EditDisplay:
         public void EditDisplay(object o)
         {
             if (o is Note note)
             {
                 Desktop.Content = note.DisplayDetails();
+            }
+            else if (o is Task task)
+            {
+                Desktop.Content = task.DisplayDetails();
+            }
+            else if (o is TaskList taskList)
+            {
+                Desktop.Content = taskList.DisplayDetails();
             }
         }
 
@@ -77,14 +86,14 @@ namespace ZTP
         {
             UIManager.DisplayNewObjectSelection();
         }
-        
+
         // Przygotowuje i wyświetla formularz tworzenia nowej notatki
         public void CreateNoteView()
         {
             inputCategory = GlobalGroups.SelectableCategoryList();
             inputCategory.PlaceholderText = "Kategoria";
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
-            
+
             // Wywołanie managera UI do wygenerowania layoutu edytora
             var editor = UIManager.CreateNoteEditor(
                 noteBuilder.DefaultName(),
@@ -94,7 +103,7 @@ namespace ZTP
                 inputTags,
                 NoteBuilder
             );
-            
+
             Desktop.Content = editor;
         }
 
@@ -109,26 +118,26 @@ namespace ZTP
                 UIManager.ShowValidationError(inputTitle, true);
                 return;
             }
-            
+
             UIManager.ShowValidationError(inputTitle, false);
-            
+
             // Ustawianie parametrów w budowniczym
             if (inputCategory?.SelectedItem is string category)
                 noteBuilder.SetCategory(category);
-            
+
             if (!string.IsNullOrWhiteSpace(inputTags?.Text))
                 noteBuilder.SetTags(inputTags.Text);
-            
+
             noteBuilder.SetName(title)
                       .SetContent(inputContent?.Text?.Trim() ?? "")
                       .Build();
-            
+
             // Czyszczenie referencji i powrót do widoku głównego
             inputTitle = null;
             inputContent = null;
             inputTags = null;
             inputCategory = null;
-            
+
             UIManager.DisplayGroup(GlobalGroups.AllGroup);
         }
 
@@ -140,11 +149,11 @@ namespace ZTP
             inputCategory = GlobalGroups.SelectableCategoryList();
             inputCategory.PlaceholderText = "Kategoria";
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
-            inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>(), PlaceholderText = "None"};
-            
+            inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>(), PlaceholderText = "None" };
+
             // Dodanie pierwszego wiersza zadania na start
             AddTaskButtons();
-            
+
             var editor = UIManager.CreateTaskEditor(
                 taskBuilder.DefaultName(),
                 out inputTitle,
@@ -155,10 +164,10 @@ namespace ZTP
                 inputPriority,
                 TaskBuilder
             );
-            
+
             Desktop.Content = editor;
         }
-        
+
         // Dodaje nowy wiersz (TextBox i DatePicker) do sekcji tworzenia zadań
         private void AddTaskButtons()
         {
@@ -166,7 +175,7 @@ namespace ZTP
                 out var taskTextBox,
                 out var datePicker
             );
-            
+
             taskTextBoxesList?.Add(taskTextBox);
             taskEndDateList?.Add(datePicker);
             inputTasksSection?.Children.Add(row);
@@ -187,14 +196,14 @@ namespace ZTP
                     hasInvalidDate |= isInvalid;
                 }
             }
-            
+
             if (hasInvalidDate)
                 return;
-            
+
             // Ustawienie priorytetu
             if (inputPriority?.SelectedItem is Priorities priority)
                 taskBuilder.SetPriority(priority);
-            
+
             // Przekazanie list kontrolek do budowniczego w celu ekstrakcji danych
             if (taskTextBoxesList != null && taskEndDateList != null)
             {
@@ -204,7 +213,7 @@ namespace ZTP
                           .SetName(inputTitle?.Text?.Trim() ?? "")
                           .Build();
             }
-            
+
             // Czyszczenie formularza
             taskTextBoxesList?.Clear();
             taskEndDateList?.Clear();
@@ -213,10 +222,10 @@ namespace ZTP
             inputTags = null;
             inputCategory = null;
             inputPriority = null;
-            
+
             UIManager.DisplayGroup(GlobalGroups.AllGroup);
         }
-        
+
         // Konfiguruje menu boczne: tagi, kategorie, statystyki i wyszukiwarkę.
         private void InitializeMenu()
         {
@@ -226,33 +235,35 @@ namespace ZTP
                 UIManager.DisplayByTagOrCategory
             );
             TagsExtender.Content = tagsSection;
-            
+
             // Sekcja dynamicznych kategorii
             var categoriesSection = UIManager.CreateMenuSection(
                 GlobalGroups.GetCategories(),
                 UIManager.DisplayByTagOrCategory
             );
             CategoriesExtender.Content = categoriesSection;
-            
+
             // Przycisk statystyk (wykorzystuje Visitora wewnątrz UIManager)
-            var statsButton = new Button { 
-                Content = "Podsumowanie", 
-                Classes = { "leftMenuButton" } 
+            var statsButton = new Button
+            {
+                Content = "Podsumowanie",
+                Classes = { "leftMenuButton" }
             };
             statsButton.Click += (s, e) => UIManager.DisplayStatistics();
             ButtonSection.Children.Add(statsButton);
-            
+
             // Przycisk raportu nadchodzących terminów
-            var reportButton = new Button {
-                Content = "Nadchodzące terminy", 
-                Classes = { "leftMenuButton" } 
+            var reportButton = new Button
+            {
+                Content = "Nadchodzące terminy",
+                Classes = { "leftMenuButton" }
             };
             reportButton.Click += (s, e) => UIManager.DisplayUpcomingTasks();
             ButtonSection.Children.Add(reportButton);
-            
+
             // Obsługa pola wyszukiwania
-            searchButton.Click += (s, e) => 
+            searchButton.Click += (s, e) =>
                 UIManager.DisplaySearchResults(searchBox.Text);
-        }    
+        }
     }
 }
