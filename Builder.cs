@@ -181,6 +181,7 @@ public class BuilderTask : IBuilder
     
     public BuilderTask Build()
     {
+        ServerConnection client = ServerConnection.CreateServerConnection();
         if (Components.Count == 0) return this;
 
         // Pojedyńcze zadanie
@@ -201,7 +202,7 @@ public class BuilderTask : IBuilder
             Clear();
             GlobalGroups.AllTasksGroup.Add(result);
             GlobalGroups.AllGroup.Add(result);
-            ServerConnection client = ServerConnection.CreateServerConnection();
+            
             client.NewTask(result);
             return this;
         }
@@ -238,6 +239,8 @@ public class BuilderTask : IBuilder
         }
 
         Clear();
+        
+        client.NewTaskList(taskList);
         GlobalGroups.AllTasksGroup.Add(taskList);
         GlobalGroups.AllGroup.Add(taskList);
         return this;

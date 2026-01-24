@@ -322,6 +322,7 @@ public class TaskList : ITaskComponent
 {
     public string Name { get; }
     public List<ITaskComponent> components { get; set; } = new List<ITaskComponent>();
+    public int TaskListId { get; set; }
     public List<string> Tags { get; set; } = new List<string>();
     public string Category { get; set; } = "";
     public DateTime StartDate => components.Count == 0 ? DateTime.MinValue : components.Min(c => c.StartDate);
@@ -344,7 +345,8 @@ public class TaskList : ITaskComponent
         Name = other.Name;
         components = other.components;
     }
-
+    
+    public void SetId(int id) => TaskListId = id;
     public void Add(ITaskComponent component) => components.Add(component);
     public void MarkAsCompleted(DateTime completionDate) => components.ForEach(c => c.MarkAsCompleted(completionDate));
     public void MarkAsIncomplete() => components.ForEach(c => c.MarkAsIncomplete());
