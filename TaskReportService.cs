@@ -9,6 +9,8 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using ZTP.Composite;
+
 
 namespace ZTP;
 
@@ -43,7 +45,7 @@ public static class TaskReportService
 
         panel.Children.Add(new TextBlock
         {
-            Text = $"⚠️ Zadania po terminie",
+            Text = $"Zadania po terminie",
             FontSize = 18,
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 10)

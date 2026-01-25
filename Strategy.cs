@@ -8,6 +8,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using ZTP.Composite;
+
 
 namespace ZTP;
 
@@ -15,15 +17,15 @@ namespace ZTP;
 // Interfejst strategii
 public interface ISortingStrategy
 {
-    IEnumerable<IComponent> Sort(IEnumerable<IComponent> components);
-    string DisplayName { get; } // Dodana właściwość do wyświetlania
+    IEnumerable<Composite.IComponent> Sort(IEnumerable<Composite.IComponent> components);
+    string DisplayName { get; } 
 }
 
 // Sortowanie alfabetyczne po nazwie
 public class SortByNameStrategy : ISortingStrategy
 {
     public string DisplayName => "Nazwa (A-Z)";
-    public IEnumerable<IComponent> Sort(IEnumerable<IComponent> components) =>
+    public IEnumerable<Composite.IComponent> Sort(IEnumerable<Composite.IComponent> components) =>
         components.OrderBy(c => c.Name);
 }
 
@@ -31,7 +33,7 @@ public class SortByNameStrategy : ISortingStrategy
 public class SortByEndDateStrategy : ISortingStrategy
 {
     public string DisplayName => "Termin";
-    public IEnumerable<IComponent> Sort(IEnumerable<IComponent> components)
+    public IEnumerable<Composite.IComponent> Sort(IEnumerable<Composite.IComponent> components)
     {
         return components.OrderBy(c => 
         {
@@ -52,6 +54,6 @@ public class SortByEndDateStrategy : ISortingStrategy
 public class SortByPriorityStrategy : ISortingStrategy
 {
     public string DisplayName => "Priorytet";
-    public IEnumerable<IComponent> Sort(IEnumerable<IComponent> components) =>
+    public IEnumerable<Composite.IComponent> Sort(IEnumerable<Composite.IComponent> components) =>
         components.OrderByDescending(c => (c as ITaskComponent)?.Priority ?? Priorities.None);
 }

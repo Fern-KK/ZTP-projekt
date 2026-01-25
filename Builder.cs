@@ -8,6 +8,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using ZTP.Composite;
+using ZTP.Composite;
 
 namespace ZTP;
 
@@ -107,7 +109,7 @@ public class BuilderNote : IBuilder
 
 public class BuilderTask : IBuilder
 {
-    private List<IComponent> Components = new List<IComponent>();
+    private List<Composite.IComponent> Components = new List<Composite.IComponent>();
     public string CurrentName {get; set; } = "";
     public string Category { get; set; } = "";
     public string Tags { get; set; } = "";
@@ -158,7 +160,6 @@ public class BuilderTask : IBuilder
     
     public BuilderTask AddTaskComponent(List<TextBox> tasklist, List<DatePicker> datelist)
     {
-        // Dodaj Taski do Buildera
         for (int i = 0; i < tasklist.Count; i++)
         {
             string text = tasklist[i].Text?.Trim() ?? "";

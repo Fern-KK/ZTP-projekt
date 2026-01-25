@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using ZTP.Composite;
 
 namespace ZTP;
 
@@ -30,14 +31,14 @@ public interface IVisitor
 public class SearchVisitor : IVisitor
 {
     private string SearchQuery;
-    private List<IComponent> SearchResults = new List<IComponent>();
+    private List<Composite.IComponent> SearchResults = new List<Composite.IComponent>();
 
     public SearchVisitor(string query)
     {
         SearchQuery = query.ToLower();
     }
 
-    public List<IComponent> GetResults() => SearchResults;
+    public List<Composite.IComponent> GetResults() => SearchResults;
 
     public void Visit(Note note)
     {
@@ -105,7 +106,7 @@ public class SearchVisitor : IVisitor
         }
     }
 
-    private bool MatchesSearch(IComponent component)
+    private bool MatchesSearch(Composite.IComponent component)
     {
         if (string.IsNullOrWhiteSpace(SearchQuery))
             return false;
