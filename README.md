@@ -14,7 +14,3 @@ odwiedza obiekty composite i przeprowadza na nich operacje bez ingerencji w ich 
 - [@hiko667](https://github.com/hiko667) 
 - [@Marchewer](https://github.com/Marchewer)
 
-testowa notka
-
-dotnet publish -c Release -r win-x64 --self-contained true  -p:PublishSingleFile=true  -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-
