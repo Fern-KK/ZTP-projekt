@@ -931,7 +931,7 @@ public class Group : IComponent
     public List<string> Tags { get; }
     public string Category { get; }
 
-    public Group(string name) => Name = name;
+       public Group(string name) => Name = name;
 
     public void Add(IComponent component) => components.Add(component);
     public int Count() => components.Count;
@@ -939,19 +939,59 @@ public class Group : IComponent
     public bool Contains(IComponent component) => components.Contains(component);
     public IReadOnlyList<IComponent> GetComponents() => components.AsReadOnly();
 
+
     // Wyświetla nagłówek grupy i renderuje całą zawartość
     public StackPanel SimpleDisplay(int depth)
     {
         var mainSection = new StackPanel { Margin = new Thickness(10 * depth, 5, 5, 10) };
 
-        // Tytuł grupy
+        // Górna sekcja z tytułem i ComboBox
+        var topSection = new Grid
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        };
+
+        // Dwie kolumny: lewa na tytuł, prawa na ComboBox
+        topSection.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star)); // Tytuł (rozciąga się)
+        topSection.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto)); // ComboBox (auto szerokość)
+
+        // Tytuł po lewej stronie
         var titleText = new TextBlock
         {
             Text = Name,
             FontSize = 14,
-            FontWeight = FontWeight.Bold
+            FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center
         };
-        mainSection.Children.Add(titleText);
+        Grid.SetColumn(titleText, 0);
+
+        // ComboBox do sortowania po prawej stronie
+        var sortComboBox = new ComboBox
+        {
+            ItemsSource = GlobalGroups.AvailableStrategies,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            SelectedItem = GlobalGroups.SortingStrategy,
+            DisplayMemberBinding = new Avalonia.Data.Binding("DisplayName"),
+            VerticalAlignment = VerticalAlignment.Center,
+            Width = 150,
+            Margin = new Thickness(10, 0, 0, 0),
+            PlaceholderText = GlobalGroups.SortingStrategy.DisplayName
+        };
+
+        sortComboBox.SelectionChanged += (s, e) =>
+        {
+            if (sortComboBox.SelectedItem is ISortingStrategy selectedStrategy)
+            {
+                GlobalGroups.SetSortingStrategy(selectedStrategy);
+                UIManager.DisplayGroup(this);
+            }
+        };
+        Grid.SetColumn(sortComboBox, 1);
+
+        topSection.Children.Add(titleText);
+        topSection.Children.Add(sortComboBox);
+        mainSection.Children.Add(topSection);
 
         // Licznik elementów
         var counterText = new TextBlock
@@ -959,17 +999,27 @@ public class Group : IComponent
             Text = $"({Count()} elementów)",
             FontSize = 12,
             Foreground = Brushes.Gray,
-            Margin = new Thickness(10, 0, 0, 10)
+            Margin = new Thickness(0, 0, 0, 10)
         };
         mainSection.Children.Add(counterText);
 
+        // Użycie strategii przed renderowaniem
+        var sortedComponents = GlobalGroups.SortingStrategy.Sort(components);
+
+
+
+
+
+
         // Elementy grupy
-        foreach (var c in components)
+        foreach (var c in sortedComponents)
         {
             mainSection.Children.Add(c.SimpleDisplay(depth + 1));
         }
+
         return mainSection;
     }
     public StackPanel SimpleDisplay() => SimpleDisplay(1);
     public void Accept(IVisitor visitor) => visitor.Visit(this);
+
 }
