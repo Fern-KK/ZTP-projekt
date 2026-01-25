@@ -175,9 +175,7 @@ public static class UIManager
     }
     
     // Tworzy pojedynczy wiersz dla zadania (tekst + wybór daty) wewnątrz listy zadań
-    public static StackPanel CreateTaskInputRow(
-        out TextBox taskTextBox,
-        out DatePicker datePicker)
+    public static StackPanel CreateTaskInputRow(out TextBox taskTextBox, out DatePicker datePicker)
     {
         var panel = new StackPanel
         {
