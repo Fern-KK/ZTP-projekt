@@ -14,7 +14,7 @@ odwiedza obiekty composite i przeprowadza na nich operacje bez ingerencji w ich 
 - [@hiko667](https://github.com/hiko667) 
 - [@Marchewer](https://github.com/Marchewer)
 
-
+testowa notka
 
 
 
