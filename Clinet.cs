@@ -110,20 +110,21 @@ public class ServerConnection
                 .GetProperty("data")
                 .GetProperty("tasks");
             foreach(var task in tasks.EnumerateArray())
-            {                
-                DateTime deadline = DateTime.ParseExact(task.GetProperty("deadline").GetString(),"dd.MM.yyyy",CultureInfo.InvariantCulture);
+            {   
+                DateTime deadline = DateTime.TryParseExact(task.GetProperty("deadline").GetString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : DateTime.Today;
+
                 var new_task = new Task(task.GetProperty("title").GetString(), deadline);
                 new_task.SetCategory(task.GetProperty("category").GetString ());
                 new_task.SetTags(task.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
                 var priorityString = task.GetProperty("priority").GetString();
-                    if (!Enum.TryParse<Priorities>(priorityString, out var priority))
-                    {
-                        priority = Priorities.None;
-                    }
-                
+                if (!Enum.TryParse<Priorities>(priorityString, out var priority))
+                {
+                    priority = Priorities.None;
+                }
                 new_task.SetPriority(priority);
                 GlobalGroups.AllGroup.Add(new_task);
-                GlobalGroups.AllTasksGroup.Add(new_task);
+                GlobalGroups.AllTasksGroup.Add(new_task);     
+                
             }
             var task_lists = json
                 .GetProperty("data")
@@ -141,7 +142,7 @@ public class ServerConnection
                 new_task_list.SetTags(task_list.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
                 foreach (var task in task_list.GetProperty("tasks").EnumerateArray())
                 {
-                    var deadline = DateTime.ParseExact(task.GetProperty("deadline").GetString(),"dd.MM.yyyy",CultureInfo.InvariantCulture);
+                    var deadline = DateTime.TryParseExact(task.GetProperty("deadline").GetString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : DateTime.Today;
                     var new_task_list_task = new Task(task.GetProperty("title").ToString(), deadline);
                     new_task_list.Add(new_task_list_task);
                 }
