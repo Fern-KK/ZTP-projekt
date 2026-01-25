@@ -658,13 +658,16 @@ public class TaskList : ITaskComponent
     {
         var mainSection = new StackPanel { Spacing = 10 };
 
-        var dateBox = new TextBlock
+        
+        var dateBox = new TextBlock{};
+        void RefreshStatusLabel()
         {
-            Text = $"Utworzono: {StartDate:dd.MM.yyyy HH:mm}",
-            FontSize = 11,
-            Foreground = Brushes.Gray
-        };
+            dateBox.Text = EndDate.HasValue && EndDate != DateTime.MaxValue
+                ? $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}"
+                : $"Status: {GetStatus()} | Termin: {StartDate:dd.MM.yyyy}";
+        }
 
+        RefreshStatusLabel();
         // Status
         var inputCompleted = new CheckBox
         {
@@ -681,6 +684,7 @@ public class TaskList : ITaskComponent
             {
                 MarkAsIncomplete();
             }
+            RefreshStatusLabel();
         };
 
         // Sekcja nazwy z checkboxem - Grid zamiast StackPanel dla lepszego układu
