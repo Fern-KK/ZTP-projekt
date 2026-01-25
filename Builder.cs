@@ -16,7 +16,6 @@ public interface IBuilder
     string CurrentName { get; set; }
     string Category { get; set; }
     string Tags { get; set; }
-    int Counter { get; set; }
 
     public string GetName();
     public string DefaultName();
@@ -24,31 +23,30 @@ public interface IBuilder
 
 public class BuilderNote : IBuilder
 {
-    public int Counter { get; set; } = 1;
     public string CurrentName {get; set; } = "";
     public string Category { get; set; } = "";
     public string Tags { get; set; } = "";
     private string Content = "";
     
-    public BuilderNote SetName(string s)
+    public BuilderNote SetName(string name)
     {
-        CurrentName = s;
+        CurrentName = name;
         return this;
     }
 
-    public BuilderNote SetContent(string s)
+    public BuilderNote SetContent(string content)
     {
-        Content = s;
+        Content = content;
         return this;
     }
-    public BuilderNote SetCategory(string c)
+    public BuilderNote SetCategory(string category)
     {
-        Category=c;
+        Category=category;
         return this;
     }
-    public BuilderNote SetTags(string t)
+    public BuilderNote SetTags(string tags)
     {
-        Tags=t;
+        Tags=tags;
         return this;
     }
 
@@ -57,21 +55,20 @@ public class BuilderNote : IBuilder
         if (string.IsNullOrEmpty(CurrentName) || CurrentName == DefaultName())
         {
             string NewName = DefaultName();
-            Counter++;
             return NewName;
         }
         return CurrentName;
     }
     public string DefaultName()
     {
-        return $"Nowa notatka {Counter}";
+        return $"Nowa notatka";
     }
 
     public BuilderNote Build()
     {
         Note note = new Note(GetName(), Content);
-        GlobalGroups.AllGroup.Add(note);
-        GlobalGroups.AllNotesGroup.Add(note);
+        DataManager.AllGroup.Add(note);
+        DataManager.AllNotesGroup.Add(note);
         ServerConnection client = ServerConnection.CreateServerConnection();
         
         if (Category != null)
@@ -80,7 +77,6 @@ public class BuilderNote : IBuilder
         }
         if(Tags != null)
         {
-            GlobalGroups.AddTags(Tags);
             var tags = Tags.Split(',');
             foreach (var t in tags)
             {
@@ -113,30 +109,29 @@ public class BuilderTask : IBuilder
 {
     private List<IComponent> Components = new List<IComponent>();
     public string CurrentName {get; set; } = "";
-    public int Counter { get; set; } = 1;
     public string Category { get; set; } = "";
     public string Tags { get; set; } = "";
-    private Priorities priority = 0;
+    private Priorities Priority = 0;
     private DateTime endDate;
-    public BuilderTask SetName(string s)
+    public BuilderTask SetName(string name)
     {
-        CurrentName = s;
+        CurrentName = name;
         return this;
     }
-    public BuilderTask SetCategory(string c)
+    public BuilderTask SetCategory(string category)
     {
-        Category=c;
+        Category=category;
         return this;
     }
-    public BuilderTask SetTags(string t)
+    public BuilderTask SetTags(string tag)
     {
-        Tags=t;
+        Tags=tag;
         return this;
     }
 
-    public BuilderTask SetPriority(Priorities p)
+    public BuilderTask SetPriority(Priorities priority)
     {
-        priority=p;
+        Priority=priority;
         return this;
     }
 
@@ -145,7 +140,6 @@ public class BuilderTask : IBuilder
         if (string.IsNullOrEmpty(CurrentName) || CurrentName == DefaultName())
         {
             string NewName = DefaultName();
-            Counter++;
             return NewName;
         }
         return CurrentName;
@@ -153,7 +147,7 @@ public class BuilderTask : IBuilder
 
     public string DefaultName()
     {
-        return $"Nowa lista zadań {Counter}";
+        return $"Nowa lista zadań";
     }
 
     public BuilderTask AddTaskComponent(ITaskComponent task)
@@ -198,10 +192,10 @@ public class BuilderTask : IBuilder
                 }
             }
 
-            result.SetPriority(priority);
+            result.SetPriority(Priority);
             Clear();
-            GlobalGroups.AllTasksGroup.Add(result);
-            GlobalGroups.AllGroup.Add(result);
+            DataManager.AllTasksGroup.Add(result);
+            DataManager.AllGroup.Add(result);
             
             client.NewTask(result);
             return this;
@@ -222,7 +216,7 @@ public class BuilderTask : IBuilder
             }
         }
 
-        taskList.SetPriority(priority);
+        taskList.SetPriority(Priority);
 
         // Dodawanie zadań do listy
         foreach (var component in Components)
@@ -241,8 +235,8 @@ public class BuilderTask : IBuilder
         Clear();
         
         client.NewTaskList(taskList);
-        GlobalGroups.AllTasksGroup.Add(taskList);
-        GlobalGroups.AllGroup.Add(taskList);
+        DataManager.AllTasksGroup.Add(taskList);
+        DataManager.AllGroup.Add(taskList);
         return this;
     }
 
@@ -251,7 +245,7 @@ public class BuilderTask : IBuilder
     {
         Components.Clear();
         CurrentName = "";
-        priority = 0;
+        Priority = 0;
         Category = "";
         Tags = "";
 

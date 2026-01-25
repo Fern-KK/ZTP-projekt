@@ -59,10 +59,22 @@ public class Note : IComponent
     }
 
     // Metody modyfikujące stan notatki
-    public void SetCategory(string category) => Category = category;
     public void SetId(int id) => NoteId = id;
-    public void SetTags(List<string> tags) => Tags = tags;
-    public void SetTags(string tag) => Tags.Add(tag);
+    public void SetCategory(string category)
+    {
+        Category = category; 
+        DataManager.AddCategory(category);
+    }
+    public void SetTags(List<string> tags)
+    {
+        Tags = tags;
+        DataManager.AddTags(tags);
+    }
+    public void SetTags(string tag)
+    {
+        Tags.Add(tag);
+        DataManager.AddTags(tag);
+    }
 
     // Uproszczony podgląd notatki do wyświetlenia na liście
     public StackPanel SimpleDisplay(int depth)
@@ -105,7 +117,7 @@ public class Note : IComponent
 
         // Sekcja dolna - kategoria, tagi i przycisk zapisu
         var downSection = new Grid { ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") };
-        var inputCategory = GlobalGroups.SelectableCategoryList();
+        var inputCategory = DataManager.SelectableCategoryList();
         inputCategory.SelectedItem = Category;
         var inputTags = new TextBox { Text = string.Join(",", Tags), MaxWidth = 200 };
 
@@ -125,7 +137,7 @@ public class Note : IComponent
             // Logika aktualizacji tagów
             if (inputTags.Text != string.Join(",", Tags))
             {
-                GlobalGroups.AddTags(Tags);
+                DataManager.AddTags(Tags);
                 Tags.Clear();
                 string[] tags = inputTags.Text.Split(',');
                 foreach (var t in tags)
@@ -135,7 +147,8 @@ public class Note : IComponent
             }
 
             ServerConnection.CreateServerConnection().UpdateNote(this, this.NoteId);
-            UIManager.DisplayGroup(GlobalGroups.AllGroup);      // Powrót do widoku głównego
+            
+            UIManager.DisplayGroup(DataManager.AllGroup);      // Powrót do widoku głównego
         };
 
         var rightSide = new StackPanel { HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
@@ -214,9 +227,21 @@ public class Task : ITaskComponent
 
     public void SetPriority(Priorities priority) => Priority = priority;
     public void SetId(int id) => TaskId = id;
-    public void SetTags(string tag) => Tags.Add(tag);
-    public void SetTags(List<string> tags) => Tags = tags;
-    public void SetCategory(string category) => Category = category;
+    public void SetTags(List<string> tags)
+    {
+        Tags = tags;
+        DataManager.AddTags(tags);
+    }
+    public void SetTags(string tag)
+    {
+        Tags.Add(tag);
+        DataManager.AddTags(tag);
+    }
+    public void SetCategory(string category)
+    {
+        Category = category; 
+        DataManager.AddCategory(category);
+    }
 
     public void MarkAsCompleted(DateTime completionDate)
     {
@@ -364,7 +389,7 @@ public class Task : ITaskComponent
 
         // Sekcja dolna - kategoria, tagi i przycisk zapisu
         var downSection = new Grid { ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") };
-        var inputCategory = GlobalGroups.SelectableCategoryList();
+        var inputCategory = DataManager.SelectableCategoryList();
         inputCategory.SelectedItem = Category;
         var inputTags = new TextBox { Text = string.Join(",", Tags), MaxWidth = 200 };
         var inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>(), SelectedItem = Priority };
@@ -386,7 +411,7 @@ public class Task : ITaskComponent
             // Logika aktualizacji tagów
             if (inputTags.Text != string.Join(",", Tags))
             {
-                GlobalGroups.AddTags(Tags);
+                DataManager.AddTags(Tags);
                 Tags.Clear();
                 string[] tags = inputTags.Text.Split(',');
                 foreach (var t in tags)
@@ -397,7 +422,7 @@ public class Task : ITaskComponent
             if (datePicker.SelectedDate.HasValue) { EndDate = datePicker.SelectedDate.Value.Date; }
 
             ServerConnection.CreateServerConnection().UpdateTask(this, TaskId);
-            UIManager.DisplayGroup(GlobalGroups.AllGroup);      // Powrót do widoku głównego
+            UIManager.DisplayGroup(DataManager.AllGroup);      // Powrót do widoku głównego
         };
 
         var rightSide = new StackPanel { HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
@@ -448,17 +473,28 @@ public class TaskList : ITaskComponent
         Category = other.Category;
         Priority = other.Priority;
     }
-    
+
     public void SetId(int id) => TaskListId = id;
     public void Add(ITaskComponent component) => components.Add(component);
     public void MarkAsCompleted(DateTime completionDate) => components.ForEach(c => c.MarkAsCompleted(completionDate));
     public void MarkAsIncomplete() => components.ForEach(c => c.MarkAsIncomplete());
     public string GetStatus() => IsCompleted ? (IsLate ? "[Spóźnione, zakończone]" : "[Zakończone]") : "[W toku]";
     public void SetPriority(Priorities priority) => Priority = priority;
-
-    public void SetTags(string tag) => Tags.Add(tag);
-    public void SetTags(List<string> tags) => Tags = tags;
-    public void SetCategory(string category) => Category = category;
+    public void SetCategory(string category)
+    {
+        Category = category; 
+        DataManager.AddCategory(category);
+    }
+    public void SetTags(List<string> tags)
+    {
+        Tags = tags;
+        DataManager.AddTags(tags);
+    }
+    public void SetTags(string tag)
+    {
+        Tags.Add(tag);
+        DataManager.AddTags(tag);
+    }
 
     private int[] getStatistics()
     {
@@ -660,8 +696,8 @@ public class TaskList : ITaskComponent
     {
         var mainSection = new StackPanel { Spacing = 10 };
 
-        
-        var dateBox = new TextBlock{};
+
+        var dateBox = new TextBlock { };
         void RefreshStatusLabel()
         {
             dateBox.Text = EndDate.HasValue && EndDate != DateTime.MaxValue
@@ -826,7 +862,7 @@ public class TaskList : ITaskComponent
 
         // Sekcja dolna - kategoria, tagi i przycisk zapisu
         var downSection = new Grid { ColumnDefinitions = ColumnDefinitions.Parse("Auto, *") };
-        var inputCategory = GlobalGroups.SelectableCategoryList();
+        var inputCategory = DataManager.SelectableCategoryList();
         if (!string.IsNullOrEmpty(Category))
         {
             inputCategory.SelectedItem = Category;
@@ -882,13 +918,13 @@ public class TaskList : ITaskComponent
                     if (!string.IsNullOrWhiteSpace(trimmedTag))
                     {
                         SetTags(trimmedTag.ToLower());
-                        GlobalGroups.AddTags(trimmedTag);
+                        DataManager.AddTags(trimmedTag);
                     }
                 }
             }
 
             // Powrót do widoku głównego
-            UIManager.DisplayGroup(GlobalGroups.AllGroup);
+            UIManager.DisplayGroup(DataManager.AllGroup);
         };
 
         var rightSide = new StackPanel
@@ -931,7 +967,7 @@ public class Group : IComponent
     public List<string> Tags { get; }
     public string Category { get; }
 
-       public Group(string name) => Name = name;
+    public Group(string name) => Name = name;
 
     public void Add(IComponent component) => components.Add(component);
     public int Count() => components.Count;
@@ -969,21 +1005,21 @@ public class Group : IComponent
         // ComboBox do sortowania po prawej stronie
         var sortComboBox = new ComboBox
         {
-            ItemsSource = GlobalGroups.AvailableStrategies,
+            ItemsSource = SortingService.AvailableStrategies,
             HorizontalAlignment = HorizontalAlignment.Right,
-            SelectedItem = GlobalGroups.SortingStrategy,
+            SelectedItem = SortingService.SortingStrategy,
             DisplayMemberBinding = new Avalonia.Data.Binding("DisplayName"),
             VerticalAlignment = VerticalAlignment.Center,
             Width = 150,
             Margin = new Thickness(10, 0, 0, 0),
-            PlaceholderText = GlobalGroups.SortingStrategy.DisplayName
+            PlaceholderText = SortingService.SortingStrategy.DisplayName
         };
 
         sortComboBox.SelectionChanged += (s, e) =>
         {
             if (sortComboBox.SelectedItem is ISortingStrategy selectedStrategy)
             {
-                GlobalGroups.SetSortingStrategy(selectedStrategy);
+                SortingService.SetSortingStrategy(selectedStrategy);
                 UIManager.DisplayGroup(this);
             }
         };
@@ -1004,7 +1040,7 @@ public class Group : IComponent
         mainSection.Children.Add(counterText);
 
         // Użycie strategii przed renderowaniem
-        var sortedComponents = GlobalGroups.SortingStrategy.Sort(components);
+        var sortedComponents = SortingService.SortingStrategy.Sort(components);
 
 
 

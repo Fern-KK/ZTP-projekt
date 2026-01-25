@@ -22,6 +22,7 @@ public static class UIManager
     // Główna metoda podmieniająca zawartość centralnego obszaru roboczego
     public static void DisplayContent(Control content)
     {
+        MainWindow.RefreshExtenders();
         MainWindow.Desktop.Content = content;
     }
     
@@ -41,6 +42,7 @@ public static class UIManager
     public static void DisplayGroup(Group group)
     {
         DisplayContent(group.SimpleDisplay());
+
     }
     
     // Wyświetla widok wyboru: czy użytkownik chce stworzyć nową notatkę, czy zadanie
@@ -66,13 +68,13 @@ public static class UIManager
     // Pobiera i wyświetla panel statystyk (wygenerowany przez wzorzec Visitor w GlobalGroups)
     public static void DisplayStatistics()
     {
-        DisplayContent(GlobalGroups.GetStatistics());
+        DisplayContent(StatisticsService.GetStatistics());
     }
     
     // Pobiera i wyświetla raport nadchodzących terminów (domyślnie z 7 dni)
     public static void DisplayUpcomingTasks()
     {
-        DisplayContent(GlobalGroups.GetUpcomingTasksReport(7));
+        DisplayContent(TaskReportService.GetUpcomingTasksReport(7));
     }
     
     // Wyświetla wyniki wyszukiwania na podstawie wpisanej frazy
@@ -81,13 +83,13 @@ public static class UIManager
         if (string.IsNullOrWhiteSpace(query))
             return;
             
-        DisplayContent(GlobalGroups.Search(query));
+        DisplayContent(SearchService.Search(query));
     }
     
     // Wyświetla elementy przefiltrowane po konkretnym tagu lub kategorii
     public static void DisplayByTagOrCategory(string tagOrCategory)
     {
-        DisplayContent(GlobalGroups.Search(tagOrCategory));
+        DisplayContent(SearchService.Search(tagOrCategory));
     }
     
     // Buduje dynamicznie formularz edycji/tworzenia notatki

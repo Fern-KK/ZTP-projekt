@@ -36,13 +36,7 @@
                         Grid.Column="1"
                         x:Name="Desktop"
                         Padding="10,10,10,0"
-                        Margin="0">
-                <TextBlock x:Name="ContentText" 
-                    Text= "Witamy :D"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center"
-                    TextWrapping="Wrap"/>
-            </ScrollViewer>
+                        Margin="0" />
         </Grid>        
         
         

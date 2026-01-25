@@ -103,15 +103,15 @@ public class ServerConnection
                 new_note.SetCategory(note.GetProperty("category").GetString());
                 new_note.SetTags(note.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
                 new_note.SetId(note.GetProperty("note_id").GetInt32());
-                GlobalGroups.AllGroup.Add(new_note);
-                GlobalGroups.AllNotesGroup.Add(new_note);
+                DataManager.AllGroup.Add(new_note);
+                DataManager.AllNotesGroup.Add(new_note);
             }
             var tasks = json
                 .GetProperty("data")
                 .GetProperty("tasks");
             foreach(var task in tasks.EnumerateArray())
             {   
-                DateTime deadline = DateTime.TryParseExact(task.GetProperty("deadline").GetString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : DateTime.Today;
+                var deadline = DateTime.TryParseExact(task.GetProperty("deadline").GetString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : (DateTime?)null;
 
                 var new_task = new Task(task.GetProperty("title").GetString(), deadline);
                 new_task.SetCategory(task.GetProperty("category").GetString ());
@@ -122,8 +122,8 @@ public class ServerConnection
                     priority = Priorities.None;
                 }
                 new_task.SetPriority(priority);
-                GlobalGroups.AllGroup.Add(new_task);
-                GlobalGroups.AllTasksGroup.Add(new_task);     
+                DataManager.AllGroup.Add(new_task);
+                DataManager.AllTasksGroup.Add(new_task);     
                 
             }
             var task_lists = json
@@ -138,16 +138,19 @@ public class ServerConnection
                     priority = Priorities.None;
                 }
                 new_task_list.SetPriority(priority);
-                if(task_list.GetProperty("category").GetString() != null){new_task_list.SetCategory(task_list.GetProperty("category").GetString());}
+                if(task_list.GetProperty("category").GetString() != null)
+                {
+                    new_task_list.SetCategory(task_list.GetProperty("category").GetString()); 
+                }
                 new_task_list.SetTags(task_list.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
                 foreach (var task in task_list.GetProperty("tasks").EnumerateArray())
                 {
-                    var deadline = DateTime.TryParseExact(task.GetProperty("deadline").GetString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : DateTime.Today;
+                    var deadline = DateTime.TryParseExact(task.GetProperty("deadline").GetString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : (DateTime?)null;
                     var new_task_list_task = new Task(task.GetProperty("title").ToString(), deadline);
                     new_task_list.Add(new_task_list_task);
                 }
-                GlobalGroups.AllGroup.Add(new_task_list);
-                GlobalGroups.AllTasksGroup.Add(new_task_list);
+                DataManager.AllGroup.Add(new_task_list);
+                DataManager.AllTasksGroup.Add(new_task_list);
             }
 
 

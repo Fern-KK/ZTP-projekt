@@ -34,8 +34,12 @@ namespace ZTP
             InitializeComponent();
             Instance = this;
 
-            // Inicjalizacja danych globalnych i budowniczych
-            GlobalGroups.Initialize();
+            DataManager.Initialize();
+            
+            ServerConnection client = ServerConnection.CreateServerConnection();
+            client.FetchContent();
+
+            
             noteBuilder = new BuilderNote();
             taskBuilder = new BuilderTask();
 
@@ -52,13 +56,13 @@ namespace ZTP
                 switch (button.Name)
                 {
                     case "BtnAll":
-                        UIManager.DisplayGroup(GlobalGroups.AllGroup);
+                        UIManager.DisplayGroup(DataManager.AllGroup);
                         break;
                     case "BtnTasks":
-                        UIManager.DisplayGroup(GlobalGroups.AllTasksGroup);
+                        UIManager.DisplayGroup(DataManager.AllTasksGroup);
                         break;
                     case "BtnNotes":
-                        UIManager.DisplayGroup(GlobalGroups.AllNotesGroup);
+                        UIManager.DisplayGroup(DataManager.AllNotesGroup);
                         break;
                 }
             }
@@ -91,7 +95,7 @@ namespace ZTP
         // Przygotowuje i wyświetla formularz tworzenia nowej notatki
         public void CreateNoteView()
         {
-            inputCategory = GlobalGroups.SelectableCategoryList();
+            inputCategory = DataManager.SelectableCategoryList();
             inputCategory.PlaceholderText = "Kategoria";
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
 
@@ -139,7 +143,7 @@ namespace ZTP
             inputTags = null;
             inputCategory = null;
 
-            UIManager.DisplayGroup(GlobalGroups.AllGroup);
+            UIManager.DisplayGroup(DataManager.AllGroup);
         }
 
         // Przygotowuje i wyświetla formularz tworzenia nowej listy zadań
@@ -147,7 +151,7 @@ namespace ZTP
         {
             taskTextBoxesList = new List<TextBox>();
             inputTasksSection = new StackPanel { Spacing = 5 };
-            inputCategory = GlobalGroups.SelectableCategoryList();
+            inputCategory = DataManager.SelectableCategoryList();
             inputCategory.PlaceholderText = "Kategoria";
             inputTags = new TextBox { Watermark = "Wpisz tagi...", MaxWidth = 200 };
             inputPriority = new ComboBox { ItemsSource = Enum.GetValues<Priorities>(), PlaceholderText = "None" };
@@ -224,26 +228,13 @@ namespace ZTP
             inputCategory = null;
             inputPriority = null;
 
-            UIManager.DisplayGroup(GlobalGroups.AllGroup);
+            UIManager.DisplayGroup(DataManager.AllGroup);
         }
 
         // Konfiguruje menu boczne: tagi, kategorie, statystyki i wyszukiwarkę.
         private void InitializeMenu()
         {
-            // Sekcja dynamicznych tagów
-            var tagsSection = UIManager.CreateMenuSection(
-                GlobalGroups.GetTags(),
-                UIManager.DisplayByTagOrCategory
-            );
-            TagsExtender.Content = tagsSection;
-
-            // Sekcja dynamicznych kategorii
-            var categoriesSection = UIManager.CreateMenuSection(
-                GlobalGroups.GetCategories(),
-                UIManager.DisplayByTagOrCategory
-            );
-            CategoriesExtender.Content = categoriesSection;
-
+        
             // Przycisk statystyk (wykorzystuje Visitora wewnątrz UIManager)
             var statsButton = new Button
             {
@@ -263,8 +254,25 @@ namespace ZTP
             ButtonSection.Children.Add(reportButton);
 
             // Obsługa pola wyszukiwania
-            searchButton.Click += (s, e) =>
-                UIManager.DisplaySearchResults(searchBox.Text);
+            searchButton.Click += (s, e) => UIManager.DisplaySearchResults(searchBox.Text);
+
+            UIManager.DisplayText("Witam :D");   
+        }
+        public void RefreshExtenders()
+        {
+            // Sekcja dynamicznych tagów
+            var tagsSection = UIManager.CreateMenuSection(
+                DataManager.GetTags(),
+                UIManager.DisplayByTagOrCategory
+            );
+            TagsExtender.Content = tagsSection;
+
+            // Sekcja dynamicznych kategorii
+            var categoriesSection = UIManager.CreateMenuSection(
+                DataManager.GetCategories(),
+                UIManager.DisplayByTagOrCategory
+            );
+            CategoriesExtender.Content = categoriesSection;
         }
     }
 }
