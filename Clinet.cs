@@ -403,7 +403,8 @@ public class ServerConnection
             return false;
         }
     }
-    //Below: TaskList handling. There is just NewTaskList function working right now, but the deletion and editing are future fetures
+    //Below: TaskList h andling. There is just NewTaskList function working right now, but the deletion and editing are future fetures
+    //We are in need to build and edit function
     public async Tasks.Task<bool> NewTaskList(TaskList task_list)
     {
         var payload = new
