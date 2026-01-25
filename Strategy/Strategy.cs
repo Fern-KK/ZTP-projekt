@@ -26,6 +26,8 @@ public interface ISortingStrategy
     string DisplayName { get; } 
 }
 
+
+
 // Sortowanie alfabetyczne po nazwie
 public class SortByNameStrategy : ISortingStrategy
 {
@@ -33,6 +35,9 @@ public class SortByNameStrategy : ISortingStrategy
     public IEnumerable<Composite.IComponent> Sort(IEnumerable<Composite.IComponent> components) =>
         components.OrderBy(c => c.Name);
 }
+
+
+
 
 // Sortowanie po EndDate (tylko dla obiektów implementujących ITaskComponent)
 public class SortByEndDateStrategy : ISortingStrategy
@@ -54,6 +59,9 @@ public class SortByEndDateStrategy : ISortingStrategy
         });
     }
 }
+
+
+
 
 // Sortowanie po priorytecie (tylko dla zadań, notatki idą na koniec)
 public class SortByPriorityStrategy : ISortingStrategy
