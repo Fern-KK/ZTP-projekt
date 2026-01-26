@@ -113,14 +113,14 @@ namespace ZTP
                 out inputContent,
                 inputCategory,
                 inputTags,
-                NoteBuilder
+                PassToNoteBuilder
             );
 
             Desktop.Content = editor;
         }
 
         // Metoda kończąca proces budowania notatki - pobiera dane z UI i tworzy obiekt
-        private void NoteBuilder()
+        private void PassToNoteBuilder()
         {
             var title = inputTitle?.Text?.Trim() ?? "";
 
@@ -174,7 +174,7 @@ namespace ZTP
                 inputCategory,
                 inputTags,
                 inputPriority,
-                TaskBuilder
+                PassToTaskBuilder
             );
 
             Desktop.Content = editor;
@@ -194,7 +194,7 @@ namespace ZTP
         }
 
         // Metoda kończąca proces budowania zadania - waliduje daty i tworzy obiekty.
-        private void TaskBuilder()
+        private void PassToTaskBuilder()
         {
             // Sprawdź poprawność dat (czy nie są z przeszłości)
             bool hasInvalidDate = false;
